@@ -9,10 +9,9 @@ class WebController extends Controller {
         const { ctx } = this;
 
         // this.ctx.service.ssh2.shell();
-        // console.log('------------');
-        // this.ctx.service.ssh2.exec();
-        const result = await this.ctx.service.sftp.list('/data/down');
-        console.log(result);
+        this.ctx.service.ssh2.exec('bash /data/down/app.sh');
+        // const result = await this.ctx.service.sftp.list('/data/down');
+        // console.log(result);
 
         await ctx.render('home', {
             data: {},

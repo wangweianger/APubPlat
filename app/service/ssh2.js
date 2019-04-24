@@ -3,65 +3,74 @@
 
 const Service = require('egg').Service;
 const Client = require('ssh2').Client;
-const conn = new Client();
+const servers = new Client();
+let conn = null;
+
 
 class Ssh2Service extends Service {
-    constructor(props){
-        super(props)
+
+    constructor(props) {
+        super(props);
         this.conn = null;
     }
 
-    async init(json={
-        host: '111.230.186.207',
-        port: '65522',
-        username: 'root',
-        password: '1vzFPu83xPbv'
-    }) {
-        return new Promise((resolve,reject)=>{
-            conn.on('ready', function () {
-                resolve(conn);
-            }).connect({
-                host: json.host,
-                port: json.port,
-                username: json.username,
-                password: json.password,
-            });
-        })
+    async init() {
+        if (!conn) {
+            conn = await this.connect();
+            const loop = () => { conn = null; };
+            servers.on('end', loop);
+            servers.on('error', loop);
+        }
     }
 
-    async exec() {
+    // 链接
+    async connect() {
+        return new Promise(resolve => {
+            servers.on('ready', () => {
+                resolve(servers);
+            }).connect({
+                host: '111.230.186.207',
+                port: '65522',
+                username: 'root',
+                password: '1vzFPu83xPbv',
+            });
+        });
+    }
+
+    // 执行linux命令和shell脚本
+    // 例如：exec('bash /data/down/app.sh')
+    async exec(exec) {
         await this.init();
-        conn.exec('bash /data/down/app.sh', function (err, stream) {
+        conn.exec(exec, (err, stream) => {
             if (err) throw err;
-            stream.on('close', function (code, signal) {
+            stream.on('close', (code, signal) => {
                 console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
                 conn.end();
-            }).on('data', function (data) {
+            }).on('data', data => {
                 console.log('STDOUT: ' + data);
-            }).stderr.on('data', function (data) {
+            }).stderr.on('data', data => {
                 console.log('STDERR: ' + data);
             });
         });
     }
 
-    async shell() {
+    // 执行linux命令
+    // 例如 shell('ll -a')
+    async shell(shell) {
         await this.init();
-        conn.shell(function (err, stream) {
+        conn.shell((err, stream) => {
             if (err) throw err;
-            stream.on('close', function () {
+            stream.on('close', () => {
                 console.log('Stream+++++ :: close');
                 conn.end();
-            }).on('data', function (data) {
+            }).on('data', data => {
                 console.log('STDOUT+++++: ' + data);
-            }).stderr.on('data', function (data) {
+            }).stderr.on('data', data => {
                 console.log('STDERR+++++: ' + data);
             });
-            stream.end('ls -a');
+            stream.end(shell);
         });
     }
 }
 
 module.exports = Ssh2Service;
-
-
-
