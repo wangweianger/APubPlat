@@ -3,7 +3,7 @@
 
 const Service = require('egg').Service;
 const Client = require('ssh2-sftp-client');
-const path = require('path');
+// const path = require('path');
 const servers = new Client();
 let sftp = null;
 
@@ -24,7 +24,6 @@ class SftpService extends Service {
     }
 
     async connect() {
-        console.log('-------------------');
         return new Promise(resolve => {
             servers.connect({
                 host: '111.230.186.207',
