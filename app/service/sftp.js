@@ -42,6 +42,12 @@ class SftpService extends Service {
         return await sftp.list(remoteFilePath);
     }
 
+    // 获得单个文件内容
+    async get(remoteFilePath) {
+        await this.init();
+        return await sftp.get(remoteFilePath);
+    }
+
     // 新增文件夹
     async mkdir(remoteFilePath, recursive) {
         await this.init();
