@@ -13,10 +13,12 @@ class WebController extends Controller {
         // const result = await this.ctx.service.sftp.list('/data/down');
         // console.log(result);
         const result = await this.ctx.service.sftp.get('/data/down/app.sh');
-        console.log(result.toString());
+        console.log(result.toString())
 
         await ctx.render('home', {
-            data: {},
+            data: {
+                result: result.toString(),
+            },
         });
     }
 

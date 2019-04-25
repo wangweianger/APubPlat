@@ -41,15 +41,18 @@ class Ssh2Service extends Service {
     // 例如：exec('bash /data/down/app.sh')
     async exec(exec) {
         await this.init();
-        conn.exec(exec, (err, stream) => {
-            if (err) throw err;
-            stream.on('close', (code, signal) => {
-                console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
-                conn.end();
-            }).on('data', data => {
-                console.log('STDOUT: ' + data);
-            }).stderr.on('data', data => {
-                console.log('STDERR: ' + data);
+        return new Promise(resolve => {
+            conn.exec(exec, (err, stream) => {
+                if (err) throw err;
+                stream.on('close', (code, signal) => {
+                    console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
+                    conn.end();
+                    resolve({});
+                }).on('data', data => {
+                    console.log('STDOUT: ' + data);
+                }).stderr.on('data', data => {
+                    console.log('STDERR: ' + data);
+                });
             });
         });
     }
@@ -58,17 +61,20 @@ class Ssh2Service extends Service {
     // 例如 shell('ll -a')
     async shell(shell) {
         await this.init();
-        conn.shell((err, stream) => {
-            if (err) throw err;
-            stream.on('close', () => {
-                console.log('Stream+++++ :: close');
-                conn.end();
-            }).on('data', data => {
-                console.log('STDOUT+++++: ' + data);
-            }).stderr.on('data', data => {
-                console.log('STDERR+++++: ' + data);
+        return new Promise(resolve => {
+            conn.shell((err, stream) => {
+                if (err) throw err;
+                stream.on('close', () => {
+                    console.log('Stream+++++ :: close');
+                    conn.end();
+                    resolve({});
+                }).on('data', data => {
+                    console.log('STDOUT+++++: ' + data);
+                }).stderr.on('data', data => {
+                    console.log('STDERR+++++: ' + data);
+                });
+                stream.end(shell);
             });
-            stream.end(shell);
         });
     }
 }
