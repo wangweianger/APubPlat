@@ -28,7 +28,8 @@
         <div id="loading"></div>
         <div id='main'>
             <% include ./header.html %>
-            <%- body %>
+            <% include ./side.html %>
+            <div id="body_content"><%- body %></div>
             <% include ./footer.html %>
         </div>
     </body>

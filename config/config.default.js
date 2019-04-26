@@ -93,6 +93,14 @@ module.exports = appInfo => {
         },
     };
 
+    exports.mongoose = {
+        url: 'mongodb://127.0.0.1:27017/APubPlat',
+        options: {
+            autoReconnect: true,
+            poolSize: 5,
+        },
+    };
+
     config.cors = {
         origin: config.origin,
         allowMethods: 'GET,PUT,POST,DELETE',

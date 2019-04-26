@@ -13,7 +13,7 @@ class EmailController extends Controller {
     }
 
     // 新增 | 更新
-    async handle(){
+    async handle() {
         const { ctx } = this;
         const query = ctx.request.body || {};
         const id = query.id || '';
@@ -31,7 +31,7 @@ class EmailController extends Controller {
     }
 
     // 删除
-    async delete(){
+    async delete() {
         const { ctx } = this;
         const query = ctx.request.body || {};
         const id = query.id;

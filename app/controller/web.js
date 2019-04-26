@@ -21,6 +21,30 @@ class WebController extends Controller {
         });
     }
 
+    // 团队管理
+    async team() {
+        const { ctx } = this;
+        await ctx.render('team', {
+            data: {},
+        });
+    }
+
+    // 应用管理
+    async application() {
+        const { ctx } = this;
+        await ctx.render('application', {
+            data: {},
+        });
+    }
+
+    // 应用管理
+    async assets() {
+        const { ctx } = this;
+        await ctx.render('assets', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

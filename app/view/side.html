@@ -1,0 +1,150 @@
+<style scoped>
+  .el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 200px;
+    min-height: 400px;
+}
+.side{
+	position: fixed;
+	left:0;
+	top:0;
+	width:199px;
+    height:100%;
+    border-right:solid 1px #eee;
+    background:#fff;
+    z-index:11;
+}  
+.side .switch-nav{
+    width: 199px;
+    height:50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background:#fff;
+    color:#000;
+    font-size:16px;
+    border-bottom:solid 1px #eee;
+}
+.side .switch-nav .icon{
+    width:50px;
+    height:50px;
+    text-align:center;
+    line-height:50px;
+    border-right:solid 1px #eee;
+    margin-right:10px;
+    
+}
+.side .switch-nav .icon i{
+    font-size:20px;
+}
+.side .label{
+    padding-top:20px;
+}
+/*滚动条样式*/
+.side .label::-webkit-scrollbar {
+    width: 4px;     
+    height: 4px;
+}
+.side .label::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.6);
+}
+.side .label::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0;
+    background: rgba(0,0,0,.1);
+}
+</style>
+
+<div class="side" id="side" v-cloak>
+    <!-- <el-radio-group v-model="isCollapse" style="margin-bottom: 20px;">
+            <el-radio-button :label="false">展开</el-radio-button>
+            <el-radio-button :label="true">收起</el-radio-button>
+        </el-radio-group> -->
+    <div class="switch-nav">
+        <div class="icon">
+            <i class="el-icon-menu"></i>
+            <!-- <span class="iconfont">&#xe626;</span> -->
+        </div>
+        <div class="text">自动化部署平台</div>
+    </div>
+    <div class="label" :style="{'height':nav_h+'px'}">
+        <el-menu 
+            :default-active="active" 
+            class="el-menu-vertical-demo" 
+            @open="handleOpen" 
+            @close="handleClose"
+            @select="handleSelect" 
+            :collapse="isCollapse">
+            <el-menu-item index="1" @click="location('/')">
+                <i class="el-icon-house"></i>
+                <span slot="title">控制面板</span>
+            </el-menu-item>
+            <el-menu-item index="2" @click="location('/team')">
+                <i class="el-icon-apple"></i>
+                <span slot="title">团队管理</span>
+            </el-menu-item>
+            <el-menu-item index="3" @click="location('/application')">
+                <i class="el-icon-notebook-2"></i>
+                <span slot="title">应用管理</span>
+            </el-menu-item>
+            <el-menu-item index="4" @click="location('/assets')">
+                <i class="el-icon-monitor"></i>
+                <span slot="title">资产管理</span>
+            </el-menu-item>
+            <el-menu-item index="5" @click="location('/build')">
+                <i class="el-icon-news"></i>
+                <span slot="title">应用构建</span>
+            </el-menu-item>
+            <el-menu-item index="5" @click="location('/logs')">
+                <i class="el-icon-document"></i>
+                <span slot="title">构建日志</span>
+            </el-menu-item>
+            <el-menu-item index="5" @click="location('/emails')">
+                <i class="el-icon-message"></i>
+                <span slot="title">邮件管理</span>
+            </el-menu-item>
+            <el-menu-item index="5" @click="location('/users')">
+                <i class="el-icon-user"></i>
+                <span slot="title">用户管理</span>
+            </el-menu-item>
+        </el-menu>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#side',
+        data: function () {
+            return {
+                isCollapse: false,
+                nav_h: 500,
+                active: '0',
+            }
+        },
+        filters: {
+        },
+        mounted() {
+            const win_h = document.documentElement.clientHeight || document.body.clientHeight;
+            this.nav_h = win_h - 50;
+            const active = util.getStorage('session', 'side-default-active');
+            this.active = active ? active : '0';
+        },
+        methods: {
+            handleOpen(key, keyPath) {
+                console.log(key, keyPath);
+                util.setStorage('session', 'side-default-active', key);
+            },
+            handleClose(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            handleSelect(key, keyPath) {
+                this.active = key;
+                util.setStorage('session', 'side-default-active', key);
+            },
+            location(url) {
+                location.href = url;
+            }
+        }
+    })
+</script>

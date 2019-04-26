@@ -1,0 +1,94 @@
+<style scoped>
+    
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">资产管理</div>
+        </el-col>
+    </el-row>
+    
+    <!-- table -->
+    <div class="com_table_block mt20">
+        <div class="table_header">
+            <div class="l">资产管理</div>
+            <div class="r">
+                <el-button type="primary" size="small" class="ml20" @click="handleTeam(1)">+ 新增资产</el-button>
+            </div>
+        </div>
+        <div class="table_body">
+            <el-table :data="datalist" style="width: 100%">
+                <el-table-column prop="name" label="资产名称">
+                </el-table-column>
+                <el-table-column prop="name" label="资产编码">
+                </el-table-column>
+                <el-table-column prop="name" label="资产状态">
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <div class="mb10">
+                            <el-button @click="handleTeam(2,scope.row)" type="primary" size="small">编辑</el-button>
+                            <el-button @click="hanleUse(scope.row)" type="danger" size="small">禁用</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+        <div class="common_pages">
+            <el-pagination background 
+                @size-change="handleSizeChange" 
+                @current-change="handleCurrentChange"
+                :current-page.sync="currentPage" 
+                :page-size="pageSize" 
+                layout="prev, pager, next, jumper" 
+                :total="totalCount">
+            </el-pagination>
+        </div>
+    </div>
+    <!-- model弹出框 -->
+    <el-dialog title="资产编辑" :visible.sync="dialogTableVisible">
+        000
+    </el-dialog>
+
+</div>
+<script>
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                datalist:[{}],
+                pageSize:10,
+                totalCount:0,
+                currentPage:1,
+                dialogTableVisible:false,
+                type:1,
+                team:{
+
+                },
+            }
+        },
+        filters: {
+        },
+        mounted() {
+        },
+        methods: {
+            handleTeam(type,tiem) {
+                this.type = type;
+                this.dialogTableVisible = true;
+            },
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+            },
+            hanleUse(item){
+                popup.confirm({
+                    title: '确定操作吗？', yes: () => {
+                        
+                    }
+                })
+            },
+        }
+    })
+</script>

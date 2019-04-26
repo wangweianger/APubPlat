@@ -1,17 +1,12 @@
 /*CSS Reset*/
 *, *:before, *:after { -webkit-box-sizing: border-box; box-sizing: border-box; }
 /*设置字体*/
-@font-face {
-    font-family: 'Montserrat';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Montserrat Regular'), local('Montserrat-Regular'), url('../font/JTUSjIg1_i6t8kCHKm459WlhzQ.woff') format('woff');
-}
-body{background: #fff;font-family: '微软雅黑';}
+@font-face{font-family: OpenSans;src: url('../font/OpenSans-Regular.ttf'),}
+body{background: #f9fafb;font-family: 'OpenSans', sans-serif!important;}
 /*字体结束*/
 body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, textarea, p, blockquote, th, td, header, hgroup, nav, section, article, aside, footer, figure, figcaption, menu, button { 
   margin: 0; padding: 0;};
-body { font-family:  Helvetica, STHeiTi, Sans-serif; line-height: 1.5; font-size: 14px; color: #70727C; -webkit-text-size-adjust: none; -webkit-tap-highlight-color: rgba(255, 255, 255, 0); outline: 0; }
+body { line-height: 1.5; font-size: 14px; color: #70727C; -webkit-text-size-adjust: none; -webkit-tap-highlight-color: rgba(255, 255, 255, 0); outline: 0; }
 h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: normal; }
 table { border-collapse: collapse; border-spacing: 0; }
 fieldset, img { border: 0; }
@@ -99,7 +94,69 @@ iframe { display: none; }
 	vertical-align: middle;
 }
 
+/* body content widht */
+#body_content{
+    overflow-y: auto;
+    font-size:14px;
+    margin-left:200px;
+    padding-top:50px;
+}
 
+.content{
+    padding:20px;
+}
+.com_title{
+    font-size:30px;
+    font-weight: 300;
+}
+/* common table block */
+.com_table_block{
+	overflow:hidden;
+	background:#fff;
+}
+.com_table_block .table_header{
+    height:50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding:20px;
+    border-bottom:solid 1px #eee;
+}
+.com_table_block .l{
+    font-size:15px;
+}
+.common_pages{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding:20px 0 30px;
+}
+
+.com_model_main{
+    overflow:hidden;
+    padding:0 10px;
+}
+.com_model_block{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom:20px;
+}
+.com_model_block .left{
+    width:100px;
+}
+.com_model_block .inp{
+    width:250px;
+}
+.com_model_main .btns{
+    margin-top:20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+/* 公共输入框 */
 .text_comm_tarea{
     width:100%;
     height:300px;

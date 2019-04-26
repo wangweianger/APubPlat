@@ -17,6 +17,11 @@ exports.cors = {
     package: 'egg-cors',
 };
 
+exports.mongoose = {
+    enable: true,
+    package: 'egg-mongoose',
+};
+
 exports.email = {
     enable: true,
     path: path.join(__dirname, '../lib/plugin/egg-email'),

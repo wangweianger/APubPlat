@@ -1,7 +1,81 @@
-<div class="header">
-   header
+<style scoped>
+.header{
+   position: fixed;
+   left:0;
+   top:0;
+   width:100%;
+   height:50px;
+   z-index:10;
+   padding-left:220px;
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   align-items: center;
+   border-bottom: solid 1px #eee;
+   background:#fff;
+}
+.header .left{
+   padding-left:20px;
+}
+.header .right{
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: flex-end;
+   padding-right:10px;
+}
+.header .right .block{
+   cursor:pointer;
+   padding:0 10px;
+   height:50px;
+   line-height:50px;
+}
+</style>
+
+<div class="header" id="header" v-cloak>
+   <div class="left">
+      <!-- <el-breadcrumb separator="/">
+         <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+         <el-breadcrumb-item><a href="/">活动管理</a></el-breadcrumb-item>
+         <el-breadcrumb-item>活动列表</el-breadcrumb-item>
+         <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+      </el-breadcrumb> -->
+   </div>
+   <div class="right">
+      <div class="block">个人中心</div>
+      <div class="block" @click="logout">退出登录</div>
+   </div>
 </div>
 
 <script>
-    
+   new Vue({
+      el: '#header',
+      data: function () {
+         return {
+            
+         }
+      },
+      filters: {
+      },
+      mounted() {
+         
+      },
+      methods: {
+         goToHome() {
+            this.$router.push({ name: 'home' })
+         },
+         logout() {
+            popup.confirm({
+               title: '确定删除商品吗？', yes: () => {
+                  ajax({
+                     url: `${baseApi}sys_account/sys_logout`,
+                  }).then(data => {
+                     util.setStorage('local', 'use_login_token', '');
+                     location.href = config.loginUrl
+                  })
+               }
+            });
+         },
+      }
+   })
 </script>
