@@ -25,7 +25,7 @@ class SftpService extends Service {
                 host: '111.230.186.207',
                 port: '65522',
                 username: 'root',
-                password: '1vzFPu83xPbv',
+                password: '01vzFPu83xPbv',
             }).then(async () => {
                 resolve(servers);
                 // const result = await sftp.list('/data/down');
