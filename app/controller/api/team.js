@@ -39,6 +39,35 @@ class TeamController extends Controller {
         });
     }
 
+    // 禁用 | 启用
+    async setStatus() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const _id = query._id;
+        const status = query.status || 1;
+        if (!_id) throw new Error('id参数不能为空!');
+
+        const result = await this.ctx.service.team.setStatus({ _id, status });
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
+    // 删除
+    async delete() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const _id = query._id;
+        if (!_id) throw new Error('id参数不能为空!');
+
+        const result = await this.ctx.service.team.delete(_id);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
 
 }
 

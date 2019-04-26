@@ -31,7 +31,9 @@
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="handleTeam(2,scope.row)" type="primary" size="small">编辑</el-button>
-                            <el-button @click="hanleUse(scope.row)" type="danger" size="small">禁用</el-button>
+                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="warning" size="small">禁用</el-button>
+                            <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success" size="small">启用</el-button>
+                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -141,11 +143,34 @@
                 console.log(`当前页: ${val}`);
             },
             hanleUse(item){
-                popup.confirm({
-                    title: '确定操作吗？', yes: () => {
-                        
-                    }
-                })
+                let str = item.status == 1 ? '禁用' : '启用';
+                popup.confirm({title: `确定${str}${item.name}团队吗？`, yes: () => {
+                    util.ajax({
+                        url: `${config.baseApi}api/v1/team/setStatus`,
+                        data: {
+                            _id: item._id,
+                            status: item.status == 1 ? 0 : 1,
+                        },
+                        success: data => {
+                            item.status = item.status == 1 ? 0 : 1,
+                            popup.miss({ title: '操作成功!' });
+                        }
+                    })
+                }})
+            },
+            hanleDelete(item){
+                popup.confirm({title: `确定删除${item.name}团队吗？`, yes: () => {
+                    util.ajax({
+                        url: `${config.baseApi}api/v1/team/delete`,
+                        data: {
+                            _id: item._id,
+                        },
+                        success: data => {
+                            this.getList();
+                            popup.miss({ title: '操作成功!' });
+                        }
+                    })
+                }})
             },
         }
     })

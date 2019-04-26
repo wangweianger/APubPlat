@@ -16,6 +16,10 @@ module.exports = app => {
     apiV1Router.get('team/list', team.list);
     // 新增 | 编辑
     apiV1Router.post('team/handle', team.handle);
+    // 设置状态
+    apiV1Router.post('team/setStatus', team.setStatus);
+    // 删除
+    apiV1Router.post('team/delete', team.delete);
 
     // --------------------------shh sftp 交互------------------------------
     // update files

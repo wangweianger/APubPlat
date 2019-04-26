@@ -9,10 +9,9 @@ class TeamService extends Service {
     async list(pageNo, pageSize) {
         pageSize = pageSize * 1;
         pageNo = pageNo * 1;
-        const query = { status: 1 };
-        const count = Promise.resolve(this.ctx.model.Team.count(query).exec());
+        const count = Promise.resolve(this.ctx.model.Team.count().exec());
         const datas = Promise.resolve(
-            this.ctx.model.Team.find(query)
+            this.ctx.model.Team.find()
                 .skip((pageNo - 1) * pageSize)
                 .limit(pageSize)
                 .exec()
@@ -44,6 +43,17 @@ class TeamService extends Service {
             result = await this.ctx.model.Team.update({ _id }, { $set: { name, code, status } }, { multi: true });
         }
         return result;
+    }
+
+    // 设置状态
+    async setStatus(json) {
+        const { _id, status } = json;
+        return await this.ctx.model.Team.update({ _id }, { $set: { status } }, { multi: true });
+    }
+
+    // 删除
+    async delete(_id) {
+        return await this.ctx.model.Team.remove({ _id });
     }
 
 }
