@@ -68,6 +68,7 @@ class SftpService extends Service {
 
     // 上传文件
     async fastPut(localPath, remotePath) {
+        await this.init();
         return await sftp.fastPut(localPath, remotePath);
     }
 
