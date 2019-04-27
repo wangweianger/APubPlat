@@ -6,6 +6,7 @@ module.exports = app => {
     const {
         files,
         team,
+        application,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -20,6 +21,16 @@ module.exports = app => {
     apiV1Router.post('team/setStatus', team.setStatus);
     // 删除
     apiV1Router.post('team/delete', team.delete);
+
+    // --------------------------- 应用管理 --------------------------------
+    // get list
+    apiV1Router.get('application/list', application.list);
+    // 新增 | 编辑
+    apiV1Router.post('application/handle', application.handle);
+    // 设置状态
+    apiV1Router.post('application/setStatus', application.setStatus);
+    // 删除
+    apiV1Router.post('application/delete', application.delete);
 
     // --------------------------shh sftp 交互------------------------------
     // update files

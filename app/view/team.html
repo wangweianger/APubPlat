@@ -135,7 +135,15 @@
                 if (item) {
                     this.team = item;
                     this.team.status = item.status == 1 ? true : false;
-                } 
+                } else {
+                    this.team = {
+                        type: 1,
+                        _id: '',
+                        name: '',
+                        code: '',
+                        status: true,
+                    }
+                }
                 this.team.type = type;
                 this.dialogTableVisible = true;
             },
@@ -143,7 +151,8 @@
                 console.log(`每页 ${val} 条`);
             },
             handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
+                this.currentPage = val;
+                this.getList();
             },
             hanleUse(item){
                 let str = item.status == 1 ? '禁用' : '启用';

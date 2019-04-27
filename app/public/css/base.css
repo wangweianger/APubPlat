@@ -156,6 +156,15 @@ iframe { display: none; }
     justify-content: center;
 }
 
+.com_top{
+    background: #fff;
+    padding:20px;
+    margin:20px 0;
+}
+.com_top .inp{
+    width:250px;
+}
+
 /* 公共输入框 */
 .text_comm_tarea{
     width:100%;
