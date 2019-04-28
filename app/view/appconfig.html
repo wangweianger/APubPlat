@@ -1,0 +1,224 @@
+<style scoped>
+    .config_main{
+        padding:20px;
+        background: #fff;
+    }
+    .comfig_header{
+        border-bottom:solid 1px #eee;
+        padding:20px 0 30px 50px;
+    }
+    .config_main .block{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .config_main .block .left{
+        width:150px;
+    }
+    .config_main .block .right{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .config_main .block .inp1{
+        width:380px;
+    }
+    .config_main .block .inp2{
+        width:180px;
+    }
+    .config_main .block .textarea{
+        width:800px;
+    }
+    .config_main .btns{
+        padding:50px 0 100px 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-left:150px;
+    }
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">应用构建配置</div>
+        </el-col>
+    </el-row>
+    <div class="config_main mt30">
+        <div class="block mb50 comfig_header">
+            <div class="right">
+                <el-button :type="config_type==1?'primary':'default'" @click="getConfigType(1)" round>git hooks方式</el-button>
+                <el-button :type="config_type==2?'primary':'default'" @click="getConfigType(2)" class="ml30"  round>shell 脚本方式</el-button>
+            </div>
+        </div>
+        <div class="block mt30">
+            <div class="left">资产列表</div>
+            <div class="right">
+                <el-table :data="assetslist" border style="width:1000px;font-size:12px;">
+                    <el-table-column prop="name" label="资产名称" width="200">
+                    </el-table-column>
+                    <el-table-column prop="outer_ip" label="外网IP" width="150">
+                    </el-table-column>
+                    <el-table-column prop="lan_ip" label="内网IP" width="150">
+                    </el-table-column>
+                    <el-table-column prop="user" label="用户名" width="80">
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template slot-scope="scope">
+                            <div>
+                                <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境</el-button>
+                                <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境</el-button>
+                                <el-button @click="distAsstes(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+        <div v-show="config_type===1">
+            <div class="block mt30">
+                <div class="left">选择git部署方式</div>
+                <div class="right">
+                    <el-button :type="git_type==1?'primary':'default'" size="small" @click="getGitType(1)" round>https方式</el-button>
+                    <el-button :type="git_type==2?'primary':'default'" size="small" @click="getGitType(2)" class="ml30" round>ssh方式</el-button>
+                </div>
+            </div>
+            <div v-show="git_type===1">
+                <div class="block mt20">
+                    <div class="left"></div>
+                    <div class="right">
+                        <el-input v-model="git_url" class="inp1" placeholder="请输入git https地址"></el-input>
+                    </div>
+                </div>
+                <div class="block mt20">
+                    <div class="left"></div>
+                    <div class="right">
+                        <el-input v-model="git_user" class="inp2" placeholder="请输入git用户名"></el-input>
+                        <el-input v-model="git_pwd" class="ml20 inp2" placeholder="请输入git密码"></el-input>
+                    </div>
+                </div>
+            </div>
+            <div v-show="git_type===2">
+                <div class="block mt20">
+                    <div class="left"></div>
+                    <div class="right">
+                        <el-input v-model="git_url" class="inp1" placeholder="请输入git ssh地址"></el-input>
+                        <span class="ml20 light">备注：请确保git平台应用项目已经添加了相应服务器的ssh key。</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block mt30">
+            <div class="left">服务器部署shell脚本</div>
+            <div class="right">
+                <el-input v-model="pro_dir" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
+                <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
+            </div>
+        </div>
+        <div>
+        <div class="block mt30">
+            <div class="left"></div>
+            <div class="right">
+                <el-button type="primary" size="small" @click="getGitType(1)" class="mb20" round>随机从资产列表中同步shell脚本</el-button>
+            </div>
+        </div>
+        <div class="block mt10">
+            <div class="left">部署shell脚本</div>
+            <div class="right">
+                <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="pro_shell" style="width:1000px;"></el-input>
+                <span class="ml20 light">备注：服务器初始shell脚本。</span>
+            </div>
+        </div>
+        <div class="btns">
+            <el-button type="primary" @click="getGitType(1)" class="mb20">保存构建配置</el-button>
+            <el-button type="default" @click="goBack()" class="mb20">取消</el-button>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                id: util.getQueryString('id'),
+                details:{},
+                assetslist:[],
+                config_type: 1, // 1: git hooks  2: shell 脚本
+                git_type: 1, // 1:https 2:ssh
+                git_url:'',
+                git_user:'',
+                git_pwd:'',
+                pro_dir:'',
+                pro_shell:'',
+            }
+        },
+        mounted() {
+            this.itemdetail();
+        },
+        methods: {
+            itemdetail(){
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/application/itemdetail`,
+                    data: {
+                        id: this.id,
+                    },
+                    success: data => {
+                        this.details = data.data;
+                        this.assetslist = data.data.assets_list || [];
+                    }
+                })
+            },
+            getConfigType(type){
+                this.config_type = type;
+            },
+            getGitType(type){
+                this.git_type = type;
+            },
+            goBack(){
+                location.href="/application"
+            },
+            checkGit(item){
+                util.ajax({
+                    url: `${config.baseApi}api/v1/util/checkGitEnviron`,
+                    data: {
+                        host: item.outer_ip,
+                        port: item.port,
+                        username: item.user,
+                        password: item.password,
+                    },
+                    success: data => {
+                        if(data.data) {
+                            const version = data.data.match(/\d[\d\.]+\d/)[0]
+                            popup.miss({title:'服务器已安装GIT环境，环境版本为'+ version})
+                        }else{
+                            popup.miss({ title: '服务器未安装GIT环境！' })
+                        }
+                    }
+                })
+            },
+            installGit(item) {
+                popup.confirm({
+                    title: `确定为${item.name}安装GIT环境吗？`, yes: () => {
+                        util.ajax({
+                            url: `${config.baseApi}api/v1/util/installGitEnviron`,
+                            data: {
+                                host: item.outer_ip,
+                                port: item.port,
+                                username: item.user,
+                                password: item.password,
+                            },
+                            success: data => {
+                                if (data.data) {
+                                    popup.miss({ title: '安装成功！'})
+                                } else {
+                                    popup.miss({ title: '安装失败!' })
+                                }
+                            }
+                        })
+                    }
+                })
+            },
+        }
+    })
+</script>

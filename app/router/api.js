@@ -8,6 +8,7 @@ module.exports = app => {
         team,
         application,
         assets,
+        util,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -34,6 +35,8 @@ module.exports = app => {
     apiV1Router.post('application/delete', application.delete);
     // 分配资产
     apiV1Router.post('application/distribution', application.distribution);
+    // 获得单个应用详情
+    apiV1Router.get('application/itemdetail', application.itemdetail);
 
     // --------------------------- 资产管理 --------------------------------
     // get list
@@ -50,5 +53,11 @@ module.exports = app => {
     apiV1Router.post('files/updatefile', files.updatefile);
     // add files
     apiV1Router.post('files/addfile', files.addfile);
+
+    // --------------------------工具方法------------------------------
+    // 检测服务器是否安装GIT环境
+    apiV1Router.post('util/checkGitEnviron', util.checkGitEnviron);
+    // 服务器是安装GIT环境
+    apiV1Router.post('util/installGitEnviron', util.installGitEnviron);
 
 };

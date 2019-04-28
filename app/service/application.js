@@ -74,6 +74,11 @@ class ApplicationService extends Service {
         return await this.ctx.model.Application.update({ _id }, { $set: { assets_list } }, { multi: true });
     }
 
+    // 单个应用详情
+    async itemdetail(id) {
+        return await this.ctx.model.Application.findOne({ _id: id, status: 1 });
+    }
+
 }
 
 module.exports = ApplicationService;

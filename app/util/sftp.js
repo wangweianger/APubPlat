@@ -1,19 +1,24 @@
 // 七牛JDK
 'use strict';
 
-const Service = require('egg').Service;
 const Client = require('ssh2-sftp-client');
-// const path = require('path');
 const servers = new Client();
-let sftp = null;
+const sftp = {};
 
-class SftpService extends Service {
+class Sftp {
+    constructor(json = {}) {
+        this.host = json.host;
+        this.port = json.port;
+        this.username = json.username;
+        this.password = json.password;
+        this.init();
+    }
 
     // init 初始化
     async init() {
-        if (!sftp) {
-            sftp = await this.connect();
-            const loop = () => { sftp = null; };
+        if (!sftp[this.host]) {
+            sftp[this.host] = await this.connect();
+            const loop = () => { sftp[this.host] = null; };
             servers.on('end', loop);
             servers.on('error', loop);
         }
@@ -22,10 +27,10 @@ class SftpService extends Service {
     async connect() {
         return new Promise(resolve => {
             servers.connect({
-                host: '111.230.186.207',
-                port: '65522',
-                username: 'root',
-                password: '1vzFPu83xPbv',
+                host: this.host,
+                port: this.port,
+                username: this.username,
+                password: this.password,
             }).then(async () => {
                 resolve(servers);
                 // const result = await sftp.list('/data/down');
@@ -39,63 +44,63 @@ class SftpService extends Service {
     // 查看文件列表
     async list(remoteFilePath) {
         await this.init();
-        return await sftp.list(remoteFilePath);
+        return await sftp[this.host].list(remoteFilePath);
     }
 
     // 获得单个文件内容
     async get(remoteFilePath) {
         await this.init();
-        return await sftp.get(remoteFilePath);
+        return await sftp[this.host].get(remoteFilePath);
     }
 
     // 新增文件夹
     async mkdir(remoteFilePath, recursive) {
         await this.init();
-        return await sftp.mkdir(remoteFilePath, recursive);
+        return await sftp[this.host].mkdir(remoteFilePath, recursive);
     }
 
     // 删除文件夹
     async rmdir(localPath, recursive) {
         await this.init();
-        return await sftp.rmdir(localPath, recursive);
+        return await sftp[this.host].rmdir(localPath, recursive);
     }
 
     // 下载文件
     async fastGet(remotePath, localPath) {
         await this.init();
-        return await sftp.fastGet(remotePath, localPath);
+        return await sftp[this.host].fastGet(remotePath, localPath);
     }
 
     // 上传文件
     async fastPut(localPath, remotePath) {
         await this.init();
-        return await sftp.fastPut(localPath, remotePath);
+        return await sftp[this.host].fastPut(localPath, remotePath);
     }
 
     // 删除文件
     async delete(remoteFilePath) {
         await this.init();
-        return await sftp.delete(remoteFilePath);
+        return await sftp[this.host].delete(remoteFilePath);
     }
 
     // 文件重命名
     async rename(remoteSourcePath, remoteDestPath) {
         await this.init();
-        return await sftp.rename(remoteSourcePath, remoteDestPath);
+        return await sftp[this.host].rename(remoteSourcePath, remoteDestPath);
     }
 
     // 文件权限更改
     async chmod(remoteDestPath, mode) {
         await this.init();
-        return await sftp.chmod(remoteDestPath, mode);
+        return await sftp[this.host].chmod(remoteDestPath, mode);
     }
 
     // 关闭窗口
     async end() {
         await this.init();
-        return await sftp.end();
+        return await sftp[this.host].end();
     }
 
 }
 
-module.exports = SftpService;
+module.exports = Sftp;

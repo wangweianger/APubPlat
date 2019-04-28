@@ -1,23 +1,24 @@
 // 七牛JDK
 'use strict';
 
-const Service = require('egg').Service;
 const Client = require('ssh2').Client;
 const servers = new Client();
-let conn = null;
+const conn = {};
 
+class Ssh2 {
 
-class Ssh2Service extends Service {
-
-    constructor(props) {
-        super(props);
-        this.conn = null;
+    constructor(json = {}) {
+        this.host = json.host;
+        this.port = json.port;
+        this.username = json.username;
+        this.password = json.password;
+        this.init();
     }
 
     async init() {
-        if (!conn) {
-            conn = await this.connect();
-            const loop = () => { conn = null; };
+        if (!conn[this.host]) {
+            conn[this.host] = await this.connect();
+            const loop = () => { conn[this.host] = null; };
             servers.on('end', loop);
             servers.on('error', loop);
         }
@@ -29,10 +30,10 @@ class Ssh2Service extends Service {
             servers.on('ready', () => {
                 resolve(servers);
             }).connect({
-                host: '111.230.186.207',
-                port: '65522',
-                username: 'root',
-                password: '1vzFPu83xPbv',
+                host: this.host,
+                port: this.port,
+                username: this.username,
+                password: this.password,
             });
         });
     }
@@ -42,15 +43,22 @@ class Ssh2Service extends Service {
     async exec(exec) {
         await this.init();
         return new Promise(resolve => {
-            conn.exec(exec, (err, stream) => {
+            let str = '';
+            conn[this.host].exec(exec, (err, stream) => {
                 if (err) throw err;
                 stream.on('close', (code, signal) => {
                     console.log('Stream :: close :: code: ' + code + ', signal: ' + signal);
-                    conn.end();
-                    resolve({});
+                    conn[this.host].end();
+                    if (code === 0) {
+                        resolve(str);
+                    } else {
+                        resolve('');
+                    }
                 }).on('data', data => {
+                    str += data;
                     console.log('STDOUT: ' + data);
                 }).stderr.on('data', data => {
+                    str += data;
                     console.log('STDERR: ' + data);
                 });
             });
@@ -62,11 +70,11 @@ class Ssh2Service extends Service {
     async shell(shell) {
         await this.init();
         return new Promise(resolve => {
-            conn.shell((err, stream) => {
+            conn[this.host].shell((err, stream) => {
                 if (err) throw err;
                 stream.on('close', () => {
                     console.log('Stream+++++ :: close');
-                    conn.end();
+                    conn[this.host].end();
                     resolve({});
                 }).on('data', data => {
                     console.log('STDOUT+++++: ' + data);
@@ -79,4 +87,4 @@ class Ssh2Service extends Service {
     }
 }
 
-module.exports = Ssh2Service;
+module.exports = Ssh2;

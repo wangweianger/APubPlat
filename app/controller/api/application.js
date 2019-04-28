@@ -87,6 +87,20 @@ class ApplicationController extends Controller {
         });
     }
 
+    // 获得单个应用详情
+    async itemdetail() {
+        const { ctx } = this;
+        const query = ctx.request.query;
+        const id = query.id;
+
+        if (!id) throw new Error('id参数不能为空!');
+
+        const result = await this.ctx.service.application.itemdetail(id);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
 
 }
 

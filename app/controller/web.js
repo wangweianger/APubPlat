@@ -12,12 +12,10 @@ class WebController extends Controller {
         // this.ctx.service.ssh2.exec('bash /data/down/app.sh');
         // const result = await this.ctx.service.sftp.list('/data/down');
         // console.log(result);
-        const result = await this.ctx.service.sftp.get('/data/down/miao.sh');
+        // const result = await this.ctx.service.sftp.get('/data/down/miao.sh');
 
         await ctx.render('home', {
-            data: {
-                result: result.toString(),
-            },
+            data: {},
         });
     }
 
@@ -33,6 +31,14 @@ class WebController extends Controller {
     async application() {
         const { ctx } = this;
         await ctx.render('application', {
+            data: {},
+        });
+    }
+
+    // 构建配置
+    async appconfig() {
+        const { ctx } = this;
+        await ctx.render('appconfig', {
             data: {},
         });
     }
