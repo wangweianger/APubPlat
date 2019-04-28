@@ -132,6 +132,7 @@
                 })
             },
             handleTeam(type, item) {
+                if (item) item = JSON.parse(JSON.stringify(item));
                 if (item) {
                     this.team = item;
                     this.team.status = item.status == 1 ? true : false;

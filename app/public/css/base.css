@@ -142,6 +142,7 @@ iframe { display: none; }
     flex-direction: row;
     align-items: center;
     margin-bottom:20px;
+    min-height:40px;
 }
 .com_model_block .left{
     width:100px;

@@ -1,5 +1,7 @@
 <style scoped>
-    
+    .com_model_block .inp{
+        width:220px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -7,47 +9,145 @@
             <div class="grid-content bg-purple com_title">资产管理</div>
         </el-col>
     </el-row>
-    
+    <div class="com_top">
+        <el-select v-model="team_code" class="inp" placeholder="选择所属团队">
+            <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
+        <el-button type="primary" class="ml20" @click="getList">查询</el-button>
+    </div>
     <!-- table -->
     <div class="com_table_block mt20">
         <div class="table_header">
             <div class="l">资产管理</div>
             <div class="r">
-                <el-button type="primary" size="small" class="ml20" @click="handleTeam(1)">+ 新增资产</el-button>
+                <el-button type="primary" size="small" class="ml20" @click="handleAssets(1)">+ 新增资产</el-button>
             </div>
         </div>
         <div class="table_body">
             <el-table :data="datalist" style="width: 100%">
                 <el-table-column prop="name" label="资产名称">
                 </el-table-column>
-                <el-table-column prop="name" label="资产编码">
+                <el-table-column prop="code" label="资产编码">
                 </el-table-column>
-                <el-table-column prop="name" label="资产状态">
+                <el-table-column label="所属团队">
+                    <template slot-scope="scope">
+                        <div>{{scope.row.teamlist[0].name}}</div>
+                    </template>
                 </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column prop="outer_ip" label="外网IP">
+                </el-table-column>
+                <el-table-column prop="lan_ip" label="内网IP">
+                </el-table-column>
+                <el-table-column prop="user" label="用户名">
+                </el-table-column>
+                <el-table-column prop="port" label="端口号">
+                </el-table-column>
+                <el-table-column prop="password" label="密码">
+                </el-table-column>
+                <el-table-column label="可用状态">
+                    <template slot-scope="scope">
+                        <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="250">
                     <template slot-scope="scope">
                         <div class="mb10">
-                            <el-button @click="handleTeam(2,scope.row)" type="primary" size="small">编辑</el-button>
-                            <el-button @click="hanleUse(scope.row)" type="danger" size="small">禁用</el-button>
+                            <el-button @click="handleAssets(2,scope.row)" type="primary" size="small">编辑
+                            </el-button>
+                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="warning"
+                                size="small">禁用</el-button>
+                            <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success"
+                                size="small">启用</el-button>
+                        </div>
+                        <div class="mb10">
+                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
+                            <el-button type="success" size="small" disabled>ssh登录</el-button>
                         </div>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
         <div class="common_pages">
-            <el-pagination background 
-                @size-change="handleSizeChange" 
-                @current-change="handleCurrentChange"
-                :current-page.sync="currentPage" 
-                :page-size="pageSize" 
-                layout="prev, pager, next, jumper" 
+            <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                :current-page.sync="currentPage" :page-size="pageSize" layout="prev, pager, next, jumper"
                 :total="totalCount">
             </el-pagination>
         </div>
     </div>
     <!-- model弹出框 -->
-    <el-dialog title="资产编辑" :visible.sync="dialogTableVisible">
-        000
+    <el-dialog width="50%" title="资产编辑" :visible.sync="dialogTableVisible">
+        <div class="com_model_main">
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">所属团队</div>
+                        <el-select class="inp" v-model="team.team_code" placeholder="请选择">
+                            <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block ml20">
+                        <div class="left">资产名称</div>
+                        <el-input class="inp" v-model="team.name" placeholder="请输资产名称"></el-input>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">资产编码</div>
+                        <el-input class="inp" v-model="team.code" placeholder="以ass_开头、例如ass_zxhy"></el-input>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block ml20">
+                        <div class="left">外网IP</div>
+                        <el-input class="inp" v-model="team.outer_ip" placeholder="请输入外网IP"></el-input>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">内网IP</div>
+                        <el-input class="inp" v-model="team.lan_ip" placeholder="请输入内容IP"></el-input>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block ml20">
+                        <div class="left">登录用户名</div>
+                        <el-input class="inp" v-model="team.user" placeholder="请输入登录用户名"></el-input>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">登录端口号</div>
+                        <el-input class="inp" v-model="team.port" placeholder="请输入登录端口号"></el-input>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block ml20">
+                        <div class="left">登录密码</div>
+                        <el-input class="inp" v-model="team.password" placeholder="请输入登录密码"></el-input>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">启用状态</div>
+                        <el-switch v-model="team.status" active-color="#409EFF"></el-switch>
+                    </div>
+                </el-col>
+            </el-row>
+            <div class="btns">
+                <el-button type="primary" @click="submitAssets"> 提交 </el-button>
+            </div>
+        </div>
     </el-dialog>
 
 </div>
@@ -56,36 +156,158 @@
         el: '#team',
         data: function () {
             return {
-                datalist:[{}],
-                pageSize:10,
-                totalCount:0,
-                currentPage:1,
-                dialogTableVisible:false,
-                type:1,
-                team:{
-
+                team_code:'',
+                teamlist:[],
+                datalist: [],
+                pageSize: 10,
+                totalCount: 0,
+                currentPage: 1,
+                dialogTableVisible: false,
+                type: 1,
+                team: {
+                    team_code:'',
+                    type: 1,
+                    _id: '',
+                    name: '',
+                    code: '',
+                    outer_ip:'',
+                    lan_ip:'',
+                    user:'',
+                    port:'',
+                    password:'',
+                    status: true,
                 },
             }
         },
         filters: {
         },
         mounted() {
+            this.getList();
+            this.getTeamList();
         },
         methods: {
-            handleTeam(type,tiem) {
-                this.type = type;
+            getList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/assets/list`,
+                    data: {
+                        app_code: this.app_code,
+                        pageNo: this.currentPage,
+                        pageSize: this.pageSize,
+                    },
+                    success: data => {
+                        this.totalCount = data.data.totalNum;
+                        this.datalist = data.data.datalist;
+                    }
+                })
+            },
+            getTeamList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/team/list`,
+                    data: {
+                        pageNo: 1,
+                        pageSize: 100,
+                    },
+                    success: data => {
+                        const datas = data.data.datalist || [];
+                        const options = [];
+                        datas.forEach(item => {
+                            options.push({
+                                value: item.code,
+                                label: item.name
+                            })
+                        })
+                        this.teamlist = options;
+                    }
+                })
+            },
+            submitAssets() {
+                if (!this.team.team_code) {
+                    popup.alert({ title: '请选择所属团队!' });
+                    return;
+                }
+                if (!this.team.name) {
+                    popup.alert({ title: '请填写资产名称!' });
+                    return;
+                }
+                if (!this.team.code) {
+                    popup.alert({ title: '请填写资产编码!' });
+                    return;
+                }
+                this.team.status = this.team.status ? 1 : 0;
+                util.ajax({
+                    url: `${config.baseApi}api/v1/assets/handle`,
+                    data: this.team,
+                    success: data => {
+                        this.dialogTableVisible = false;
+                        this.getList();
+                        popup.miss({ title: '操作成功!' });
+                    }
+                })
+            },
+            handleAssets(type, item) {
+                if(item) item = JSON.parse(JSON.stringify(item));
+                if (item) {
+                    this.team = item;
+                    this.team.status = item.status == 1 ? true : false;
+                } else {
+                    this.team = {
+                        team_code: '',
+                        app_code: '',
+                        type: 1,
+                        _id: '',
+                        name: '',
+                        code: '',
+                        outer_ip: '',
+                        lan_ip: '',
+                        user: '',
+                        port: '',
+                        password: '',
+                        status: true,
+                    }
+                }
+                this.team.type = type;
                 this.dialogTableVisible = true;
             },
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
             },
             handleCurrentChange(val) {
-                console.log(`当前页: ${val}`);
+                this.currentPage = val;
+                this.getList();
             },
-            hanleUse(item){
+            hanleUse(item) {
+                let str = item.status == 1 ? '禁用' : '启用';
                 popup.confirm({
-                    title: '确定操作吗？', yes: () => {
-                        
+                    title: `确定${str}${item.name}资产吗？`, yes: () => {
+                        util.ajax({
+                            url: `${config.baseApi}api/v1/assets/setStatus`,
+                            data: {
+                                _id: item._id,
+                                status: item.status == 1 ? 0 : 1,
+                            },
+                            success: data => {
+                                item.status = item.status == 1 ? 0 : 1,
+                                    popup.miss({ title: '操作成功!' });
+                            }
+                        })
+                    }
+                })
+            },
+            hanleDelete(item) {
+                popup.confirm({
+                    title: `确定删除${item.name}资产吗？`, yes: () => {
+                        util.ajax({
+                            url: `${config.baseApi}api/v1/assets/delete`,
+                            data: {
+                                _id: item._id,
+                            },
+                            success: data => {
+                                this.getList();
+                                popup.miss({ title: '操作成功!' });
+                            }
+                        })
                     }
                 })
             },

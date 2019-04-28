@@ -7,6 +7,7 @@ module.exports = app => {
         files,
         team,
         application,
+        assets,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -31,6 +32,16 @@ module.exports = app => {
     apiV1Router.post('application/setStatus', application.setStatus);
     // 删除
     apiV1Router.post('application/delete', application.delete);
+
+    // --------------------------- 资产管理 --------------------------------
+    // get list
+    apiV1Router.get('assets/list', assets.list);
+    // 新增 | 编辑
+    apiV1Router.post('assets/handle', assets.handle);
+    // 设置状态
+    apiV1Router.post('assets/setStatus', assets.setStatus);
+    // 删除
+    apiV1Router.post('assets/delete', assets.delete);
 
     // --------------------------shh sftp 交互------------------------------
     // update files

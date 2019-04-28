@@ -154,6 +154,10 @@
                 })
             },
             submitApplication() {
+                if (!this.team.team_code) {
+                    popup.alert({ title: '请选择所属团队!' });
+                    return;
+                }
                 if (!this.team.name) {
                     popup.alert({ title: '请填写应用名称!' });
                     return;
@@ -174,11 +178,13 @@
                 })
             },
             handleApplication(type, item) {
+                if (item) item = JSON.parse(JSON.stringify(item));
                 if (item) {
                     this.team = item;
                     this.team.status = item.status == 1 ? true : false;
                 } else {
                     this.team = {
+                        team_code: '',
                         type: 1,
                         _id: '',
                         name: '',

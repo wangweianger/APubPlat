@@ -2,16 +2,16 @@
 
 const Controller = require('egg').Controller;
 
-class ApplicationController extends Controller {
+class AssetsController extends Controller {
 
     async list() {
         const { ctx } = this;
         const query = ctx.request.query;
         const pageNo = query.pageNo || 1;
         const pageSize = query.pageSize || this.app.config.pageSize;
-        const team_code = query.team_code;
+        const app_code = query.app_code;
 
-        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code);
+        const result = await this.ctx.service.assets.list(pageNo, pageSize, app_code);
 
         ctx.body = this.app.result({
             data: result,
@@ -28,14 +28,25 @@ class ApplicationController extends Controller {
         status = status * 1;
         const name = query.name;
         const code = query.code;
-        const team_code = query.team_code;
         const _id = query._id;
-        if (type === 2 && !_id) throw new Error('id参数不能为空!');
-        if (!team_code) throw new Error('请选择应用所属团队!');
-        if (!name) throw new Error('应用名称不能为空!');
-        if (!code) throw new Error('应用编码不能为空!');
+        const team_code = query.team_code;
+        const outer_ip = query.outer_ip;
+        const lan_ip = query.lan_ip;
+        const user = query.user;
+        const port = query.port;
+        const password = query.password;
 
-        const result = await this.ctx.service.application.handle({ type, name, code, status, _id, team_code });
+        if (type === 2 && !_id) throw new Error('id参数不能为空!');
+        if (!team_code) throw new Error('请选择资产所属团队!');
+        if (!name) throw new Error('资产名称不能为空!');
+        if (!code) throw new Error('资产编码不能为空!');
+        if (!outer_ip) throw new Error('外网IP不能为空!');
+        if (!lan_ip) throw new Error('外网IP不能为空!');
+        if (!user) throw new Error('登录用户名不能为空!');
+        if (!port) throw new Error('登录端口号不能为空!');
+        if (!password) throw new Error('登录密码不能为空!');
+
+        const result = await this.ctx.service.assets.handle({ type, name, code, status, _id, team_code, outer_ip, lan_ip, user, port, password });
 
         ctx.body = this.app.result({
             data: result,
@@ -50,7 +61,7 @@ class ApplicationController extends Controller {
         const status = query.status || 1;
         if (!_id) throw new Error('id参数不能为空!');
 
-        const result = await this.ctx.service.application.setStatus({ _id, status });
+        const result = await this.ctx.service.assets.setStatus({ _id, status });
 
         ctx.body = this.app.result({
             data: result,
@@ -64,7 +75,7 @@ class ApplicationController extends Controller {
         const _id = query._id;
         if (!_id) throw new Error('id参数不能为空!');
 
-        const result = await this.ctx.service.application.delete(_id);
+        const result = await this.ctx.service.assets.delete(_id);
 
         ctx.body = this.app.result({
             data: result,
@@ -74,4 +85,4 @@ class ApplicationController extends Controller {
 
 }
 
-module.exports = ApplicationController;
+module.exports = AssetsController;
