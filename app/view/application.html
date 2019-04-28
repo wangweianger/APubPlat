@@ -1,5 +1,34 @@
 <style scoped>
-
+    .el-table .disabled-row {
+        background: oldlace;
+    }
+    .model_assets_list .btns{
+        border-top:solid 1px #eee;
+        padding:35px 0 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    .model_assets_list .ml{
+        margin-left:20px;
+    }
+    .model_assets_list .common_pages{
+        justify-content: flex-start;
+    }
+    .assets_item_list{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .assets_item_list .as_1{
+        display: inline-block;
+        width:300px;
+    }
+    .assets_item_list .as_2{
+        display: inline-block;
+        width:180px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -23,22 +52,33 @@
             </div>
         </div>
         <div class="table_body">
-            <el-table :data="datalist" style="width: 100%">
-                <el-table-column prop="name" label="应用名称">
+            <el-table :data="datalist" style="width: 100%" :row-class-name="tableRowClassName">
+                <el-table-column prop="name" label="应用名称" width="250">
                 </el-table-column>
-                <el-table-column prop="code" label="应用编码">
+                <el-table-column prop="code" label="应用编码" width="150">
                 </el-table-column>
-                <el-table-column label="所属团队">
+                <el-table-column label="所属团队" width="200">
                     <template slot-scope="scope">
                         <div>{{scope.row.teamlist[0].name}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="可用状态">
+                <el-table-column label="拥有资产">
+                    <template slot-scope="scope">
+                        <div v-for="item in scope.row.assets_list">
+                            <div class="assets_item_list">
+                                <span class="as_1">资产名称：{{item.name}}</span>
+                                <span class="as_2">外网IP：{{item.outer_ip}}</span>
+                                <span class="as_2">内网IP：{{item.lan_ip}}</span>
+                            </div>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="可用状态" width="100">
                     <template slot-scope="scope">
                         <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="250">
+                <el-table-column label="操作" width="200">
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
@@ -46,6 +86,9 @@
                                 size="small">禁用</el-button>
                             <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success"
                                 size="small">启用</el-button>
+                        </div>
+                        <div class="mb10">
+                            <el-button @click="distAsstes(scope.row)" type="success" size="small">分配资产</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                     </template>
@@ -53,7 +96,7 @@
             </el-table>
         </div>
         <div class="common_pages">
-            <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange"
+            <el-pagination background @current-change="handleCurrentChange"
                 :current-page.sync="currentPage" :page-size="pageSize" layout="prev, pager, next, jumper"
                 :total="totalCount">
             </el-pagination>
@@ -85,7 +128,26 @@
             </div>
         </div>
     </el-dialog>
-
+    <!-- 分配资产 -->
+    <el-dialog class="model_assets_list" title="分配资产" :visible.sync="assets.dialogAppVisible">
+        <el-table :data="assets.assestsList" @selection-change="handleSelectionChange">
+            <el-table-column type="selection" width="55"></el-table-column>
+            <el-table-column property="name" label="所属团队" width="150"></el-table-column>
+            <el-table-column property="name" label="资产名称" width="150"></el-table-column>
+            <el-table-column property="code" label="资产编码" width="150"></el-table-column>
+            <el-table-column property="outer_ip" label="外网IP" width="200"></el-table-column>
+            <el-table-column property="lan_ip" label="内网IP" width="200"></el-table-column>
+        </el-table>
+        <div class="common_pages">
+            <el-pagination background @current-change="handleAssetsCurrentChange" :current-page.sync="assets.currentPage"
+                :page-size="assets.pageSize" layout="prev, pager, next, jumper" :total="assets.totalCount">
+            </el-pagination>
+        </div>
+        <div class="btns">
+            <el-button type="primary" @click="submitAppsAssets">确定</el-button>
+            <el-button class="ml" @click="assets.dialogAppVisible=false">取消</el-button>
+        </div>
+    </el-dialog>
 </div>
 <script>
     new Vue({
@@ -95,7 +157,7 @@
                 team_code:'',
                 teamlist: [],
                 datalist: [],
-                pageSize: 10,
+                pageSize: 30,
                 totalCount: 0,
                 currentPage: 1,
                 dialogTableVisible: false,
@@ -108,6 +170,15 @@
                     code: '',
                     status: true,
                 },
+                assets:{
+                    appItem:{},
+                    dialogAppVisible: false,
+                    multipleSelection: [],
+                    assestsList: [],
+                    currentPage: 1,
+                    pageSize:10,
+                    totalCount: 0,
+                },
             }
         },
         filters: {
@@ -115,6 +186,7 @@
         mounted() {
             this.getList();
             this.getTeamList();
+            this.getAssestList();
         },
         methods: {
             getList() {
@@ -150,6 +222,56 @@
                             })
                         })
                         this.teamlist = options;
+                    }
+                })
+            },
+            getAssestList(){
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/assets/list`,
+                    data: {
+                        status: 1,
+                        pageNo: this.assets.currentPage,
+                        pageSize: this.assets.pageSize,
+                    },
+                    success: data => {
+                        this.assets.totalCount = data.data.totalNum;
+                        this.assets.assestsList = data.data.datalist;
+                    }
+                })
+            },
+            distAsstes(item){
+                this.assets.appItem = item;
+                this.assets.dialogAppVisible = true;
+                const assets_list = item.assets_list || [];
+                const list = [];
+                this.assets.assestsList.forEach(item=>{
+                    assets_list.forEach(item_1=>{
+                        if(item.code === item_1.code){
+                            list.push(item);
+                        }
+                    })
+                })
+                this.assets.multipleSelection = list;
+            },
+            handleSelectionChange(val) {
+                this.assets.multipleSelection = val;
+            },
+            handleAssetsCurrentChange(){
+                this.assets.currentPage = val;
+                this.getAssestList();
+            },
+            submitAppsAssets(){
+                const assets_list = [];
+                util.ajax({
+                    url: `${config.baseApi}api/v1/application/distribution`,
+                    data: {
+                        _id: this.assets.appItem._id,
+                        assets_list: this.assets.multipleSelection,
+                    },
+                    success: data => {
+                        this.assets.dialogAppVisible = false;
+                        this.getList();
                     }
                 })
             },
@@ -235,6 +357,12 @@
                         })
                     }
                 })
+            },
+            tableRowClassName({ row, rowIndex }) {
+                if (row.status != 1) {
+                    return 'disabled-row';
+                }
+                return '';
             },
         }
     })

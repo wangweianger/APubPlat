@@ -71,6 +71,22 @@ class ApplicationController extends Controller {
         });
     }
 
+    // 分配资产
+    async distribution() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const _id = query._id;
+        const assets_list = query.assets_list || [];
+
+        if (!_id) throw new Error('id参数不能为空!');
+
+        const result = await this.ctx.service.application.distribution(_id, assets_list);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
 
 }
 

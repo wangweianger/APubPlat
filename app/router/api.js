@@ -32,6 +32,8 @@ module.exports = app => {
     apiV1Router.post('application/setStatus', application.setStatus);
     // 删除
     apiV1Router.post('application/delete', application.delete);
+    // 分配资产
+    apiV1Router.post('application/distribution', application.distribution);
 
     // --------------------------- 资产管理 --------------------------------
     // get list

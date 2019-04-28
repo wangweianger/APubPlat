@@ -69,6 +69,11 @@ class ApplicationService extends Service {
         return await this.ctx.model.Application.remove({ _id });
     }
 
+    // 分配资产
+    async distribution(_id, assets_list = []) {
+        return await this.ctx.model.Application.update({ _id }, { $set: { assets_list } }, { multi: true });
+    }
+
 }
 
 module.exports = ApplicationService;

@@ -1,5 +1,7 @@
 <style scoped>
-    
+    .el-table .disabled-row {
+        background: oldlace;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -17,7 +19,7 @@
             </div>
         </div>
         <div class="table_body">
-            <el-table :data="datalist" style="width: 100%">
+            <el-table :data="datalist" style="width: 100%" :row-class-name="tableRowClassName">
                 <el-table-column prop="name" label="团队名称">
                 </el-table-column>
                 <el-table-column prop="code" label="团队编码">
@@ -81,7 +83,7 @@
         data: function () {
             return {
                 datalist:[],
-                pageSize:10,
+                pageSize:30,
                 totalCount:0,
                 currentPage:1,
                 dialogTableVisible:false,
@@ -185,6 +187,12 @@
                     })
                 }})
             },
+            tableRowClassName({ row, rowIndex }) {
+                if (row.status != 1) {
+                    return 'disabled-row';
+                }
+                return '';
+            }
         }
     })
 </script>

@@ -9,9 +9,10 @@ class AssetsController extends Controller {
         const query = ctx.request.query;
         const pageNo = query.pageNo || 1;
         const pageSize = query.pageSize || this.app.config.pageSize;
-        const app_code = query.app_code;
+        const team_code = query.team_code;
+        const status = query.status || '';
 
-        const result = await this.ctx.service.assets.list(pageNo, pageSize, app_code);
+        const result = await this.ctx.service.assets.list(pageNo, pageSize, team_code, status);
 
         ctx.body = this.app.result({
             data: result,
