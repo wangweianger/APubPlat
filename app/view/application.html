@@ -16,18 +16,29 @@
     .model_assets_list .common_pages{
         justify-content: flex-start;
     }
-    .assets_item_list{
+    .assets_item_list:nth-child(odd){
+        border-bottom:solid 1px #eee;
+        padding-bottom:5px;
+        margin-bottom:5px;
+    }
+    .assets_item_list.first{
+        border-bottom:none;
+        padding-bottom:0px;
+        margin-bottom:0px;
+    }
+    .assets_item_item{
+        font-size:12px;
         display: flex;
         flex-direction: row;
         align-items: center;
     }
-    .assets_item_list .as_1{
+    .assets_item_item .as_1{
         display: inline-block;
-        width:300px;
+        width:250px;
     }
-    .assets_item_list .as_2{
+    .assets_item_item .as_2{
         display: inline-block;
-        width:180px;
+        width:150px;
     }
 </style>
 <div class="content" id="team" v-cloak>
@@ -53,43 +64,48 @@
         </div>
         <div class="table_body">
             <el-table :data="datalist" style="width: 100%" :row-class-name="tableRowClassName">
-                <el-table-column prop="name" label="应用名称" width="250">
+                <el-table-column prop="name" label="应用名称">
                 </el-table-column>
-                <el-table-column prop="code" label="应用编码" width="150">
+                <el-table-column prop="code" label="应用编码">
                 </el-table-column>
-                <el-table-column label="所属团队" width="200">
+                <el-table-column label="所属团队">
                     <template slot-scope="scope">
                         <div>{{scope.row.teamlist[0].name}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="拥有资产">
+                <el-table-column label="拥有资产"  width="700">
                     <template slot-scope="scope">
-                        <div v-for="item in scope.row.assets_list">
-                            <div class="assets_item_list">
+                        <div class="assets_item_list" 
+                            :class="{'first':scope.row.assets_list.length==1?true:false}"
+                            v-for="(item,index) in scope.row.assets_list" 
+                            :key="index">
+                            <div class="assets_item_item" >
                                 <span class="as_1">资产名称：{{item.name}}</span>
                                 <span class="as_2">外网IP：{{item.outer_ip}}</span>
                                 <span class="as_2">内网IP：{{item.lan_ip}}</span>
+                                <el-button type="primary" size="mini">构建部署</el-button>
                             </div>
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column label="可用状态" width="100">
+                <el-table-column label="可用状态" width="120">
                     <template slot-scope="scope">
                         <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200">
+                <el-table-column label="操作" width="250">
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
-                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="warning"
-                                size="small">禁用</el-button>
+                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger"
+                                size="small" plain>禁用</el-button>
                             <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success"
                                 size="small">启用</el-button>
+                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                         <div class="mb10">
-                            <el-button @click="distAsstes(scope.row)" type="success" size="small">分配资产</el-button>
-                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
+                            <el-button @click="distAsstes(scope.row)" type="success" size="small" plain>分配资产</el-button>
+                            <el-button @click="distAsstes(scope.row)" type="primary" size="small">构建部署</el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -130,7 +146,7 @@
     </el-dialog>
     <!-- 分配资产 -->
     <el-dialog class="model_assets_list" title="分配资产" :visible.sync="assets.dialogAppVisible">
-        <el-table :data="assets.assestsList" @selection-change="handleSelectionChange">
+        <el-table :data="assets.assestsList" ref="multipleTable" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column property="name" label="所属团队" width="150"></el-table-column>
             <el-table-column property="name" label="资产名称" width="150"></el-table-column>
@@ -244,15 +260,18 @@
                 this.assets.appItem = item;
                 this.assets.dialogAppVisible = true;
                 const assets_list = item.assets_list || [];
-                const list = [];
-                this.assets.assestsList.forEach(item=>{
-                    assets_list.forEach(item_1=>{
-                        if(item.code === item_1.code){
-                            list.push(item);
-                        }
+                this.assets.multipleSelection = assets_list;
+                if(assets_list.length) {
+                    this.assets.assestsList.forEach(item_1=>{
+                        assets_list.forEach(item_2=>{
+                            if(item_1.code === item_2.code){
+                                setTimeout(()=>{ this.$refs.multipleTable.toggleRowSelection(item_1, true); },100)
+                            }
+                        })
                     })
-                })
-                this.assets.multipleSelection = list;
+                } else {
+                    this.$refs.multipleTable.clearSelection();
+                }
             },
             handleSelectionChange(val) {
                 this.assets.multipleSelection = val;

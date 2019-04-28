@@ -33,7 +33,7 @@
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="handleTeam(2,scope.row)" type="primary" size="small">编辑</el-button>
-                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="warning" size="small">禁用</el-button>
+                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger" size="small" plain>禁用</el-button>
                             <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success" size="small">启用</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
@@ -192,7 +192,7 @@
                     return 'disabled-row';
                 }
                 return '';
-            }
+            },
         }
     })
 </script>
