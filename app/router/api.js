@@ -37,6 +37,8 @@ module.exports = app => {
     apiV1Router.post('application/distribution', application.distribution);
     // 获得单个应用详情
     apiV1Router.get('application/itemdetail', application.itemdetail);
+    // 更新单个应用构建配置
+    apiV1Router.post('application/updateConfigs', application.updateConfigs);
 
     // --------------------------- 资产管理 --------------------------------
     // get list

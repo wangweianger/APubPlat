@@ -68,7 +68,7 @@
                             <div>
                                 <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境</el-button>
                                 <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境</el-button>
-                                <el-button @click="distAsstes(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
+                                <el-button @click="getShhKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -111,7 +111,7 @@
         <div class="block mt30">
             <div class="left">服务器部署shell脚本</div>
             <div class="right">
-                <el-input v-model="pro_dir" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
+                <el-input v-model="shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
                 <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
             </div>
         </div>
@@ -125,13 +125,13 @@
         <div class="block mt10">
             <div class="left">部署shell脚本</div>
             <div class="right">
-                <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="pro_shell" style="width:1000px;"></el-input>
+                <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="shell_body" style="width:1000px;"></el-input>
                 <span class="ml20 light">备注：服务器初始shell脚本。</span>
             </div>
         </div>
         <div class="btns">
-            <el-button type="primary" @click="getGitType(1)" class="mb20">保存构建配置</el-button>
-            <el-button type="default" @click="goBack()" class="mb20">取消</el-button>
+            <el-button type="primary" @click="submitConfigs" class="mb20">保存构建配置</el-button>
+            <el-button type="default" @click="goBack" class="mb20">取消</el-button>
         </div>
     </div>
 </div>
@@ -148,8 +148,8 @@
                 git_url:'',
                 git_user:'',
                 git_pwd:'',
-                pro_dir:'',
-                pro_shell:'',
+                shell_path:'',
+                shell_body:'',
             }
         },
         mounted() {
@@ -166,6 +166,13 @@
                     success: data => {
                         this.details = data.data;
                         this.assetslist = data.data.assets_list || [];
+                        this.config_type = data.data.config_type;
+                        this.git_type = data.data.git_msg.git_type;
+                        this.git_url = data.data.git_msg.git_url;
+                        this.git_user = data.data.git_msg.git_user;
+                        this.git_pwd = data.data.git_msg.git_pwd;
+                        this.shell_path = data.data.shell_path;
+                        this.shell_body = data.data.shell_body;
                     }
                 })
             },
@@ -190,9 +197,9 @@
                     success: data => {
                         if(data.data) {
                             const version = data.data.match(/\d[\d\.]+\d/)[0]
-                            popup.miss({title:'服务器已安装GIT环境，环境版本为'+ version})
+                            popup.miss({title:'检测到服务器已安装GIT 环境版本为'+ version})
                         }else{
-                            popup.miss({ title: '服务器未安装GIT环境！' })
+                            popup.miss({ title: '检测到服务器未安装GIT环境！' })
                         }
                     }
                 })
@@ -216,6 +223,49 @@
                                 }
                             }
                         })
+                    }
+                })
+            },
+            getShhKey(item){
+
+            },
+            submitConfigs(){
+                if (this.config_type === 1 && !this.git_url) {
+                    popup.alert({ title: '请填写拉取代码的路径!' });
+                    return;
+                }
+                if (this.config_type === 1 && this.git_type === 1 && !this.git_user) {
+                    popup.alert({ title: '请填git用户名!' });
+                    return;
+                }
+                if (this.config_type === 1 && this.git_type === 1 && !this.git_pwd) {
+                    popup.alert({ title: '请填git密码!' });
+                    return;
+                }
+                if (!this.shell_path) {
+                    popup.alert({ title: '请填写编译的shell路径!' });
+                    return;
+                }
+                if (!this.shell_body) {
+                    popup.alert({ title: '请填写编译shell的内容!' });
+                    return;
+                }
+                util.ajax({
+                    url: `${config.baseApi}api/v1/application/updateConfigs`,
+                    data: {
+                        id:this.id,
+                        config_type:this.config_type,
+                        git_type: this.git_type,
+                        git_url: this.git_url,
+                        git_user: this.git_user,
+                        git_pwd: this.git_pwd,
+                        shell_path: this.shell_path,
+                        shell_body: this.shell_body,
+                    },
+                    success: data => {
+                        this.itemdetail();
+                        popup.miss({title:'操作成功!'})
+                        // setTimeout(()=>{ location.href = "/application" },1500)
                     }
                 })
             },
