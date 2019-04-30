@@ -106,19 +106,12 @@ class ApplicationController extends Controller {
     async updateConfigs() {
         const { ctx } = this;
         const query = ctx.request.body;
-        let { id, config_type, git_type, git_url, git_user, git_pwd, shell_path, shell_body } = query;
-
-        config_type = config_type * 1;
-        git_type = git_type * 1;
+        const id = query.id;
+        const tasklist = query.tasklist || [];
 
         if (!id) throw new Error('id参数不能为空!');
-        if (config_type === 1 && !git_url) throw new Error('请填写拉取代码的路径!');
-        if (config_type === 1 && git_type === 1 && !git_user) throw new Error('请填git用户名!');
-        if (config_type === 1 && git_type === 1 && !git_pwd) throw new Error('请填git密码!');
-        if (!shell_path) throw new Error('请填写编译的shell路径!');
-        if (!shell_body) throw new Error('请填写编译shell的内容!');
 
-        const result = await this.ctx.service.application.updateConfigs(query);
+        const result = await this.ctx.service.application.updateConfigs(id, tasklist);
 
         ctx.body = this.app.result({
             data: result,

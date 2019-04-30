@@ -79,11 +79,10 @@ class ApplicationService extends Service {
         return await this.ctx.model.Application.findOne({ _id: id, status: 1 });
     }
     // 更新单个应用部署配置
-    async updateConfigs(query) {
-        const { id, config_type, git_type, git_url, git_user, git_pwd, shell_path, shell_body } = query;
+    async updateConfigs(id, tasklist) {
         return await this.ctx.model.Application.update(
             { _id: id },
-            { $set: { config_type, shell_path, shell_body, git_msg: { git_type, git_url, git_user, git_pwd } } },
+            { $set: { task_list: tasklist } },
             { multi: true }
         );
     }

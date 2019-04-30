@@ -3,10 +3,6 @@
         padding:20px;
         background: #fff;
     }
-    .comfig_header{
-        border-bottom:solid 1px #eee;
-        padding:20px 0 30px 50px;
-    }
     .config_main .block{
         display: flex;
         flex-direction: row;
@@ -15,6 +11,7 @@
     }
     .config_main .block .left{
         width:150px;
+        color:#666;
     }
     .config_main .block .right{
         display: flex;
@@ -30,12 +27,19 @@
     .config_main .block .textarea{
         width:800px;
     }
-    .config_main .btns{
+    .config_main .btns_submit{
         padding:50px 0 100px 0;
         display: flex;
         flex-direction: row;
         align-items: center;
-        padding-left:150px;
+    }
+    .lable_parent{
+        position: relative;
+    }
+    .lable_parent .delete{
+        position: absolute;
+        right:20px;
+        top:0;
     }
 </style>
 <div class="content" id="team" v-cloak>
@@ -45,15 +49,9 @@
         </el-col>
     </el-row>
     <div class="config_main mt30">
-        <div class="block mb50 comfig_header">
-            <div class="right">
-                <el-button :type="config_type==1?'primary':'default'" @click="getConfigType(1)" round>git hooks方式</el-button>
-                <el-button :type="config_type==2?'primary':'default'" @click="getConfigType(2)" class="ml30"  round>shell 脚本方式</el-button>
-            </div>
-        </div>
-        <div class="block mt30">
-            <div class="left">资产列表</div>
-            <div class="right">
+        <div class="block mb50">
+            <div class="bottom">
+                <div class="top mb20">资产列表</div>
                 <el-table :data="assetslist" border style="width:1000px;font-size:12px;">
                     <el-table-column prop="name" label="资产名称" width="200">
                     </el-table-column>
@@ -75,64 +73,113 @@
                 </el-table>
             </div>
         </div>
-        <div v-show="config_type===1">
-            <div class="block mt30">
-                <div class="left">选择git部署方式</div>
-                <div class="right">
-                    <el-button :type="git_type==1?'primary':'default'" size="small" @click="getGitType(1)" round>https方式</el-button>
-                    <el-button :type="git_type==2?'primary':'default'" size="small" @click="getGitType(2)" class="ml30" round>ssh方式</el-button>
+        <div class="block mb50">
+            <el-button type="primary" icon="el-icon-plus" @click="addNewTask" class="ml30">新建任务</el-button>
+        </div>
+        <el-tabs 
+            v-model="editableTabsValue" 
+            closable 
+            type="border-card"
+            v-if="tasklist.length" 
+            @tab-remove="removeTab">
+            <el-tab-pane 
+                class="lable_parent" 
+                v-for="(item,index) in tasklist" 
+                :key="index" 
+                :label="item.task_name" 
+                :name="index+''">
+                <div class="delete">
+                    <el-button type="danger" icon="el-icon-delete" size="medium" @click="deleteItemTask(item,index)" class="ml30">删除此任务</el-button>
                 </div>
-            </div>
-            <div v-show="git_type===1">
-                <div class="block mt20">
-                    <div class="left"></div>
+                <div class="block mt30">
+                    <div class="left">任务名称</div>
                     <div class="right">
-                        <el-input v-model="git_url" class="inp1" placeholder="请输入git https地址"></el-input>
+                        <el-input v-model="item.task_name" class="inp1"></el-input>
                     </div>
                 </div>
-                <div class="block mt20">
-                    <div class="left"></div>
-                    <div class="right">
-                        <el-input v-model="git_user" class="inp2" placeholder="请输入git用户名"></el-input>
-                        <el-input v-model="git_pwd" class="ml20 inp2" placeholder="请输入git密码"></el-input>
+                <div class="block mt30">
+                    <div class="left">任务类型</div>
+                    <div class="right">{{item.task_type=='git'?'git hooks任务':''}}{{item.task_type=='shell'?'shell脚本任务':''}}</div>
+                </div>
+                <div v-show="item.task_type=='git'?true:false">
+                    <div class="block mt30">
+                        <div class="left">选择git部署方式</div>
+                        <div class="right">
+                            <el-button :type="item.git_type=='https'?'primary':'default'" size="small" @click="item.git_type='https'" round>https方式
+                            </el-button>
+                            <el-button :type="item.git_type=='ssh'?'primary':'default'" size="small" @click="item.git_type='ssh'" class="ml30" round>
+                                ssh方式</el-button>
+                        </div>
+                    </div>
+                    <div v-show="item.git_type=='https'?true:false">
+                        <div class="block mt20">
+                            <div class="left"></div>
+                            <div class="right">
+                                <el-input v-model="item.git_url" class="inp1" placeholder="请输入git https地址"></el-input>
+                            </div>
+                        </div>
+                        <div class="block mt20">
+                            <div class="left"></div>
+                            <div class="right">
+                                <el-input v-model="item.git_user" class="inp2" placeholder="请输入git用户名"></el-input>
+                                <el-input v-model="item.git_pwd" class="ml20 inp2" placeholder="请输入git密码"></el-input>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-show="item.git_type=='ssh'?true:false">
+                        <div class="block mt20">
+                            <div class="left"></div>
+                            <div class="right">
+                                <el-input v-model="item.git_url" class="inp1" placeholder="请输入git ssh地址"></el-input>
+                                <span class="ml20 light">备注：请确保git平台应用项目已经添加了相应服务器的ssh key。</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div v-show="git_type===2">
-                <div class="block mt20">
-                    <div class="left"></div>
+                <div class="block mt30">
+                    <div class="left">服务器部署shell脚本</div>
                     <div class="right">
-                        <el-input v-model="git_url" class="inp1" placeholder="请输入git ssh地址"></el-input>
-                        <span class="ml20 light">备注：请确保git平台应用项目已经添加了相应服务器的ssh key。</span>
+                        <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
+                        <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="block mt30">
-            <div class="left">服务器部署shell脚本</div>
-            <div class="right">
-                <el-input v-model="shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
-                <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
-            </div>
-        </div>
-        <div>
-        <div class="block mt30">
-            <div class="left"></div>
-            <div class="right">
-                <el-button type="primary" size="small" @click="getGitType(1)" class="mb20" round>随机从资产列表中同步shell脚本</el-button>
-            </div>
-        </div>
-        <div class="block mt10">
-            <div class="left">部署shell脚本</div>
-            <div class="right">
-                <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="shell_body" style="width:1000px;"></el-input>
-                <span class="ml20 light">备注：服务器初始shell脚本。</span>
-            </div>
-        </div>
-        <div class="btns">
+                <div class="block mt30">
+                    <div class="left">部署shell脚本</div>
+                    <div>
+                        <!-- <el-button type="primary" size="small" round>随机从资产列表中同步shell脚本</el-button> -->
+                        <div class="mt10 right">
+                            <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="item.shell_body" style="width:1000px;">
+                            </el-input>
+                        </div>
+                        <div class="mt10 light">备注：服务器初始shell脚本。</div>
+                    </div>
+                </div>
+            </el-tab-pane>
+        </el-tabs>
+        <div class="btns_submit" v-if="tasklist.length">
             <el-button type="primary" @click="submitConfigs" class="mb20">保存构建配置</el-button>
             <el-button type="default" @click="goBack" class="mb20">取消</el-button>
         </div>
+        
+        <!-- 新建任务model -->
+        <el-dialog width="600px" title="新建任务" :visible.sync="dialogTableVisible">
+            <div class="com_model_main">
+                <div class="com_model_block">
+                    <div class="left">任务名称</div>
+                    <el-input class="inp" v-model.trim="task_name" placeholder="请输入任务名称"></el-input>
+                </div>
+                <div class="com_model_block">
+                    <div class="left">任务类型</div>
+                    <el-select class="inp" v-model="task_type" placeholder="请选择">
+                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </div>
+                <div class="btns">
+                    <el-button type="primary" @click="submitTask"> 提交 </el-button>
+                </div>
+            </div>
+        </el-dialog>
     </div>
 </div>
 <script>
@@ -143,13 +190,19 @@
                 id: util.getQueryString('id'),
                 details:{},
                 assetslist:[],
-                config_type: 1, // 1: git hooks  2: shell 脚本
-                git_type: 1, // 1:https 2:ssh
-                git_url:'',
-                git_user:'',
-                git_pwd:'',
-                shell_path:'',
-                shell_body:'',
+                dialogTableVisible:false,
+                options:[{
+                    value: 'git',
+                    label: 'GIT任务'
+                },{
+                    value: 'shell',
+                    label: 'SHELL任务'
+                }],
+                task_name:'',
+                task_type: '',
+                tasklist:[],
+                editableTabsValue: 0,
+
             }
         },
         mounted() {
@@ -166,21 +219,55 @@
                     success: data => {
                         this.details = data.data;
                         this.assetslist = data.data.assets_list || [];
-                        this.config_type = data.data.config_type;
-                        this.git_type = data.data.git_msg.git_type;
-                        this.git_url = data.data.git_msg.git_url;
-                        this.git_user = data.data.git_msg.git_user;
-                        this.git_pwd = data.data.git_msg.git_pwd;
-                        this.shell_path = data.data.shell_path;
-                        this.shell_body = data.data.shell_body;
+                        this.tasklist = data.data.task_list || [];
                     }
                 })
             },
-            getConfigType(type){
-                this.config_type = type;
+            addNewTask(){
+                this.task_type = '';
+                this.task_name = '';
+                this.dialogTableVisible = true;
             },
-            getGitType(type){
-                this.git_type = type;
+            submitTask(){
+                if(!this.task_name){
+                    popup.alert({title:'请填写任务名称!'})
+                    return;
+                }
+                if (!this.task_type) {
+                    popup.alert({ title: '请选择任务类型!' })
+                    return;
+                }
+                this.dialogTableVisible = false;
+                this.editableTabsValue = this.tasklist.length + '';
+                this.tasklist.push({
+                    task_name:this.task_name,
+                    task_type: this.task_type,
+                    git_type:'https',
+                })
+            },
+            removeTab(targetName){
+                popup.confirm({title: `确定删除此任务吗？`, yes: () => {
+                    let tabs = this.tasklist;
+                    let activeName = this.editableTabsValue;
+                    if (activeName == targetName) {
+                        tabs.forEach((tab, index) => {
+                            if (tab.name === targetName) {
+                                let nextTab = tabs[index + 1] || tabs[index - 1];
+                                if (nextTab) {
+                                    activeName = nextTab.name;
+                                }
+                            }
+                        });
+                    }
+                    this.editableTabsValue = activeName;
+                    this.tasklist = tabs.filter((tab,index) => index != targetName);
+                }})
+            },
+            deleteItemTask(item,index){
+                popup.confirm({ title: `确定删除${item.task_name}任务吗？`, yes: () => {
+                    this.editableTabsValue = '0';
+                    this.tasklist.splice(index, 1);
+                }})
             },
             goBack(){
                 location.href="/application"
@@ -230,42 +317,15 @@
 
             },
             submitConfigs(){
-                if (this.config_type === 1 && !this.git_url) {
-                    popup.alert({ title: '请填写拉取代码的路径!' });
-                    return;
-                }
-                if (this.config_type === 1 && this.git_type === 1 && !this.git_user) {
-                    popup.alert({ title: '请填git用户名!' });
-                    return;
-                }
-                if (this.config_type === 1 && this.git_type === 1 && !this.git_pwd) {
-                    popup.alert({ title: '请填git密码!' });
-                    return;
-                }
-                if (!this.shell_path) {
-                    popup.alert({ title: '请填写编译的shell路径!' });
-                    return;
-                }
-                if (!this.shell_body) {
-                    popup.alert({ title: '请填写编译shell的内容!' });
-                    return;
-                }
                 util.ajax({
                     url: `${config.baseApi}api/v1/application/updateConfigs`,
                     data: {
                         id:this.id,
-                        config_type:this.config_type,
-                        git_type: this.git_type,
-                        git_url: this.git_url,
-                        git_user: this.git_user,
-                        git_pwd: this.git_pwd,
-                        shell_path: this.shell_path,
-                        shell_body: this.shell_body,
+                        tasklist:this.tasklist,
                     },
                     success: data => {
                         this.itemdetail();
                         popup.miss({title:'操作成功!'})
-                        // setTimeout(()=>{ location.href = "/application" },1500)
                     }
                 })
             },
