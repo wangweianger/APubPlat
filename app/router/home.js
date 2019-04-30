@@ -12,6 +12,9 @@ module.exports = app => {
     // 资产管理
     router.get('/assets', web.assets);
 
+    // 环境管理
+    router.get('/environment', web.environment);
+
     // 应用管理
     router.get('/application', web.application);
 

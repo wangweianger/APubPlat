@@ -51,6 +51,14 @@ class WebController extends Controller {
         });
     }
 
+    // 环境配置
+    async environment() {
+        const { ctx } = this;
+        await ctx.render('environment', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

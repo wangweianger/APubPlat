@@ -1,0 +1,158 @@
+<style scoped>
+    
+</style>
+<div class="content" id="environment" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">环境管理</div>
+        </el-col>
+    </el-row>
+
+    <!-- table -->
+    <div class="com_table_block mt20">
+        <div class="table_header">
+            <div class="l">环境管理</div>
+            <div class="r">
+                <el-button type="primary" size="small" class="ml20" @click="handleEnvironment(1)">+ 新增环境</el-button>
+            </div>
+        </div>
+        <div class="table_body">
+            <el-table :data="datalist" style="width: 100%">
+                <el-table-column prop="name" label="环境名称">
+                </el-table-column>
+                <el-table-column prop="code" label="环境编码">
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <div class="mb10">
+                            <el-button @click="handleEnvironment(2,scope.row)" type="primary" size="small">编辑</el-button>
+                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+        <div class="common_pages">
+            <el-pagination background @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                :current-page.sync="currentPage" :page-size="pageSize" layout="prev, pager, next, jumper"
+                :total="totalCount">
+            </el-pagination>
+        </div>
+    </div>
+    <!-- model弹出框 -->
+    <el-dialog width="500px" title="环境编辑" :visible.sync="dialogTableVisible">
+        <div class="com_model_main">
+            <div class="com_model_block">
+                <div class="left">环境名称</div>
+                <el-input class="inp" v-model="environment.name" placeholder="请输环境名称"></el-input>
+            </div>
+            <div class="com_model_block">
+                <div class="left">环境编码</div>
+                <el-input class="inp" v-model="environment.code" placeholder="以env_开头、例如env_zxhy"></el-input>
+            </div>
+            <div class="btns">
+                <el-button type="primary" @click="submitEnvironment"> 提交 </el-button>
+            </div>
+        </div>
+    </el-dialog>
+
+</div>
+<script>
+    new Vue({
+        el: '#environment',
+        data: function () {
+            return {
+                datalist: [],
+                pageSize: 30,
+                totalCount: 0,
+                currentPage: 1,
+                dialogTableVisible: false,
+                type: 1,
+                environment: {
+                    type: 1,
+                    id: '',
+                    name: '',
+                    code: '',
+                },
+            }
+        },
+        filters: {
+        },
+        mounted() {
+            this.getList();
+        },
+        methods: {
+            getList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/environment/list`,
+                    data:{
+                        pageNo: this.currentPage,
+                        pageSize: this.pageSize
+                    },
+                    success: data => {
+                        this.totalCount = data.data.totalNum;
+                        this.datalist = data.data.datalist;
+                    }
+                })
+            },
+            submitEnvironment() {
+                if (!this.environment.name) {
+                    popup.alert({ title: '请填写环境名称!' });
+                    return;
+                }
+                if (!this.environment.code) {
+                    popup.alert({ title: '请填写环境编码!' });
+                    return;
+                }
+                util.ajax({
+                    url: `${config.baseApi}api/v1/environment/handle`,
+                    data: this.environment,
+                    success: data => {
+                        this.dialogTableVisible = false;
+                        this.getList();
+                        popup.miss({ title: '操作成功!' });
+                    }
+                })
+            },
+            handleEnvironment(type, item) {
+                if (item) item = JSON.parse(JSON.stringify(item));
+                if (item) {
+                    this.environment = item;
+                } else {
+                    this.environment = {
+                        type: 1,
+                        id: '',
+                        name: '',
+                        code: '',
+                    }
+                }
+                this.environment.type = type;
+                this.dialogTableVisible = true;
+            },
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.getList();
+            },
+            hanleDelete(item) {
+                popup.confirm({
+                    title: `确定删除${item.name}环境吗？`, yes: () => {
+                        util.ajax({
+                            url: `${config.baseApi}api/v1/environment/delete`,
+                            data: {
+                                id: item.id,
+                            },
+                            success: data => {
+                                this.getList();
+                                popup.miss({ title: '操作成功!' });
+                            }
+                        })
+                    }
+                })
+            },
+        }
+    })
+</script>

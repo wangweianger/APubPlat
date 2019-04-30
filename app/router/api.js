@@ -9,6 +9,7 @@ module.exports = app => {
         application,
         assets,
         util,
+        environment,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -23,6 +24,14 @@ module.exports = app => {
     apiV1Router.post('team/setStatus', team.setStatus);
     // 删除
     apiV1Router.post('team/delete', team.delete);
+
+    // --------------------------- 环境管理 --------------------------------
+    // get list
+    apiV1Router.get('environment/list', environment.list);
+    // 新增 | 编辑
+    apiV1Router.post('environment/handle', environment.handle);
+    // 删除
+    apiV1Router.post('environment/delete', environment.delete);
 
     // --------------------------- 应用管理 --------------------------------
     // get list
