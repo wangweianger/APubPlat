@@ -6,11 +6,12 @@ const Service = require('egg').Service;
 class ApplicationService extends Service {
 
     // init 初始化
-    async list(pageNo, pageSize, team_code) {
+    async list(pageNo, pageSize, team_code, environ_code) {
         pageSize = pageSize * 1;
         pageNo = pageNo * 1;
         const query = { $match: {} };
         if (team_code) query.$match.team_code = team_code;
+        if (environ_code) query.$match.environ_code = environ_code;
         const count = Promise.resolve(this.ctx.model.Application.count(query.$match).exec());
         const datas = Promise.resolve(
             this.ctx.model.Application.aggregate([
@@ -21,6 +22,24 @@ class ApplicationService extends Service {
                         localField: 'team_code',
                         foreignField: 'code',
                         as: 'teamlist',
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'environments',
+                        localField: 'environ_code',
+                        foreignField: 'code',
+                        as: 'environlist',
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        teamlist: 1,
+                        assets_list: 1,
+                        status: 1,
+                        environlist: 1,
                     },
                 },
                 { $skip: (pageNo - 1) * pageSize },
@@ -40,7 +59,7 @@ class ApplicationService extends Service {
 
     // add | update
     async handle(json) {
-        const { type, name, code, status, _id, team_code } = json;
+        const { type, name, code, status, _id, team_code, environ_code } = json;
         let result = '';
         if (type === 1) {
             // add
@@ -49,11 +68,12 @@ class ApplicationService extends Service {
             application.code = code;
             application.status = status;
             application.team_code = team_code;
+            application.environ_code = environ_code;
             application.create_time = new Date();
             result = await application.save();
         } else if (type === 2) {
             // update
-            result = await this.ctx.model.Application.update({ _id }, { $set: { name, code, status, team_code } }, { multi: true });
+            result = await this.ctx.model.Application.update({ _id }, { $set: { name, code, status, team_code, environ_code } }, { multi: true });
         }
         return result;
     }

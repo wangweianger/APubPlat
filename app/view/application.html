@@ -48,8 +48,12 @@
         </el-col>
     </el-row>
     <div class="com_top">
-        <el-select v-model="team_code" class="inp" placeholder="选择所属团队">
+        <el-select v-model="team_code" class="inp" @change="getList" placeholder="选择所属团队">
             <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
+        <el-select v-model="environ_code" class="inp" @change="getList" placeholder="选择所属环境">
+            <el-option v-for="item in environlist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
         </el-select>
         <el-button type="primary" class="ml20" @click="getList">查询</el-button>
@@ -66,11 +70,14 @@
             <el-table :data="datalist" style="width: 100%" :row-class-name="tableRowClassName">
                 <el-table-column prop="name" label="应用名称">
                 </el-table-column>
-                <el-table-column prop="code" label="应用编码">
-                </el-table-column>
                 <el-table-column label="所属团队">
                     <template slot-scope="scope">
                         <div>{{scope.row.teamlist[0].name}}</div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="所属环境">
+                    <template slot-scope="scope">
+                        <div class="success">{{scope.row.environlist[0].name}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column label="拥有资产"  width="700">
@@ -129,6 +136,12 @@
                 </el-option>
             </div>
             <div class="com_model_block">
+                <div class="left">选择环境</div>
+                <el-select class="inp" v-model="team.environ_code" placeholder="请选择">
+                    <el-option v-for="item in environlist" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+            </div>
+            <div class="com_model_block">
                 <div class="left">应用名称</div>
                 <el-input class="inp" v-model="team.name" placeholder="请输应用名称"></el-input>
             </div>
@@ -172,7 +185,9 @@
         data: function () {
             return {
                 team_code:'',
+                environ_code:'',
                 teamlist: [],
+                environlist:[],
                 datalist: [],
                 pageSize: 30,
                 totalCount: 0,
@@ -181,6 +196,7 @@
                 type: 1,
                 team: {
                     team_code:'',
+                    environ_code:'',
                     type: 1,
                     _id: '',
                     name: '',
@@ -203,6 +219,7 @@
         mounted() {
             this.getList();
             this.getTeamList();
+            this.getEnvironList();
             this.getAssestList();
         },
         methods: {
@@ -212,6 +229,7 @@
                     url: `${config.baseApi}api/v1/application/list`,
                     data: {
                         team_code: this.team_code,
+                        environ_code:this.environ_code,
                         pageNo: this.currentPage,
                         pageSize: this.pageSize,
                     },
@@ -228,6 +246,7 @@
                     data:{
                         pageNo:1,
                         pageSize:100,
+                        status:1,
                     },
                     success: data => {
                         const datas = data.data.datalist || [];
@@ -239,6 +258,27 @@
                             })
                         })
                         this.teamlist = options;
+                    }
+                })
+            },
+            getEnvironList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/environment/list`,
+                    data: {
+                        pageNo: 1,
+                        pageSize: 100,
+                    },
+                    success: data => {
+                        const datas = data.data.datalist || [];
+                        const options = [];
+                        datas.forEach(item => {
+                            options.push({
+                                value: item.code,
+                                label: item.name
+                            })
+                        })
+                        this.environlist = options;
                     }
                 })
             },
@@ -300,6 +340,10 @@
                     popup.alert({ title: '请选择所属团队!' });
                     return;
                 }
+                if (!this.team.environ_code) {
+                    popup.alert({ title: '请选择所属环境!' });
+                    return;
+                }
                 if (!this.team.name) {
                     popup.alert({ title: '请填写应用名称!' });
                     return;
@@ -327,6 +371,7 @@
                 } else {
                     this.team = {
                         team_code: '',
+                        environ_code:'',
                         type: 1,
                         _id: '',
                         name: '',
@@ -384,7 +429,6 @@
                 }
                 return '';
             },
-            // 构建配置
             setAppConfig(item){
                location.href = "/appconfig?id=" + item._id;
             },

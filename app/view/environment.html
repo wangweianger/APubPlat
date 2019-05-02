@@ -88,7 +88,7 @@
                     url: `${config.baseApi}api/v1/environment/list`,
                     data:{
                         pageNo: this.currentPage,
-                        pageSize: this.pageSize
+                        pageSize: this.pageSize,
                     },
                     success: data => {
                         this.totalCount = data.data.totalNum;

@@ -6,12 +6,14 @@ const Service = require('egg').Service;
 class TeamService extends Service {
 
     // init 初始化
-    async list(pageNo, pageSize) {
+    async list(pageNo, pageSize, status) {
         pageSize = pageSize * 1;
         pageNo = pageNo * 1;
-        const count = Promise.resolve(this.ctx.model.Team.count().exec());
+        const query = {};
+        if (status) query.status = status * 1;
+        const count = Promise.resolve(this.ctx.model.Team.count(query).exec());
         const datas = Promise.resolve(
-            this.ctx.model.Team.find()
+            this.ctx.model.Team.find(query)
                 .skip((pageNo - 1) * pageSize)
                 .limit(pageSize)
                 .exec()

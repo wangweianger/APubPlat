@@ -10,8 +10,9 @@ class ApplicationController extends Controller {
         const pageNo = query.pageNo || 1;
         const pageSize = query.pageSize || this.app.config.pageSize;
         const team_code = query.team_code;
+        const environ_code = query.environ_code;
 
-        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code);
+        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code, environ_code);
 
         ctx.body = this.app.result({
             data: result,
@@ -29,13 +30,15 @@ class ApplicationController extends Controller {
         const name = query.name;
         const code = query.code;
         const team_code = query.team_code;
+        const environ_code = query.environ_code;
         const _id = query._id;
         if (type === 2 && !_id) throw new Error('id参数不能为空!');
         if (!team_code) throw new Error('请选择应用所属团队!');
+        if (!environ_code) throw new Error('请选择应用所属环境!');
         if (!name) throw new Error('应用名称不能为空!');
         if (!code) throw new Error('应用编码不能为空!');
 
-        const result = await this.ctx.service.application.handle({ type, name, code, status, _id, team_code });
+        const result = await this.ctx.service.application.handle({ type, name, code, status, _id, team_code, environ_code });
 
         ctx.body = this.app.result({
             data: result,

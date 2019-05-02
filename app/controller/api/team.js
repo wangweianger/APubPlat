@@ -9,8 +9,9 @@ class TeamController extends Controller {
         const query = ctx.request.query;
         const pageNo = query.pageNo || 1;
         const pageSize = query.pageSize || this.app.config.pageSize;
+        const status = query.status;
 
-        const result = await this.ctx.service.team.list(pageNo, pageSize);
+        const result = await this.ctx.service.team.list(pageNo, pageSize, status);
 
         ctx.body = this.app.result({
             data: result,

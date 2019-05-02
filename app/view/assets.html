@@ -13,7 +13,7 @@
         </el-col>
     </el-row>
     <div class="com_top">
-        <el-select v-model="team_code" class="inp" placeholder="选择所属团队">
+        <el-select v-model="team_code" class="inp" @change="getList" placeholder="选择所属团队">
             <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
         </el-select>

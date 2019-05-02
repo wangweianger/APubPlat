@@ -44,7 +44,9 @@ iframe { display: none; }
 .pdl20{padding-left:20px!important;}
 
 .lightcolor{color:#999;}
-.maincolor{color:#A79AFE;}
+.primary{color:#409eff;}
+.success{color:#67c23a;}
+.warning{color:#e6a23c;}
 .tipscolor{color:#e15f63;font-size:14px;}
 .light{color:#999;font-size:12px;}
 .red{color:red!important;}
