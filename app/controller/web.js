@@ -59,6 +59,14 @@ class WebController extends Controller {
         });
     }
 
+    // 邮件管理
+    async emails() {
+        const { ctx } = this;
+        await ctx.render('email', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

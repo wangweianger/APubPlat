@@ -2,68 +2,62 @@
 'use strict';
 
 const Service = require('egg').Service;
-const { sql } = require('mysqls');
 
 class EmailService extends Service {
 
-    //构建上传策略函数
-    async list(key) {
-        return  await sql
-            .table('email')
-            .select(true)
-            .order('createTime desc')
-            .exec() || [];
+    // init 初始化
+    async list(pageNo, pageSize, status) {
+        pageSize = pageSize * 1;
+        pageNo = pageNo * 1;
+        const query = {};
+        if (status) query.status = status * 1;
+        const count = Promise.resolve(this.ctx.model.Email.count(query).exec());
+        const datas = Promise.resolve(
+            this.ctx.model.Email.find(query)
+                .skip((pageNo - 1) * pageSize)
+                .limit(pageSize)
+                .exec()
+        );
+        const all = await Promise.all([ count, datas ]);
+        const [ totalNum, datalist ] = all;
+
+        return {
+            datalist,
+            totalNum,
+            pageNo,
+        };
     }
 
-    // 新增 | 更新
-    async handle(emali, name, id){
-        console.log(emali, name, id)
-        if (id) id = parseInt(id);
-        const opction = { emali, name };
-
-        let result = null;
-
-        if (id + '') {
-            // 更新
-            result = await sql
-                .table('email')
-                .data(opction)
-                .where({ id: id })
-                .update(true)
-                .exec();
-        } else {
-            // 新增
-            result = await sql
-                .table('email')
-                .data(opction)
-                .insert(true)
-                .exec();
+    // add | update
+    async handle(json) {
+        const { type, name, email, status, id } = json;
+        let result = '';
+        if (type === 1) {
+            // add
+            const emails = this.ctx.model.Email();
+            emails.name = name;
+            emails.email = email;
+            emails.status = status;
+            emails.create_time = new Date();
+            result = await emails.save();
+        } else if (type === 2) {
+            // update
+            result = await this.ctx.model.Email.update({ _id: id }, { $set: { name, email, status } }, { multi: true });
         }
-
         return result;
     }
 
-    // 删除
-    async delete(id){
-        return await sql.table('email')
-            .where({ id: id })
-            .delet(true)
-            .exec();
+    // 设置状态
+    async setStatus(json) {
+        const { id, status } = json;
+        return await this.ctx.model.Email.update({ _id: id }, { $set: { status } }, { multi: true });
     }
 
-    // 是否禁用
-    async usable(id, usable) {
-        return await sql
-            .table('email')
-            .data({ usable})
-            .where({ id: id })
-            .update(true)
-            .exec();
+    // 删除
+    async delete(id) {
+        return await this.ctx.model.Email.remove({ _id: id });
     }
 
 }
 
 module.exports = EmailService;
-
-
-

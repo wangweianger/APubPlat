@@ -21,4 +21,7 @@ module.exports = app => {
     // 应用配置
     router.get('/appconfig', web.appconfig);
 
+    // 邮件管理
+    router.get('/emails', web.emails);
+
 };

@@ -10,6 +10,7 @@ module.exports = app => {
         assets,
         util,
         environment,
+        email,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -58,6 +59,16 @@ module.exports = app => {
     apiV1Router.post('assets/setStatus', assets.setStatus);
     // 删除
     apiV1Router.post('assets/delete', assets.delete);
+
+    // --------------------------- 邮件管理 --------------------------------
+    // get list
+    apiV1Router.get('email/list', email.list);
+    // 新增 | 编辑
+    apiV1Router.post('email/handle', email.handle);
+    // 设置状态
+    apiV1Router.post('email/setStatus', email.setStatus);
+    // 删除
+    apiV1Router.post('email/delete', email.delete);
 
     // --------------------------shh sftp 交互------------------------------
     // update files
