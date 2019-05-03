@@ -79,11 +79,12 @@ class ApplicationController extends Controller {
         const { ctx } = this;
         const query = ctx.request.body;
         const _id = query._id;
+        const net_type = query.net_type || 1;
         const assets_list = query.assets_list || [];
 
         if (!_id) throw new Error('id参数不能为空!');
 
-        const result = await this.ctx.service.application.distribution(_id, assets_list);
+        const result = await this.ctx.service.application.distribution(_id, assets_list, net_type);
 
         ctx.body = this.app.result({
             data: result,

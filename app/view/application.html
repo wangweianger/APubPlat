@@ -40,6 +40,10 @@
         display: inline-block;
         width:150px;
     }
+    .model_assets_list .b_t{
+        padding-top:15px;
+        border-top:solid 1px #eee; 
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -80,7 +84,7 @@
                         <div class="success">{{scope.row.environlist[0].name}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="拥有资产"  width="700">
+                <el-table-column label="拥有资产"  width="520">
                     <template slot-scope="scope">
                         <div class="assets_item_list" 
                             :class="{'first':scope.row.assets_list.length==1?true:false}"
@@ -88,11 +92,16 @@
                             :key="index">
                             <div class="assets_item_item" >
                                 <span class="as_1">资产名称：{{item.name}}</span>
-                                <span class="as_2">外网IP：{{item.outer_ip}}</span>
-                                <span class="as_2">内网IP：{{item.lan_ip}}</span>
+                                <span class="as_2" v-if="scope.row.net_type==1?true:false">外网IP：{{item.outer_ip}}</span>
+                                <span class="as_2" v-if="scope.row.net_type==2?true:false">内网IP：{{item.lan_ip}}</span>
                                 <el-button type="primary" size="mini" disabled>单机部署</el-button>
                             </div>
                         </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="部署网络方式" width="120">
+                    <template slot-scope="scope">
+                        <div>{{scope.row.net_type == 1?'外网IP':'内网IP'}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column label="可用状态" width="120">
@@ -100,7 +109,7 @@
                         <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="300">
+                <el-table-column label="操作" width="300" fixed="right">
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
@@ -112,8 +121,11 @@
                         </div>
                         <div class="mb10">
                             <el-button @click="distAsstes(scope.row)" type="success" size="small" plain>分配资产</el-button>
-                            <el-button @click="distAsstes(scope.row)" type="primary" size="small" disabled>快速部署</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
+                        </div>
+                        <div>
+                            <el-button @click="distAsstes(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
+                            <el-button @click="distAsstes(scope.row)" type="primary" size="small" disabled>快速部署</el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -159,7 +171,7 @@
         </div>
     </el-dialog>
     <!-- 分配资产 -->
-    <el-dialog class="model_assets_list" title="分配资产" :visible.sync="assets.dialogAppVisible">
+    <el-dialog width="70%" class="model_assets_list" title="分配资产" :visible.sync="assets.dialogAppVisible">
         <el-table :data="assets.assestsList" ref="multipleTable" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column property="name" label="所属团队" width="150"></el-table-column>
@@ -172,6 +184,12 @@
             <el-pagination background @current-change="handleAssetsCurrentChange" :current-page.sync="assets.currentPage"
                 :page-size="assets.pageSize" layout="prev, pager, next, jumper" :total="assets.totalCount">
             </el-pagination>
+        </div>
+        <div class="com_model_block b_t">
+            <div class="left">网络部署方式</div>
+            <el-select class="inp" v-model="assets.net_type" placeholder="请选择">
+                <el-option v-for="item in netoption" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
         </div>
         <div class="btns">
             <el-button type="primary" @click="submitAppsAssets">确定</el-button>
@@ -204,6 +222,7 @@
                     status: true,
                 },
                 assets:{
+                    net_type:1,
                     appItem:{},
                     dialogAppVisible: false,
                     multipleSelection: [],
@@ -212,6 +231,13 @@
                     pageSize:10,
                     totalCount: 0,
                 },
+                netoption: [{
+                    value: 1,
+                    label: '外网IP'
+                }, {
+                    value: 2,
+                    label: '内网IP'
+                }],
             }
         },
         filters: {
@@ -328,6 +354,7 @@
                     data: {
                         _id: this.assets.appItem._id,
                         assets_list: this.assets.multipleSelection,
+                        net_type:this.assets.net_type,
                     },
                     success: data => {
                         this.assets.dialogAppVisible = false;

@@ -38,6 +38,7 @@ class ApplicationService extends Service {
                         name: 1,
                         teamlist: 1,
                         assets_list: 1,
+                        net_type: 1,
                         status: 1,
                         environlist: 1,
                     },
@@ -90,8 +91,9 @@ class ApplicationService extends Service {
     }
 
     // 分配资产
-    async distribution(_id, assets_list = []) {
-        return await this.ctx.model.Application.update({ _id }, { $set: { assets_list } }, { multi: true });
+    async distribution(_id, assets_list = [], net_type) {
+        net_type = net_type * 1;
+        return await this.ctx.model.Application.update({ _id }, { $set: { assets_list, net_type } }, { multi: true });
     }
 
     // 单个应用详情
