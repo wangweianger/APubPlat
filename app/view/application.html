@@ -1,4 +1,7 @@
 <style scoped>
+    .com_top .inp{
+        width:180px;
+    }
     .el-table .disabled-row {
         background: oldlace;
     }
@@ -52,15 +55,22 @@
         </el-col>
     </el-row>
     <div class="com_top">
-        <el-select v-model="team_code" class="inp" @change="getList" placeholder="选择所属团队">
-            <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-        </el-select>
-        <el-select v-model="environ_code" class="inp" @change="getList" placeholder="选择所属环境">
+        <el-select v-model="environ_code" class="inp" @change="getList" placeholder="部署环境筛选">
             <el-option v-for="item in environlist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
         </el-select>
-        <el-button type="primary" class="ml20" @click="getList">查询</el-button>
+        <el-select v-model="team_code" class="inp" @change="getList" placeholder="所属团队筛选">
+            <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
+        <el-select v-model="net_type" class="inp" @change="getList" placeholder="部署网络方式筛选">
+            <el-option v-for="item in netoption" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
+        <el-select v-model="status" class="inp" @change="getList" placeholder="应用状态筛选">
+            <el-option v-for="item in statusopction" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
     </div>
     <!-- table -->
     <div class="com_table_block mt20">
@@ -204,6 +214,8 @@
             return {
                 team_code:'',
                 environ_code:'',
+                net_type:'',
+                status:'',
                 teamlist: [],
                 environlist:[],
                 datalist: [],
@@ -238,6 +250,13 @@
                     value: 2,
                     label: '内网IP'
                 }],
+                statusopction: [{
+                    value: 1,
+                    label: '启用'
+                }, {
+                    value: 0,
+                    label: '禁用'
+                }],
             }
         },
         filters: {
@@ -256,6 +275,8 @@
                     data: {
                         team_code: this.team_code,
                         environ_code:this.environ_code,
+                        net_type:this.net_type,
+                        status:this.status,
                         pageNo: this.currentPage,
                         pageSize: this.pageSize,
                     },

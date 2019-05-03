@@ -6,12 +6,15 @@ const Service = require('egg').Service;
 class ApplicationService extends Service {
 
     // init 初始化
-    async list(pageNo, pageSize, team_code, environ_code) {
+    async list(pageNo, pageSize, team_code, environ_code, net_type, status) {
         pageSize = pageSize * 1;
         pageNo = pageNo * 1;
         const query = { $match: {} };
         if (team_code) query.$match.team_code = team_code;
         if (environ_code) query.$match.environ_code = environ_code;
+        if (net_type) query.$match.net_type = net_type * 1;
+        if (status + '') query.$match.status = status * 1;
+
         const count = Promise.resolve(this.ctx.model.Application.count(query.$match).exec());
         const datas = Promise.resolve(
             this.ctx.model.Application.aggregate([

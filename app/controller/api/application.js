@@ -11,8 +11,10 @@ class ApplicationController extends Controller {
         const pageSize = query.pageSize || this.app.config.pageSize;
         const team_code = query.team_code;
         const environ_code = query.environ_code;
+        const net_type = query.net_type;
+        const status = query.status;
 
-        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code, environ_code);
+        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code, environ_code, net_type, status);
 
         ctx.body = this.app.result({
             data: result,
