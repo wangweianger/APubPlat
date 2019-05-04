@@ -23,7 +23,7 @@
 ## 技术选型说明
 * nodejs，mongodb，shell，ssh2，xterm，redis，socket，vue，egg
 
-## 项目开发文档
+## 项目开发文档 
 * 待写
 
 ### DEMO图片
