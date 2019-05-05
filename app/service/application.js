@@ -41,6 +41,7 @@ class ApplicationService extends Service {
                         name: 1,
                         teamlist: 1,
                         assets_list: 1,
+                        email_list: 1,
                         net_type: 1,
                         status: 1,
                         environlist: 1,
@@ -108,6 +109,15 @@ class ApplicationService extends Service {
         return await this.ctx.model.Application.update(
             { _id: id },
             { $set: { task_list: tasklist } },
+            { multi: true }
+        );
+    }
+
+    // 绑定|取消 应该绑定的邮箱
+    async handleEmail(id, emaillist) {
+        return await this.ctx.model.Application.update(
+            { _id: id },
+            { $set: { email_list: emaillist } },
             { multi: true }
         );
     }

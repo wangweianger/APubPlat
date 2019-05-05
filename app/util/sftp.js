@@ -6,16 +6,23 @@ const servers = new Client();
 const sftp = {};
 
 class Sftp {
-    constructor(json = {}) {
+    constructor() {
+        this.host = '';
+        this.port = '';
+        this.username = '';
+        this.password = '';
+    }
+
+    // init 初始化
+    async init(json = {}) {
         this.host = json.host;
         this.port = json.port;
         this.username = json.username;
         this.password = json.password;
-        this.init();
+        await this.connectStatus();
     }
 
-    // init 初始化
-    async init() {
+    async connectStatus() {
         if (!sftp[this.host]) {
             sftp[this.host] = await this.connect();
             const loop = () => { sftp[this.host] = null; };
@@ -43,64 +50,66 @@ class Sftp {
 
     // 查看文件列表
     async list(remoteFilePath) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].list(remoteFilePath);
     }
 
     // 获得单个文件内容
     async get(remoteFilePath) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].get(remoteFilePath);
     }
 
     // 新增文件夹
     async mkdir(remoteFilePath, recursive) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].mkdir(remoteFilePath, recursive);
     }
 
     // 删除文件夹
     async rmdir(localPath, recursive) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].rmdir(localPath, recursive);
     }
 
     // 下载文件
     async fastGet(remotePath, localPath) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].fastGet(remotePath, localPath);
     }
 
     // 上传文件
     async fastPut(localPath, remotePath) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].fastPut(localPath, remotePath);
     }
 
     // 删除文件
     async delete(remoteFilePath) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].delete(remoteFilePath);
     }
 
     // 文件重命名
     async rename(remoteSourcePath, remoteDestPath) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].rename(remoteSourcePath, remoteDestPath);
     }
 
     // 文件权限更改
     async chmod(remoteDestPath, mode) {
-        await this.init();
+        await this.connectStatus();
         return await sftp[this.host].chmod(remoteDestPath, mode);
     }
 
     // 关闭窗口
     async end() {
-        await this.init();
-        return await sftp[this.host].end();
+        await this.connectStatus();
+        await sftp[this.host].end();
+        sftp[this.host] = null;
+        return 'success';
     }
 
 }
 
-module.exports = Sftp;
+module.exports = new Sftp();

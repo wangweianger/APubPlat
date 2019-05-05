@@ -66,7 +66,7 @@
                             <div>
                                 <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境</el-button>
                                 <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境</el-button>
-                                <el-button @click="getShhKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
+                                <el-button @click="showSshKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -180,6 +180,26 @@
                 </div>
             </div>
         </el-dialog>
+
+        <!-- ssk 弹出框 -->
+        <el-dialog width="800px" title="SSH KEY" :visible.sync="sshkey.dialogSshKeyVisible">
+            <div class="com_model_main">
+                <div class="mb20 common_tops"><i class="el-icon-warning"></i>请尽量使用获得ssh key按钮，若生成新的ssh key则相关地方均需要更改（例如：github ssk）</div>
+                <div>
+                    <el-button @click="getSshKey(1)" type="primary" plain>获得SSH KEY</el-button>
+                </div>
+                <div class="block mt30">
+                    <div class="left" style="width:80px;">邮箱地址</div>
+                    <div class="right">
+                        <el-input v-model="sshkey.email" style="width:200px;margin-right:15px;" placeholder="用来生成ssh key的邮箱备注"></el-input>
+                        <el-button @click="getSshKey(2)" class="ml10" type="danger" plain>生成新的SSH KEY</el-button>
+                    </div>
+                </div>
+                <div class="mt30 mb20">ssh key</div>
+                <el-input type="textarea" :rows="6" v-model="sshkey.sshKey"></el-input>
+            </div>
+        </el-dialog>
+
     </div>
 </div>
 <script>
@@ -202,7 +222,12 @@
                 task_type: '',
                 tasklist:[],
                 editableTabsValue: 0,
-
+                sshkey:{
+                    dialogSshKeyVisible: false,
+                    sshKey: '',
+                    email:'',
+                    assetsItem: {},
+                },
             }
         },
         mounted() {
@@ -313,9 +338,6 @@
                     }
                 })
             },
-            getShhKey(item){
-
-            },
             submitConfigs(){
                 util.ajax({
                     url: `${config.baseApi}api/v1/application/updateConfigs`,
@@ -326,6 +348,26 @@
                     success: data => {
                         this.itemdetail();
                         popup.miss({title:'操作成功!'})
+                    }
+                })
+            },
+            showSshKey(item) {
+                this.sshkey.assetsItem = item;
+                this.sshkey.dialogSshKeyVisible = true;
+            },
+            getSshKey(type){
+                util.ajax({
+                    url: `${config.baseApi}api/v1/util/getAssetSshKey`,
+                    data: {
+                        type: type,
+                        email:this.sshkey.email,
+                        host: this.sshkey.assetsItem.outer_ip,
+                        port: this.sshkey.assetsItem.port,
+                        username: this.sshkey.assetsItem.user,
+                        password: this.sshkey.assetsItem.password,
+                    },
+                    success: data => {
+                        this.sshkey.sshKey = data.data;
                     }
                 })
             },

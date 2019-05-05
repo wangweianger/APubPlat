@@ -134,7 +134,7 @@
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                         <div>
-                            <el-button @click="distAsstes(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
+                            <el-button @click="distEmails(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
                             <el-button @click="distAsstes(scope.row)" type="primary" size="small" disabled>快速部署</el-button>
                         </div>
                     </template>
@@ -181,7 +181,7 @@
         </div>
     </el-dialog>
     <!-- 分配资产 -->
-    <el-dialog width="70%" class="model_assets_list" title="分配资产" :visible.sync="assets.dialogAppVisible">
+    <el-dialog width="950px" class="model_assets_list" title="分配资产" :visible.sync="assets.dialogAppVisible">
         <el-table :data="assets.assestsList" ref="multipleTable" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="55"></el-table-column>
             <el-table-column property="name" label="所属团队" width="150"></el-table-column>
@@ -204,6 +204,24 @@
         <div class="btns">
             <el-button type="primary" @click="submitAppsAssets">确定</el-button>
             <el-button class="ml" @click="assets.dialogAppVisible=false">取消</el-button>
+        </div>
+    </el-dialog>
+    <!-- 分配邮件 -->
+    <el-dialog width="700px" class="model_assets_list" title="分配邮件" :visible.sync="email.dialogEmailVisible">
+        <el-table :data="email.emailsList">
+            <el-table-column property="email" label="邮件地址" width="200"></el-table-column>
+            <el-table-column property="name" label="邮件所属人" width="200"></el-table-column>
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button v-if="!scope.row.selected" @click="handleEmails(1,scope.row)" type="primary" size="small">绑定</el-button>
+                    <el-button v-if="scope.row.selected" @click="handleEmails(2,scope.row)" type="primary" size="small" plain>取消</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <div class="common_pages">
+            <el-pagination background @current-change="handleAssetsCurrentChange" :current-page.sync="assets.currentPage"
+                :page-size="assets.pageSize" layout="prev, pager, next, jumper" :total="assets.totalCount">
+            </el-pagination>
         </div>
     </el-dialog>
 </div>
@@ -257,6 +275,15 @@
                     value: 0,
                     label: '禁用'
                 }],
+                email:{
+                    dialogEmailVisible:false,
+                    emailsList: [],
+                    emailItem: [],
+                    appId:'',
+                    currentPage: 1,
+                    pageSize: 10,
+                    totalCount: 0,
+                },
             }
         },
         filters: {
@@ -266,6 +293,7 @@
             this.getTeamList();
             this.getEnvironList();
             this.getAssestList();
+            this.getEmailList();
         },
         methods: {
             getList() {
@@ -479,6 +507,59 @@
             },
             setAppConfig(item){
                location.href = "/appconfig?id=" + item._id;
+            },
+            getEmailList(){
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/email/list`,
+                    data:{
+                        status: 1,
+                        pageNo: this.email.currentPage,
+                        pageSize:this.email.pageSize,
+                    },
+                    success: data => {
+                        this.email.totalCount = data.data.totalNum;
+                        this.email.emailsList = data.data.datalist;
+                    }
+                })
+            },
+            distEmails(item){
+                 const itemEmailList = item.email_list || [];
+                this.email.emailItem = itemEmailList;
+                this.email.appId = item._id;
+                this.email.dialogEmailVisible = true;
+                if(itemEmailList && itemEmailList.length){
+                    const emailsList = this.email.emailsList;
+                    emailsList.forEach(item=>{
+                        item.selected = false;
+                        if(itemEmailList.includes(item.email)){
+                            item.selected = true;
+                        }
+                    })
+                    this.email.emailsList = emailsList;
+                }
+            },
+            handleEmails(type,item){
+                if(type === 1){
+                    // 绑定
+                    this.email.emailItem.push(item.email);
+                }else if(type === 2){
+                    // 取消
+                    const index = this.email.emailItem.indexOf(item.email);
+                    this.email.emailItem.splice(index,1)
+                }
+                util.ajax({
+                    url: `${config.baseApi}api/v1/application/handleEmail`,
+                    data:{
+                        id: this.email.appId,
+                        emaillist: this.email.emailItem,
+                    },
+                    success:data=>{
+                        this.email.dialogEmailVisible = false;
+                        this.getList();
+                        popup.miss({title:'操作成功!'})
+                    }
+                })
             },
         }
     })

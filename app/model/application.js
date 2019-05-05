@@ -12,6 +12,7 @@ module.exports = app => {
         net_type: { type: Number, default: 1 }, // 网络部署IP说明 1：外网IP  2：内网IP
         assets_list: { type: Array }, // 拥有资产列表
         task_list: { type: Array }, // 任务list
+        email_list: { type: Array }, // 绑定邮箱列表
         status: { type: Number, default: 1 }, // 可用装填 1：可用  0：禁用
         create_time: { type: Date, default: Date.now }, // 创建时间
     });

@@ -49,6 +49,8 @@ module.exports = app => {
     apiV1Router.get('application/itemdetail', application.itemdetail);
     // 更新单个应用构建配置
     apiV1Router.post('application/updateConfigs', application.updateConfigs);
+    // 绑定|取消 应用绑定的邮箱
+    apiV1Router.post('application/handleEmail', application.handleEmail);
 
     // --------------------------- 资产管理 --------------------------------
     // get list
@@ -81,5 +83,7 @@ module.exports = app => {
     apiV1Router.post('util/checkGitEnviron', util.checkGitEnviron);
     // 服务器是安装GIT环境
     apiV1Router.post('util/installGitEnviron', util.installGitEnviron);
+    // 获得ssh key
+    apiV1Router.post('util/getAssetSshKey', util.getAssetSshKey);
 
 };

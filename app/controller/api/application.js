@@ -124,6 +124,22 @@ class ApplicationController extends Controller {
         });
     }
 
+    // 绑定|取消 应该绑定的邮箱
+    async handleEmail() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const id = query.id;
+        const emaillist = query.emaillist || [];
+
+        if (!id) throw new Error('id参数不能为空!');
+
+        const result = await this.ctx.service.application.handleEmail(id, emaillist);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
 }
 
 module.exports = ApplicationController;

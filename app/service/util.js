@@ -8,19 +8,38 @@ class UtilService extends Service {
 
     // 检测git环境
     async checkGitEnviron(query) {
-        const ssh2Obj = new ssh2(query);
-        const result = ssh2Obj.exec('git --version');
+        await ssh2.init(query);
+        const result = await ssh2.exec('git --version');
+        ssh2.end();
         return result;
     }
 
     // 安装git环境
     async installGitEnviron(query) {
-        const ssh2Obj = new ssh2(query);
-        const result = ssh2Obj.exec('yum -y install git');
+        await ssh2.init(query);
+        const result = await ssh2.exec('yum -y install git');
+        ssh2.end();
         return result;
     }
 
+    // 获得服务器的ssh key
+    async getAssetSshKey(query) {
+        const type = query.type * 1;
+        const email = query.email;
+        await ssh2.init(query);
 
+        let result = '';
+        if (type === 1) {
+            // get ssh key
+            result = await ssh2.exec('cat ~/.ssh/id_rsa.pub');
+        } else if (type === 2) {
+            // add new ssh key
+            await ssh2.exec(`echo y | ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa -C "${email}"`);
+            result = await ssh2.exec('cat ~/.ssh/id_rsa.pub');
+        }
+        ssh2.end();
+        return result;
+    }
 }
 
 module.exports = UtilService;

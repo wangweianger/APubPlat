@@ -77,7 +77,7 @@ iframe { display: none; }
     height: 100%;
     top:0;
     left:0;
-    z-index:1010;
+    z-index:10000;
 }
 
 /****阿里icon*****/
@@ -167,6 +167,15 @@ iframe { display: none; }
 }
 .com_top .inp{
     width:250px;
+}
+
+.common_tops{
+    font-size:12px;
+    color:#999;
+}
+.common_tops .el-icon-warning{
+    color:#409eff;
+    margin-right:6px;
 }
 
 /* 公共输入框 */
