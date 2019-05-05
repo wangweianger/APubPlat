@@ -24,4 +24,10 @@ module.exports = app => {
     // 邮件管理
     router.get('/emails', web.emails);
 
+    // 应该构建
+    router.get('/build', web.build);
+
+    // 开始构建
+    router.get('/buildprocess', web.buildprocess);
+
 };

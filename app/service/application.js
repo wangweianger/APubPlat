@@ -6,7 +6,7 @@ const Service = require('egg').Service;
 class ApplicationService extends Service {
 
     // init 初始化
-    async list(pageNo, pageSize, team_code, environ_code, net_type, status) {
+    async list(pageNo, pageSize, team_code, environ_code, net_type, status, name) {
         pageSize = pageSize * 1;
         pageNo = pageNo * 1;
         const query = { $match: {} };
@@ -14,6 +14,7 @@ class ApplicationService extends Service {
         if (environ_code) query.$match.environ_code = environ_code;
         if (net_type) query.$match.net_type = net_type * 1;
         if (status + '') query.$match.status = status * 1;
+        if (name) query.$match.name = { $regex: new RegExp(name) };
 
         const count = Promise.resolve(this.ctx.model.Application.count(query.$match).exec());
         const datas = Promise.resolve(

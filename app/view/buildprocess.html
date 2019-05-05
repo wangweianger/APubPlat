@@ -1,0 +1,240 @@
+<style scoped>
+    .config_main {
+        padding: 20px;
+        background: #fff;
+    }
+
+    .config_main .block {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size:13px;
+    }
+
+    .config_main .block .left {
+        width: 100px;
+        color: #666;
+    }
+
+    .config_main .block .right {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .comm_build_textarea{
+        border:solid 1px #eee;
+        padding:10px;
+        width:950px;
+        height:200px;
+    }
+    .btns{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin-top:20px;
+    }
+    .item_task{
+        width:1200px;
+    }
+    .item_task .title{
+        font-size:25px;
+        font-weight: 300;
+    }
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">开始构建</div>
+        </el-col>
+    </el-row>
+    <div class="config_main mt30">
+        <div class="block">
+            <div class="bottom">
+                <div class="top mb20">资产列表</div>
+                <el-table :data="assetslist" border style="width:1100px;font-size:12px;">
+                    <el-table-column prop="name" label="资产名称" width="200">
+                    </el-table-column>
+                    <el-table-column prop="outer_ip" label="外网IP" width="150">
+                    </el-table-column>
+                    <el-table-column prop="lan_ip" label="内网IP" width="150">
+                    </el-table-column>
+                    <el-table-column prop="user" label="用户名" width="80">
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template slot-scope="scope">
+                            <div>
+                                <el-button @click="showSshKey(scope.row)" type="primary" size="mini">单机部署
+                                </el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+    </div>
+    <!-- main -->
+    <div class="config_main mt30" v-for="(item,index) in tasklist" :key="index">
+        <div class="item_task">
+            <div class="title">{{item.task_name}}</div>
+            <el-row class="mt30">
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">任务类型</div>
+                        <div class="right">
+                            {{item.task_type=='git'?'git hooks任务':''}}{{item.task_type=='shell'?'shell脚本任务':''}}</div>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">git部署方式</div>
+                        <div class="right">{{item.task_type=='git'?'https方式':''}}{{item.task_type=='ssh'?'ssh方式':''}}</div>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row class="mt20">
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">git地址</div>
+                        <div class="right">{{item.git_url}}</div>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">shell脚本地址</div>
+                        <div class="right">{{item.shell_path}}</div>
+                    </div>
+                </el-col>
+            </el-row>
+    
+            <div class="block mt30">
+                <div class="left">shell脚本内容</div>
+                <div class="right">
+                    <textarea disabled="disabled" class="comm_build_textarea">{{item.shell_body}}</textarea>
+                </div>
+            </div>
+            <div class="btns">
+                <el-button type="primary" @click="submitConfigs" class="mb20">全量部署</el-button>
+                <el-button type="default" @click="goBack" class="mb20">返回</el-button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                id: util.getQueryString('id'),
+                details: {},
+                assetslist: [],
+                dialogTableVisible: false,
+                options: [{
+                    value: 'git',
+                    label: 'GIT任务'
+                }, {
+                    value: 'shell',
+                    label: 'SHELL任务'
+                }],
+                task_name: '',
+                task_type: '',
+                tasklist: [],
+                editableTabsValue: 0,
+                sshkey: {
+                    dialogSshKeyVisible: false,
+                    sshKey: '',
+                    email: '',
+                    assetsItem: {},
+                },
+            }
+        },
+        mounted() {
+            this.itemdetail();
+        },
+        methods: {
+            itemdetail() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/application/itemdetail`,
+                    data: {
+                        id: this.id,
+                    },
+                    success: data => {
+                        this.details = data.data;
+                        this.assetslist = data.data.assets_list || [];
+                        this.tasklist = data.data.task_list || [];
+                    }
+                })
+            },
+            addNewTask() {
+                this.task_type = '';
+                this.task_name = '';
+                this.dialogTableVisible = true;
+            },
+            submitTask() {
+                if (!this.task_name) {
+                    popup.alert({ title: '请填写任务名称!' })
+                    return;
+                }
+                if (!this.task_type) {
+                    popup.alert({ title: '请选择任务类型!' })
+                    return;
+                }
+                this.dialogTableVisible = false;
+                this.editableTabsValue = this.tasklist.length + '';
+                this.tasklist.push({
+                    task_name: this.task_name,
+                    task_type: this.task_type,
+                    git_type: 'https',
+                })
+            },
+            removeTab(targetName) {
+                popup.confirm({
+                    title: `确定删除此任务吗？`, yes: () => {
+                        let tabs = this.tasklist;
+                        let activeName = this.editableTabsValue;
+                        if (activeName == targetName) {
+                            tabs.forEach((tab, index) => {
+                                if (tab.name === targetName) {
+                                    let nextTab = tabs[index + 1] || tabs[index - 1];
+                                    if (nextTab) {
+                                        activeName = nextTab.name;
+                                    }
+                                }
+                            });
+                        }
+                        this.editableTabsValue = activeName;
+                        this.tasklist = tabs.filter((tab, index) => index != targetName);
+                    }
+                })
+            },
+            deleteItemTask(item, index) {
+                popup.confirm({
+                    title: `确定删除${item.task_name}任务吗？`, yes: () => {
+                        this.editableTabsValue = '0';
+                        this.tasklist.splice(index, 1);
+                    }
+                })
+            },
+            goBack() {
+                location.href = "/build"
+            },
+            submitConfigs() {
+                util.ajax({
+                    url: `${config.baseApi}api/v1/application/updateConfigs`,
+                    data: {
+                        id: this.id,
+                        tasklist: this.tasklist,
+                    },
+                    success: data => {
+                        this.itemdetail();
+                        popup.miss({ title: '操作成功!' })
+                    }
+                })
+            },
+            
+        }
+    })
+</script>

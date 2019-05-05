@@ -13,8 +13,9 @@ class ApplicationController extends Controller {
         const environ_code = query.environ_code;
         const net_type = query.net_type;
         const status = query.status;
+        const name = query.app_name;
 
-        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code, environ_code, net_type, status);
+        const result = await this.ctx.service.application.list(pageNo, pageSize, team_code, environ_code, net_type, status, name);
 
         ctx.body = this.app.result({
             data: result,

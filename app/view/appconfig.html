@@ -352,6 +352,7 @@
                 })
             },
             showSshKey(item) {
+                if (this.sshkey.assetsItem._id !== item._id) this.sshkey.sshKey = '';
                 this.sshkey.assetsItem = item;
                 this.sshkey.dialogSshKeyVisible = true;
             },

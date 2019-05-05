@@ -67,6 +67,22 @@ class WebController extends Controller {
         });
     }
 
+    // 应用构建
+    async build() {
+        const { ctx } = this;
+        await ctx.render('build', {
+            data: {},
+        });
+    }
+
+    // 开始构建
+    async buildprocess() {
+        const { ctx } = this;
+        await ctx.render('buildprocess', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;
