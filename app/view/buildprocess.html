@@ -2,6 +2,7 @@
     .config_main {
         padding: 20px;
         background: #fff;
+        box-shadow: 5px 5px 10px #eee;
     }
 
     .config_main .block {
@@ -24,17 +25,16 @@
     }
 
     .comm_build_textarea{
-        border:solid 1px #eee;
         padding:10px;
         width:950px;
-        height:200px;
+        height:300px;
     }
     .btns{
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
-        margin-top:20px;
+        padding-top:30px;
     }
     .item_task{
         width:1200px;
@@ -112,7 +112,7 @@
             <div class="block mt30">
                 <div class="left">shell脚本内容</div>
                 <div class="right">
-                    <textarea disabled="disabled" class="comm_build_textarea">{{item.shell_body}}</textarea>
+                    <div :id="'editor_'+index" class="comm_build_textarea"></div>
                 </div>
             </div>
             <div class="btns">
@@ -122,6 +122,8 @@
         </div>
     </div>
 </div>
+<script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
+<script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
 <script>
     new Vue({
         el: '#team',
@@ -154,6 +156,32 @@
             this.itemdetail();
         },
         methods: {
+            runMonaco(id, data){
+                //载入Monaco
+                let editor = null;
+                const _this = this;
+                const moId = `editor_${id}`;
+                require(['vs/editor/editor.main'], function () {
+                    //得到支持的语言
+                    var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
+                    //创建编辑器
+                    editor = monaco.editor.create(document.getElementById(moId), {
+                        //内容
+                        value: data,
+                        //语言
+                        language: 'shell',
+                        scrollBeyondLastLine: false,
+                        readOnly: true,
+                        automaticLayout: true,
+                        //主题，三款：vs、vs-dark、hc-black
+                        theme: 'vs-dark',
+                        //代码略缩图
+                        minimap: {
+                            enabled: true
+                        }
+                    });
+                });
+            },
             itemdetail() {
                 util.ajax({
                     type: 'get',
@@ -164,7 +192,13 @@
                     success: data => {
                         this.details = data.data;
                         this.assetslist = data.data.assets_list || [];
-                        this.tasklist = data.data.task_list || [];
+                        const tasklist = data.data.task_list || [];
+                        if (tasklist && tasklist.length) {
+                            tasklist.forEach((item, index) => {
+                                this.runMonaco(index, item.shell_body)
+                            })
+                        }
+                        this.tasklist = tasklist;
                     }
                 })
             },
@@ -195,17 +229,8 @@
                     title: `确定删除此任务吗？`, yes: () => {
                         let tabs = this.tasklist;
                         let activeName = this.editableTabsValue;
-                        if (activeName == targetName) {
-                            tabs.forEach((tab, index) => {
-                                if (tab.name === targetName) {
-                                    let nextTab = tabs[index + 1] || tabs[index - 1];
-                                    if (nextTab) {
-                                        activeName = nextTab.name;
-                                    }
-                                }
-                            });
-                        }
-                        this.editableTabsValue = activeName;
+                        activeName = tabs[targetName + 1] ? targetName : activeName - 1;
+                        this.editableTabsValue = activeName + '';
                         this.tasklist = tabs.filter((tab, index) => index != targetName);
                     }
                 })

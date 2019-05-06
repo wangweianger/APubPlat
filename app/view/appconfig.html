@@ -105,34 +105,23 @@
                     <div class="block mt30">
                         <div class="left">选择git部署方式</div>
                         <div class="right">
-                            <el-button :type="item.git_type=='https'?'primary':'default'" size="small" @click="item.git_type='https'" round>https方式
+                            <el-button :type="item.git_type=='https'?'primary':'default'" size="small" @click="selectGitType(index,item,'https')" round>https方式
                             </el-button>
-                            <el-button :type="item.git_type=='ssh'?'primary':'default'" size="small" @click="item.git_type='ssh'" class="ml30" round>
+                            <el-button :type="item.git_type=='ssh'?'primary':'default'" size="small" @click="selectGitType(index,item,'ssh')" class="ml30" round>
                                 ssh方式</el-button>
                         </div>
                     </div>
-                    <div v-show="item.git_type=='https'?true:false">
-                        <div class="block mt20">
-                            <div class="left"></div>
-                            <div class="right">
-                                <el-input v-model="item.git_url" class="inp1" placeholder="请输入git https地址"></el-input>
-                            </div>
-                        </div>
-                        <div class="block mt20">
-                            <div class="left"></div>
-                            <div class="right">
-                                <el-input v-model="item.git_user" class="inp2" placeholder="请输入git用户名"></el-input>
-                                <el-input v-model="item.git_pwd" class="ml20 inp2" placeholder="请输入git密码"></el-input>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-show="item.git_type=='ssh'?true:false">
-                        <div class="block mt20">
-                            <div class="left"></div>
-                            <div class="right">
-                                <el-input v-model="item.git_url" class="inp1" placeholder="请输入git ssh地址"></el-input>
-                                <span class="ml20 light">备注：请确保git平台应用项目已经添加了相应服务器的ssh key。</span>
-                            </div>
+                    <div class="block mt30">
+                        <div class="left"></div>
+                        <div class="right light">
+                            <span v-if="item.git_type=='https'?true:false">
+                                <i class="el-icon-warning fs-16 mr5 primary"></i>
+                                使用https方式拉取代码时需要用户名和密码，若用户名中有<span class="red">@</span>时需要转换为<span class="red">%40</span>。
+                            </span>
+                            <span v-if="item.git_type=='ssh'?true:false">
+                                <i class="el-icon-warning fs-16 mr5 primary"></i>
+                                使用ssh方式拉取代码时请确认git端项目已填写ssh key秘钥。
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -148,8 +137,9 @@
                     <div>
                         <!-- <el-button type="primary" size="small" round>随机从资产列表中同步shell脚本</el-button> -->
                         <div class="mt10 right">
-                            <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="item.shell_body" style="width:1000px;">
-                            </el-input>
+                            <div :id="'editor_'+index" style="width:1000px;height:350px;"></div>
+                            <!-- <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="item.shell_body" style="width:1000px;">
+                            </el-input> -->
                         </div>
                         <div class="mt10 light">备注：服务器初始shell脚本。</div>
                     </div>
@@ -202,7 +192,10 @@
 
     </div>
 </div>
+<script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
+<script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
 <script>
+    const monacos = {};
     new Vue({
         el: '#team',
         data: function () {
@@ -234,7 +227,33 @@
             this.itemdetail();
         },
         methods: {
-            itemdetail(){
+            runMonaco(id,data) {
+                //载入Monaco
+                let editor = null;
+                _this = this;
+                const moId = `editor_${id}`;
+                require(['vs/editor/editor.main'], function () {
+                    //得到支持的语言
+                    var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
+                    //创建编辑器
+                    monacos[moId] = editor = monaco.editor.create(document.getElementById(moId), {
+                        value: data,
+                        language: 'shell',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        fontSize:14,
+                        //主题，三款：vs、vs-dark、hc-black
+                        theme: 'vs-dark',
+                        minimap: {
+                            enabled: true
+                        }
+                    });
+                    editor.onDidChangeModelContent(function (e) {
+                        _this.tasklist[id].shell_body = editor.getValue()
+                    });
+                });
+            },
+            itemdetail(type=false){
                 util.ajax({
                     type: 'get',
                     url: `${config.baseApi}api/v1/application/itemdetail`,
@@ -244,9 +263,35 @@
                     success: data => {
                         this.details = data.data;
                         this.assetslist = data.data.assets_list || [];
-                        this.tasklist = data.data.task_list || [];
+                        const tasklist = data.data.task_list || [];
+                        if (tasklist && tasklist.length) {
+                            tasklist.forEach((item, index) => {
+                                if(!item.shell_body) item.shell_body = '#!/bin/bash\r\n'
+                                if(!type) this.runMonaco(index, item.shell_body)
+                            })
+                        }
+                        this.tasklist = tasklist;
                     }
                 })
+            },
+            selectGitType(index,item,type){
+                item.git_type = type;
+                const https = 'git clone http://123%40qq.com:123456@git.xxx.com/www.git'
+                const ssh = 'git clone git@git.xxx.com/www.git'
+                if(type === 'https'){
+                    if(item.shell_body.indexOf(ssh) > -1){
+                        item.shell_body = item.shell_body.replace(ssh, https)
+                    }else if (item.shell_body.indexOf(https) == -1) {
+                        item.shell_body = item.shell_body + '\r\n' + https + '\r\n'
+                    }
+                }else if(type === 'ssh'){
+                    if (item.shell_body.indexOf(https) > -1) {
+                        item.shell_body = item.shell_body.replace(https, ssh)
+                    }else if (item.shell_body.indexOf(ssh) == -1) {
+                        item.shell_body =  item.shell_body + '\r\n' +ssh + '\r\n'
+                    }
+                }
+                monacos[`editor_${index}`].setValue(item.shell_body);
             },
             addNewTask(){
                 this.task_type = '';
@@ -264,27 +309,23 @@
                 }
                 this.dialogTableVisible = false;
                 this.editableTabsValue = this.tasklist.length + '';
+                const default_shell_body = this.task_type === 'git' ? 
+                    '#!/bin/bash\r\ngit clone http://123%40qq.com:123456@git.xxx.com/www.git\r\n' : 
+                    '#!/bin/bash\r\n';
                 this.tasklist.push({
                     task_name:this.task_name,
                     task_type: this.task_type,
+                    shell_body: default_shell_body,
                     git_type:'https',
                 })
+                setTimeout(()=>{ this.runMonaco(this.tasklist.length - 1, default_shell_body) },0)
             },
             removeTab(targetName){
                 popup.confirm({title: `确定删除此任务吗？`, yes: () => {
                     let tabs = this.tasklist;
                     let activeName = this.editableTabsValue;
-                    if (activeName == targetName) {
-                        tabs.forEach((tab, index) => {
-                            if (tab.name === targetName) {
-                                let nextTab = tabs[index + 1] || tabs[index - 1];
-                                if (nextTab) {
-                                    activeName = nextTab.name;
-                                }
-                            }
-                        });
-                    }
-                    this.editableTabsValue = activeName;
+                    activeName = tabs[targetName + 1]? targetName: activeName - 1;
+                    this.editableTabsValue = activeName + '';
                     this.tasklist = tabs.filter((tab,index) => index != targetName);
                 }})
             },
@@ -339,6 +380,9 @@
                 })
             },
             submitConfigs(){
+                this.tasklist.forEach((item,index)=>{
+                    item.shell_body = monacos[`editor_${index}`].getValue();
+                })
                 util.ajax({
                     url: `${config.baseApi}api/v1/application/updateConfigs`,
                     data: {
@@ -346,7 +390,7 @@
                         tasklist:this.tasklist,
                     },
                     success: data => {
-                        this.itemdetail();
+                        this.itemdetail(true);
                         popup.miss({title:'操作成功!'})
                     }
                 })
