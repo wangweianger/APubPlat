@@ -4,7 +4,6 @@
 const Client = require('ssh2-sftp-client');
 const servers = new Client();
 const sftp = {};
-
 class Sftp {
     constructor() {
         this.host = '';
@@ -112,4 +111,4 @@ class Sftp {
 
 }
 
-module.exports = new Sftp();
+module.exports = Sftp;

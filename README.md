@@ -21,7 +21,7 @@
 * 发布系统是接下来我的主要开发方向，致力于为公司开发简单而强大的自动化发布系统，因此会持续的开发并完善
 
 ## 技术选型说明
-* nodejs，mongodb，shell，ssh2，xterm，redis，socket，vue，egg
+* nodejs，mongodb，shell，ssh2，xterm，monaco-editor，redis，socket，vue，egg
 
 ## 项目开发文档 
 * 待写

@@ -97,12 +97,6 @@
             <el-row class="mt20">
                 <el-col :span="12">
                     <div class="block">
-                        <div class="left">git地址</div>
-                        <div class="right">{{item.git_url}}</div>
-                    </div>
-                </el-col>
-                <el-col :span="12">
-                    <div class="block">
                         <div class="left">shell脚本地址</div>
                         <div class="right">{{item.shell_path}}</div>
                     </div>
@@ -116,7 +110,8 @@
                 </div>
             </div>
             <div class="btns">
-                <el-button type="primary" @click="submitConfigs" class="mb20">全量部署</el-button>
+                <el-button type="danger" @click="generateBuildConfig(item)" class="mb20" plain>生成构建配置</el-button>
+                <el-button type="primary" @click="submitConfigs(item)" class="mb20">全量部署</el-button>
                 <el-button type="default" @click="goBack" class="mb20">返回</el-button>
             </div>
         </div>
@@ -247,19 +242,21 @@
                 location.href = "/build"
             },
             submitConfigs() {
+                
+            },
+            generateBuildConfig(item){
                 util.ajax({
-                    url: `${config.baseApi}api/v1/application/updateConfigs`,
+                    url: `${config.baseApi}api/v1/build/generateBuildConfig`,
                     data: {
                         id: this.id,
-                        tasklist: this.tasklist,
+                        item: item,
+                        assetslist:this.assetslist,
                     },
                     success: data => {
-                        this.itemdetail();
                         popup.miss({ title: '操作成功!' })
                     }
                 })
             },
-            
         }
     })
 </script>

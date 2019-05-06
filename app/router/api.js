@@ -11,6 +11,7 @@ module.exports = app => {
         util,
         environment,
         email,
+        build,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -85,5 +86,8 @@ module.exports = app => {
     apiV1Router.post('util/installGitEnviron', util.installGitEnviron);
     // 获得ssh key
     apiV1Router.post('util/getAssetSshKey', util.getAssetSshKey);
+
+    // -------------------------- build 构建 ------------------------------
+    apiV1Router.post('build/generateBuildConfig', build.generateBuildConfig);
 
 };
