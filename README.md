@@ -27,4 +27,5 @@
 * 待写
 
 ### DEMO图片
-![](https://github.com/wangweianger/APubPlat/blob/master/demo/01.png "")
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/02.png "")
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/03.png "")
