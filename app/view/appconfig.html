@@ -315,7 +315,7 @@
             },
             selectGitType(index,item,type){
                 item.git_type = type;
-                const https = 'git clone http://123%40qq.com:123456@git.xxx.com/www.git'
+                const https = 'git clone https://xxx%40qq.com:123456@git.xxx.com/www.git'
                 const ssh = 'git clone git@git.xxx.com/www.git'
                 if(type === 'https'){
                     if(item.shell_body.indexOf(ssh) > -1){
@@ -349,7 +349,7 @@
                 this.dialogTableVisible = false;
                 this.editableTabsValue = this.tasklist.length + '';
                 const default_shell_body = this.task_type === 'git' ? 
-                    '#!/bin/bash\r\ngit clone http://123%40qq.com:123456@git.xxx.com/www.git\r\n' : 
+                    '#!/bin/bash\r\ngit clone https://xxx%40qq.com:123456@git.xxx.com/www.git\r\n' : 
                     '#!/bin/bash\r\n';
                 this.tasklist.push({
                     task_name:this.task_name,

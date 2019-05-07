@@ -33,4 +33,7 @@ module.exports = app => {
     // 资产构建
     router.get('/assetsconfig', web.assetsconfig);
 
+    // 资产任务
+    router.get('/commtask', web.commtask);
+
 };

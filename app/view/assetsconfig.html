@@ -3,6 +3,12 @@
         padding: 20px;
         background: #fff;
     }
+    .bottom .top{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -12,36 +18,64 @@
     </el-row>
     <div class="config_main mt30">
         <div class="bottom">
-            <div class="top mb20">资产列表</div>
+            <div class="top mb20">
+                <div>资产列表</div> 
+                <el-button @click="addNewCommTask" type="primary" icon="el-icon-plus" size="small">新建资产任务</el-button>
+            </div>
             <el-table :data="assetslist" border @selection-change="handleSelectionChange"
                 style="width:100%;font-size:13px;">
                 <el-table-column type="selection" width="55"></el-table-column>
-                <el-table-column prop="name" label="资产名称" width="200">
+                <el-table-column prop="name" label="资产名称">
                 </el-table-column>
-                <el-table-column prop="code" label="资产编码" width="150">
+                <el-table-column prop="code" label="资产编码">
                 </el-table-column>
-                <el-table-column prop="outer_ip" label="外网IP" width="150">
+                <el-table-column prop="outer_ip" label="外网IP">
                 </el-table-column>
-                <el-table-column prop="lan_ip" label="内网IP" width="150">
+                <el-table-column prop="lan_ip" label="内网IP">
                 </el-table-column>
-                <el-table-column prop="user" label="用户名" width="100">
+                <el-table-column prop="user" label="用户名" width="120">
                 </el-table-column>
-                <el-table-column label="操作">
-                    <template slot-scope="scope">
+                <el-table-column label="操作"  width="500" fixed="right">
+                    <template slot-scope="scope" >
                         <div>
-                            <div></div>
-                            <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境
-                            </el-button>
-                            <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境
-                            </el-button>
-                            <el-button @click="showSshKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY
-                            </el-button>
+                            <span v-for="(item,index) in tasklist" :key="index">
+                                <el-button 
+                                    @click="handleTask(scope.row,item)" 
+                                    :type="item.btn_color" 
+                                    :plain="item.is_plain==1?true:false"
+                                    size="mini" 
+                                    >{{item.name}}</el-button>
+                                    <div v-if="index!==0 && index%3===0" class="mb10"></div>
+                            </span>
+                            <div class="mt10"></div>
+                            <el-button @click="showSshKey(scope.row)" type="danger" size="mini">获得SSH KEY</el-button>
                         </div>
                     </template>
                 </el-table-column>
             </el-table>
         </div>
         
+        <!-- ssk 弹出框 -->
+        <el-dialog width="800px" title="SSH KEY" :visible.sync="sshkey.dialogSshKeyVisible">
+            <div class="com_model_main">
+                <div class="mb20 common_tops"><i class="el-icon-warning"></i>请尽量使用获得ssh key按钮，若生成新的ssh key则相关地方均需要更改（例如：github
+                    ssk）</div>
+                <div>
+                    <el-button @click="getSshKey(1)" type="primary" plain>获得SSH KEY</el-button>
+                </div>
+                <div class="block mt30">
+                    <div class="left" style="width:80px;">邮箱地址</div>
+                    <div class="right">
+                        <el-input v-model="sshkey.email" style="width:200px;margin-right:15px;" placeholder="用来生成ssh key的邮箱备注">
+                        </el-input>
+                        <el-button @click="getSshKey(2)" class="ml10" type="danger" plain>生成新的SSH KEY</el-button>
+                    </div>
+                </div>
+                <div class="mt30 mb20">ssh key</div>
+                <el-input type="textarea" :rows="6" v-model="sshkey.sshKey"></el-input>
+            </div>
+        </el-dialog>
+
     </div>
 </div>
 <script>
@@ -52,18 +86,124 @@
             return {
                 assetslist: [],
                 multipleSelection: [],
+                sshkey: {
+                    dialogSshKeyVisible: false,
+                    sshKey: '',
+                    email: '',
+                    assetsItem: {},
+                },
+                tasklist:[],
             }
         },
         mounted() {
             this.getDatas();
+            this.getCommtaskList();
         },
         methods: {
+            getCommtaskList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/commtask/list`,
+                    success: data => {
+                        this.tasklist = data.data || [];
+                    }
+                })
+            },
             getDatas(){
                 const asslist = util.getStorage('session','assets_list_configs');
                 this.assetslist = asslist ? JSON.parse(asslist) : [];
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;
+            },
+            checkGit(item) {
+                util.ajax({
+                    url: `${config.baseApi}api/v1/util/checkGitEnviron`,
+                    data: {
+                        host: item.outer_ip,
+                        port: item.port,
+                        username: item.user,
+                        password: item.password,
+                    },
+                    success: data => {
+                        if (data.data) {
+                            const version = data.data.match(/\d[\d\.]+\d/)[0]
+                            popup.miss({ title: '检测到服务器已安装GIT 环境版本为' + version })
+                        } else {
+                            popup.miss({ title: '检测到服务器未安装GIT环境！' })
+                        }
+                    }
+                })
+            },
+            installGit(item) {
+                popup.confirm({
+                    title: `确定为${item.name}安装GIT环境吗？`, yes: () => {
+                        util.ajax({
+                            url: `${config.baseApi}api/v1/util/installGitEnviron`,
+                            data: {
+                                host: item.outer_ip,
+                                port: item.port,
+                                username: item.user,
+                                password: item.password,
+                            },
+                            success: data => {
+                                if (data.data) {
+                                    popup.miss({ title: '安装成功！' })
+                                } else {
+                                    popup.miss({ title: '安装失败!' })
+                                }
+                            }
+                        })
+                    }
+                })
+            },
+            showSshKey(item) {
+                if (this.sshkey.assetsItem._id !== item._id) this.sshkey.sshKey = '';
+                this.sshkey.assetsItem = item;
+                this.sshkey.dialogSshKeyVisible = true;
+            },
+            getSshKey(type) {
+                util.ajax({
+                    url: `${config.baseApi}api/v1/util/getAssetSshKey`,
+                    data: {
+                        type: type,
+                        email: this.sshkey.email,
+                        host: this.sshkey.assetsItem.outer_ip,
+                        port: this.sshkey.assetsItem.port,
+                        username: this.sshkey.assetsItem.user,
+                        password: this.sshkey.assetsItem.password,
+                    },
+                    success: data => {
+                        this.sshkey.sshKey = data.data;
+                    }
+                })
+            },
+            handleTask(assetsItem,commItem){
+                popup.confirm({ title: `确定执行${commItem.name}任务吗？`, yes: () => {
+                        util.ajax({
+                        url: `${config.baseApi}api/v1/util/handleShellTasks`,
+                        data: {
+                            shell_type: commItem.type,
+                            shell_body: commItem.shell_body,
+                            shell_opction: commItem.shell_opction,
+                            shell_path: commItem.shell_path,
+                            host: assetsItem.outer_ip,
+                            port: assetsItem.port,
+                            username: assetsItem.user,
+                            password: assetsItem.password,
+                        },
+                        success: data => {
+                            if (data.data.type == 1) {
+                                popup.miss({ title: data.data.result })
+                            } else if (data.data.type == 2) {
+                                popup.miss({ title: '操作成功!' })
+                            }
+                        }
+                    })
+                }})
+            },
+            addNewCommTask(){
+                location.href="/commtask?model=1"
             },
         }
     })

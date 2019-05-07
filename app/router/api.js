@@ -12,6 +12,7 @@ module.exports = app => {
         environment,
         email,
         build,
+        commtask,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -73,6 +74,14 @@ module.exports = app => {
     // 删除
     apiV1Router.post('email/delete', email.delete);
 
+    // -------------------------- 资产任务管理 ------------------------------
+    // get list
+    apiV1Router.get('commtask/list', commtask.list);
+    // 新增 | 编辑
+    apiV1Router.post('commtask/handle', commtask.handle);
+    // 删除
+    apiV1Router.post('commtask/delete', commtask.delete);
+
     // --------------------------shh sftp 交互------------------------------
     // update files
     apiV1Router.post('files/updatefile', files.updatefile);
@@ -86,6 +95,8 @@ module.exports = app => {
     apiV1Router.post('util/installGitEnviron', util.installGitEnviron);
     // 获得ssh key
     apiV1Router.post('util/getAssetSshKey', util.getAssetSshKey);
+    // 执行shell任务
+    apiV1Router.post('util/handleShellTasks', util.handleShellTasks);
 
     // -------------------------- build 构建 ------------------------------
     apiV1Router.post('build/generateBuildConfig', build.generateBuildConfig);

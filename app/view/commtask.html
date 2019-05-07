@@ -1,0 +1,245 @@
+<style scoped>
+    .comm_build_textarea {
+        width: 840px;
+        height: 180px;
+    }
+    .com_model_main .com_model_block .left{
+        width:130px;
+    }
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">资产任务管理</div>
+        </el-col>
+    </el-row>
+    <!-- table -->
+    <div class="com_table_block mt20">
+        <div class="table_header">
+            <div class="l">资产任务管理</div>
+            <div class="r">
+                <el-button type="primary" size="small" class="ml20" icon="el-icon-plus" @click="handleCommTask(1)">新建资产任务</el-button>
+            </div>
+        </div>
+        <div class="table_body">
+            <el-table :data="datalist" style="width: 100%">
+                <el-table-column prop="name" label="任务名称">
+                </el-table-column>
+                <el-table-column label="任务类型">
+                    <template slot-scope="scope">
+                        <div>{{scope.row.type == 1?'窗口运行命令':'shell脚本命令'}}</div>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="shell_path" label="shell脚本地址">
+                </el-table-column>
+                <el-table-column prop="shell_opction" label="shell脚本参数">
+                </el-table-column>
+                <el-table-column label="按钮样式">
+                    <template slot-scope="scope">
+                        <div><el-button :type="scope.row.btn_color" :plain="scope.row.is_plain==1?true:false" size="small">按钮样式</el-button></div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <div class="mb10">
+                            <el-button @click="handleCommTask(2,scope.row)" type="primary" size="small">查看|编辑</el-button>
+                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small" plain>删除</el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+    </div>
+    <!-- model弹出框 -->
+    <el-dialog width="1000px" title="资产任务编辑" :visible.sync="dialogTableVisible">
+        <div class="com_model_main">
+            <div class="com_model_block">
+                <div class="left">任务名称<span class="red">*</span></div>
+                <el-input class="inp" v-model="team.name" placeholder="请输任务名称"></el-input>
+            </div>
+            <div class="com_model_block">
+                <div class="left">任务类型<span class="red">*</span></div>
+                <el-select v-model="team.type" class="inp" placeholder="请选择">
+                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="com_model_block" v-if="team.type==2?true:false">
+                <div class="left">shell脚本参数</div>
+                <el-input class="inp" v-model="team.shell_path" placeholder="例如：/usr/src/build.sh"></el-input>
+            </div>
+            <div class="com_model_block" v-if="team.type==2?true:false">
+                <div class="left">shell脚本参数</div>
+                <el-input class="inp" v-model="team.shell_opction" placeholder="shell脚本参数请以空格隔开"></el-input>
+            </div>
+            <div class="com_model_block">
+                <div class="left">按钮颜色<span class="red">*</span></div>
+                <el-select v-model="team.btn_color" class="inp" placeholder="请选择">
+                    <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+                </el-select>
+            </div>
+            <div class="com_model_block">
+                <div class="left">是否是plain样式<span class="red">*</span></div>
+                <el-radio v-model="team.is_plain" :label="1">是</el-radio>
+                <el-radio v-model="team.is_plain" :label="2">否</el-radio>
+            </div>
+            <div class="com_model_block">
+                <div class="left">按钮预览</div>
+                <el-button :type="team.btn_color" :plain="team.is_plain==1?true:false" size="mini">按钮预览</el-button>
+            </div>
+            <div class="com_model_block">
+                <div class="left">任务脚本内容<span class="red">*</span></div>
+                <div id="editor" class="comm_build_textarea"></div>
+            </div>
+            <div class="btns">
+                <el-button type="primary" @click="submitCommtask"> 提交 </el-button>
+            </div>
+        </div>
+    </el-dialog>
+
+</div>
+<script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
+<script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
+<script>
+    let editor = null;
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                datalist:[],
+                dialogTableVisible: false,
+                options:[{
+                    value: 1,
+                    label: '窗口运行命令'
+                }, {
+                    value: 2,
+                    label: 'shell脚本命令'
+                }],
+                options1: [{
+                    value: 'default',
+                    label: 'default'
+                }, {
+                    value: 'primary',
+                    label: 'primary'
+                }, {
+                    value: 'success',
+                    label: 'success'
+                }, {
+                    value: 'info',
+                    label: 'info'
+                }, {
+                    value: 'warning',
+                    label: 'warning'
+                }, {
+                    value: 'danger',
+                    label: 'danger'
+                }],
+                team: {},
+            }
+        },
+        mounted() {
+            this.getList();
+            if(util.getQueryString('model')) this.handleCommTask(1);
+        },
+        methods: {
+            getList(){
+                util.ajax({
+                    type:'get',
+                    url: `${config.baseApi}api/v1/commtask/list`,
+                    success:data=>{
+                        this.datalist = data.data || [];
+                    }
+                })
+            },
+            handleCommTask(type, item){
+                if (item) item = JSON.parse(JSON.stringify(item));
+                if (item) {
+                    this.team = item;
+                    editor ? editor.setValue(item.shell_body) : setTimeout(() => { this.runMonaco('editor', item.shell_body); });
+                } else {
+                    this.team = {
+                        name: '',
+                        type: 1,
+                        shell_body: '',
+                        btn_color: 'primary',
+                        is_plain: 2,
+                        shell_opction:'',
+                        shell_path:'',
+                    }
+                    editor ? editor.setValue('') : setTimeout(() => { this.runMonaco('editor', ''); });
+                }
+                this.team.handletype = type;
+                this.dialogTableVisible = true;
+            },
+            submitCommtask(){
+                if(!this.team.name){
+                    popup.alert({title:'请输入任务名称!'})
+                    return
+                }
+                const shell_body = editor.getValue()
+                if (!shell_body) {
+                    popup.alert({ title: '请输入任务脚本内容!' })
+                    return
+                }
+                this.team.shell_body = shell_body;
+                util.ajax({
+                    url:`${config.baseApi}api/v1/commtask/handle`,
+                    data:this.team,
+                    success:data=>{
+                        this.getList();
+                        this.dialogTableVisible = false;
+                        popup.miss({title:'操作成功!'})
+                    }
+                })
+            },
+            hanleDelete(item) {
+                popup.confirm({
+                    title: `确定删除${item.name}邮件吗？`, yes: () => {
+                        util.ajax({
+                            url: `${config.baseApi}api/v1/commtask/delete`,
+                            data: {
+                                id: item._id,
+                            },
+                            success: data => {
+                                this.getList();
+                                popup.miss({ title: '操作成功!' });
+                            }
+                        })
+                    }
+                })
+            },
+            runMonaco(id, data) {
+                //载入Monaco
+                const _this = this;
+                require(['vs/editor/editor.main'], function () {
+                    //得到支持的语言
+                    var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
+                    //创建编辑器
+                    editor = monaco.editor.create(document.getElementById(id), {
+                        //内容
+                        value: data,
+                        //语言
+                        language: 'shell',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        //主题，三款：vs、vs-dark、hc-black
+                        theme: 'vs-dark',
+                        //代码略缩图
+                        minimap: {
+                            enabled: true
+                        }
+                    });
+                });
+            },
+            deleteItemTask(item, index) {
+                popup.confirm({
+                    title: `确定删除${item.task_name}任务吗？`, yes: () => {
+                        this.editableTabsValue = '0';
+                        this.tasklist.splice(index, 1);
+                    }
+                })
+            },
+        }
+    })
+</script>
