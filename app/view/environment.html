@@ -13,7 +13,7 @@
         <div class="table_header">
             <div class="l">环境管理</div>
             <div class="r">
-                <el-button type="primary" size="small" class="ml20" @click="handleEnvironment(1)">+ 新增环境</el-button>
+                <el-button type="primary" size="small" class="ml20" icon="el-icon-plus" @click="handleEnvironment(1)">新增环境</el-button>
             </div>
         </div>
         <div class="table_body">
@@ -25,8 +25,8 @@
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <div class="mb10">
-                            <el-button @click="handleEnvironment(2,scope.row)" type="primary" size="small">编辑</el-button>
-                            <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
+                            <el-button @click="handleEnvironment(2,scope.row)" icon="el-icon-edit" type="primary" size="small">编辑</el-button>
+                            <el-button @click="hanleDelete(scope.row)" icon="el-icon-delete" type="danger" size="small">删除</el-button>
                         </div>
                     </template>
                 </el-table-column>

@@ -3,6 +3,11 @@
         padding:20px;
         background: #fff;
     }
+    .config_main .row-col{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
     .config_main .block{
         display: flex;
         flex-direction: row;
@@ -11,7 +16,7 @@
     }
     .config_main .block .left{
         width:150px;
-        color:#666;
+        color:#999;
     }
     .config_main .block .right{
         display: flex;
@@ -22,7 +27,7 @@
         width:380px;
     }
     .config_main .block .inp2{
-        width:180px;
+        width:190px;
     }
     .config_main .block .textarea{
         width:800px;
@@ -52,7 +57,13 @@
         <div class="block mb50">
             <div class="bottom">
                 <div class="top mb20">资产列表</div>
-                <el-table :data="assetslist" border style="width:1000px;font-size:12px;">
+                <div class="mb10">
+                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-s-tools" size="small">资产配置</el-button>
+                    <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
+                    </span>
+                </div>
+                <el-table :data="assetslist" border @selection-change="handleSelectionChange" style="width:1000px;font-size:12px;">
+                    <el-table-column type="selection" width="55"></el-table-column>
                     <el-table-column prop="name" label="资产名称" width="200">
                     </el-table-column>
                     <el-table-column prop="outer_ip" label="外网IP" width="150">
@@ -64,6 +75,7 @@
                     <el-table-column label="操作">
                         <template slot-scope="scope">
                             <div>
+                                <el-button @click="serverConfigs(scope.row)" type="primary" size="mini" plain>资产配置</el-button>
                                 <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境</el-button>
                                 <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境</el-button>
                                 <el-button @click="showSshKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
@@ -92,18 +104,18 @@
                     <el-button type="danger" icon="el-icon-delete" size="medium" @click="deleteItemTask(item,index)" class="ml30">删除此任务</el-button>
                 </div>
                 <div class="block mt30">
-                    <div class="left">任务名称</div>
+                    <div class="left">任务名称<span class="red">*</span></div>
                     <div class="right">
                         <el-input v-model="item.task_name" class="inp1"></el-input>
                     </div>
                 </div>
                 <div class="block mt30">
-                    <div class="left">任务类型</div>
+                    <div class="left">任务类型<span class="red">*</span></div>
                     <div class="right">{{item.task_type=='git'?'git hooks任务':''}}{{item.task_type=='shell'?'shell脚本任务':''}}</div>
                 </div>
                 <div v-show="item.task_type=='git'?true:false">
                     <div class="block mt30">
-                        <div class="left">选择git部署方式</div>
+                        <div class="left">选择git部署方式<span class="red">*</span></div>
                         <div class="right">
                             <el-button :type="item.git_type=='https'?'primary':'default'" size="small" @click="selectGitType(index,item,'https')" round>https方式
                             </el-button>
@@ -126,28 +138,53 @@
                     </div>
                 </div>
                 <div class="block mt30">
-                    <div class="left">服务器部署shell脚本</div>
+                    <div class="left">服务器部署shell脚本<span class="red">*</span></div>
                     <div class="right">
                         <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
                         <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
                     </div>
                 </div>
                 <div class="block mt30">
-                    <div class="left">部署shell脚本</div>
+                    <div class="left">发布前是否先做备份</div>
+                    <div class="right">
+                        <el-switch v-model="item.is_backups"></el-switch>
+                    </div>
+                </div>
+                <div class="row-col mt30">
+                    <div class="block">
+                        <div class="left">应用所在位置<span class="red">*</span></div>
+                        <div class="right">
+                            <el-input v-model="item.project_path" class="inp2" placeholder="应用所在路径"></el-input>
+                        </div>
+                    </div>
+                    <div class="block ml20">
+                        <div class="left">应用备份的路径</div>
+                        <div class="right">
+                            <el-input v-model="item.backups_path" class="inp2" placeholder="应用备份的路径"></el-input>
+                        </div>
+                    </div>
+                </div>
+                <div class="block mt30">
+                    <div class="left">部署shell脚本<span class="red">*</span></div>
                     <div>
-                        <!-- <el-button type="primary" size="small" round>随机从资产列表中同步shell脚本</el-button> -->
                         <div class="mt10 right">
                             <div :id="'editor_'+index" style="width:1000px;height:350px;"></div>
-                            <!-- <el-input type="textarea" :rows="15" placeholder="部署shell脚本" v-model="item.shell_body" style="width:1000px;">
-                            </el-input> -->
                         </div>
                         <div class="mt10 light">备注：服务器初始shell脚本。</div>
+                    </div>
+                </div>
+                <div class="block mt30">
+                    <div class="left">备注</div>
+                    <div class="right">
+                        <el-input type="textarea" :rows="2" placeholder="选填" v-model="item.remarks" style="width:1000px;">
+                        </el-input>
                     </div>
                 </div>
             </el-tab-pane>
         </el-tabs>
         <div class="btns_submit" v-if="tasklist.length">
             <el-button type="primary" @click="submitConfigs" class="mb20">保存构建配置</el-button>
+            <el-button type="danger" @click="goToBuild" class="mb20" plain>去发布应用</el-button>
             <el-button type="default" @click="goBack" class="mb20">取消</el-button>
         </div>
         
@@ -214,13 +251,14 @@
                 task_name:'',
                 task_type: '',
                 tasklist:[],
-                editableTabsValue: 0,
+                editableTabsValue: util.getQueryString('tab') || '0',
                 sshkey:{
                     dialogSshKeyVisible: false,
                     sshKey: '',
                     email:'',
                     assetsItem: {},
                 },
+                multipleSelection:[],
             }
         },
         mounted() {
@@ -266,6 +304,7 @@
                         const tasklist = data.data.task_list || [];
                         if (tasklist && tasklist.length) {
                             tasklist.forEach((item, index) => {
+                                item.is_backups = item.is_backups == 1 ? true : false;
                                 if(!item.shell_body) item.shell_body = '#!/bin/bash\r\n'
                                 if(!type) this.runMonaco(index, item.shell_body)
                             })
@@ -317,6 +356,7 @@
                     task_type: this.task_type,
                     shell_body: default_shell_body,
                     git_type:'https',
+                    is_backups:false,
                 })
                 setTimeout(()=>{ this.runMonaco(this.tasklist.length - 1, default_shell_body) },0)
             },
@@ -381,7 +421,8 @@
             },
             submitConfigs(){
                 this.tasklist.forEach((item,index)=>{
-                    item.shell_body = monacos[`editor_${index}`].getValue();
+                    item.is_backups = item.is_backups ? 1 : 0;
+                    item.shell_body = monacos[`editor_${index}`].getValue() || '#!/bin/bash\r\n';
                 })
                 util.ajax({
                     url: `${config.baseApi}api/v1/application/updateConfigs`,
@@ -415,6 +456,21 @@
                         this.sshkey.sshKey = data.data;
                     }
                 })
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            serverConfigs(item) {
+                if (!item && !this.multipleSelection.length) {
+                    popup.alert({ title: '请选择需要配置的资产!' })
+                    return;
+                }
+                const assestsList = item ? [item] : this.multipleSelection;
+                util.setStorage('session', 'assets_list_configs', JSON.stringify(assestsList));
+                location.href = "/assetsconfig";
+            },
+            goToBuild(){
+                location.href = "/buildprocess?id="+this.id;
             },
         }
     })

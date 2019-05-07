@@ -30,4 +30,7 @@ module.exports = app => {
     // 开始构建
     router.get('/buildprocess', web.buildprocess);
 
+    // 资产构建
+    router.get('/assetsconfig', web.assetsconfig);
+
 };

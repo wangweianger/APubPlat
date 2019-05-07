@@ -1,0 +1,70 @@
+<style scoped>
+    .config_main {
+        padding: 20px;
+        background: #fff;
+    }
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">应用构建配置</div>
+        </el-col>
+    </el-row>
+    <div class="config_main mt30">
+        <div class="bottom">
+            <div class="top mb20">资产列表</div>
+            <el-table :data="assetslist" border @selection-change="handleSelectionChange"
+                style="width:100%;font-size:13px;">
+                <el-table-column type="selection" width="55"></el-table-column>
+                <el-table-column prop="name" label="资产名称" width="200">
+                </el-table-column>
+                <el-table-column prop="code" label="资产编码" width="150">
+                </el-table-column>
+                <el-table-column prop="outer_ip" label="外网IP" width="150">
+                </el-table-column>
+                <el-table-column prop="lan_ip" label="内网IP" width="150">
+                </el-table-column>
+                <el-table-column prop="user" label="用户名" width="100">
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <div>
+                            <div></div>
+                            <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境
+                            </el-button>
+                            <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境
+                            </el-button>
+                            <el-button @click="showSshKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY
+                            </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+        
+    </div>
+</div>
+<script>
+    const monacos = {};
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                assetslist: [],
+                multipleSelection: [],
+            }
+        },
+        mounted() {
+            this.getDatas();
+        },
+        methods: {
+            getDatas(){
+                const asslist = util.getStorage('session','assets_list_configs');
+                this.assetslist = asslist ? JSON.parse(asslist) : [];
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+        }
+    })
+</script>

@@ -83,6 +83,14 @@ class WebController extends Controller {
         });
     }
 
+    // 资产构建
+    async assetsconfig() {
+        const { ctx } = this;
+        await ctx.render('assetsconfig', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

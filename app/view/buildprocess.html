@@ -4,18 +4,23 @@
         background: #fff;
         box-shadow: 5px 5px 10px #eee;
     }
-
+    .config_main .row-col{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
     .config_main .block {
         display: flex;
         flex-direction: row;
         align-items: center;
         flex-wrap: wrap;
-        font-size:13px;
+        font-size:14px;
     }
 
     .config_main .block .left {
-        width: 100px;
-        color: #666;
+        width: 150px;
+        color: #999;
+        font-size:12px;
     }
 
     .config_main .block .right {
@@ -54,20 +59,22 @@
         <div class="block">
             <div class="bottom">
                 <div class="top mb20">资产列表</div>
-                <el-table :data="assetslist" border style="width:1100px;font-size:12px;">
-                    <el-table-column prop="name" label="资产名称" width="200">
-                    </el-table-column>
-                    <el-table-column prop="outer_ip" label="外网IP" width="150">
-                    </el-table-column>
-                    <el-table-column prop="lan_ip" label="内网IP" width="150">
-                    </el-table-column>
-                    <el-table-column prop="user" label="用户名" width="80">
-                    </el-table-column>
-                    <el-table-column label="操作">
+                <div class="mb10">
+                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-s-tools" size="small">资产配置</el-button>
+                    <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
+                    </span>
+                </div>
+                <el-table :data="assetslist" border @selection-change="handleSelectionChange" style="width:auto;font-size:13px;">
+                    <el-table-column type="selection" width="55"></el-table-column>
+                    <el-table-column prop="name" label="资产名称" width="200"></el-table-column>
+                    <el-table-column prop="code" label="资产编码" width="200"></el-table-column>
+                    <el-table-column prop="outer_ip" label="外网IP" width="150"></el-table-column>
+                    <el-table-column prop="lan_ip" label="内网IP" width="150"></el-table-column>
+                    <el-table-column prop="user" label="用户名" width="80"></el-table-column>
+                    <el-table-column label="操作" width="120">
                         <template slot-scope="scope">
                             <div>
-                                <el-button @click="showSshKey(scope.row)" type="primary" size="mini">单机部署
-                                </el-button>
+                                <el-button @click="serverConfigs(scope.row)" type="primary" size="mini" plain>资产配置</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -101,18 +108,47 @@
                         <div class="right">{{item.shell_path}}</div>
                     </div>
                 </el-col>
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">应用所在位置</div>
+                        <div class="right">{{item.project_path}}</div>
+                    </div>
+                </el-col>
             </el-row>
-    
+            <el-row class="mt20">
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">发布前是否先做备份</div>
+                        <div class="right"><el-switch v-model="item.is_backups"></el-switch></div>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">应用备份的路径</div>
+                        <div class="right">{{item.backups_path}}</div>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row class="mt20">
+                <el-col :span="24">
+                    <div class="block">
+                        <div class="left">备注</div>
+                        <div class="right">{{item.remarks}}</div>
+                    </div>
+                </el-col>
+            </el-row>
             <div class="block mt30">
                 <div class="left">shell脚本内容</div>
                 <div class="right">
                     <div :id="'editor_'+index" class="comm_build_textarea"></div>
                 </div>
             </div>
-            <div class="btns">
-                <el-button type="danger" @click="generateBuildConfig(item)" class="mb20" plain>生成构建配置</el-button>
-                <el-button type="primary" @click="submitConfigs(item)" class="mb20">全量部署</el-button>
-                <el-button type="default" @click="goBack" class="mb20">返回</el-button>
+            <div class="btns mb20">
+                <el-button type="primary" @click="deployApplications(item,1)">全量部署</el-button>
+                <el-button type="success" @click="deployApplications(item,2)" plain>部分部署</el-button>
+                <el-button type="primary" @click="updageAppConfigs(index)" plain>修改构建配置</el-button>
+                <el-button type="danger" @click="generateBuildConfig(item)" plain>生成构建配置</el-button>
+                <el-button type="default" @click="goBack">返回</el-button>
             </div>
         </div>
     </div>
@@ -145,6 +181,7 @@
                     email: '',
                     assetsItem: {},
                 },
+                multipleSelection:[],
             }
         },
         mounted() {
@@ -190,6 +227,7 @@
                         const tasklist = data.data.task_list || [];
                         if (tasklist && tasklist.length) {
                             tasklist.forEach((item, index) => {
+                                item.is_backups = item.is_backups == 1 ? true : false;
                                 this.runMonaco(index, item.shell_body)
                             })
                         }
@@ -241,8 +279,11 @@
             goBack() {
                 location.href = "/build"
             },
-            submitConfigs() {
-                
+            deployApplications(item,type) {
+                if(type === 2 && !this.multipleSelection.length){
+                    popup.alert({title:'请先勾选需要部署的服务器!'});
+                    return;
+                }
             },
             generateBuildConfig(item){
                 util.ajax({
@@ -256,6 +297,21 @@
                         popup.miss({ title: '操作成功!' })
                     }
                 })
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            serverConfigs(item) {
+                if (!item && !this.multipleSelection.length) {
+                    popup.alert({ title: '请选择需要配置的资产!' })
+                    return;
+                }
+                const assestsList = item ? [item] : this.multipleSelection;
+                util.setStorage('session', 'assets_list_configs', JSON.stringify(assestsList));
+                location.href = "/assetsconfig";
+            },
+            updageAppConfigs(index){
+                location.href = "/appconfig?id="+this.id+'&tab='+index;
             },
         }
     })
