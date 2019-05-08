@@ -4,6 +4,7 @@
   "description": "",
   "private": true,
   "dependencies": {
+    "debug": "^4.1.1",
     "egg": "^2.2.1",
     "egg-mongoose": "^3.1.1",
     "egg-redis": "^2.3.2",

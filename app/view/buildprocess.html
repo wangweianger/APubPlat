@@ -47,6 +47,40 @@
         font-size:25px;
         font-weight: 300;
     }
+    .comm_shell_model{
+    }
+    .comm_shell_model .mask {
+        position: fixed;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        background: rgba(0,0,0,.6);
+        z-index:110;
+    }
+    .comm_shell_model .content{
+        position: fixed;
+        left:50%;
+        top:50%;
+        width:1500px;
+        height:780px;
+        transform: translate(-50%,-50%);
+        background:#000;
+        z-index:111;
+    }
+    .comm_shell_model .close{
+        position: absolute;
+        right:10px;
+        top:10px;
+        font-size:28px;
+        cursor:pointer;
+        color:#fff;
+    }
+    .comm_shell_model .terminal{
+        width:1200px;
+        height:700px;
+        margin:20px 0 0 10px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -151,35 +185,35 @@
             </div>
         </div>
     </div>
+
+    <div style="display:flex;flex-direction: row;">
+        <div class="mt10" style="width:800px;height:600px;" id="terminal0"></div>
+        <div class="mt10" style="width:800px;height:600px;" id="terminal1"></div>
+    </div>
+
+    <!-- xtrem弹出框 -->
+    <!-- <div class="comm_shell_model" v-show="dialogTableVisible">
+        <div class="mask" @click="dialogTableVisible=false"></div>
+        <div class="content">
+            <span class="el-icon-close close" @click="dialogTableVisible=false"></span>
+            <div class="mt10" class="terminal" id="terminal0"></div>
+        </div>
+    </div> -->
+
 </div>
 <script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
 <script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
 <script>
+    let xteam = null;
+    let socket = null;
     new Vue({
         el: '#team',
         data: function () {
             return {
                 id: util.getQueryString('id'),
-                details: {},
                 assetslist: [],
                 dialogTableVisible: false,
-                options: [{
-                    value: 'git',
-                    label: 'GIT任务'
-                }, {
-                    value: 'shell',
-                    label: 'SHELL任务'
-                }],
-                task_name: '',
-                task_type: '',
                 tasklist: [],
-                editableTabsValue: 0,
-                sshkey: {
-                    dialogSshKeyVisible: false,
-                    sshKey: '',
-                    email: '',
-                    assetsItem: {},
-                },
                 multipleSelection:[],
             }
         },
@@ -221,7 +255,6 @@
                         id: this.id,
                     },
                     success: data => {
-                        this.details = data.data;
                         this.assetslist = data.data.assets_list || [];
                         const tasklist = data.data.task_list || [];
                         if (tasklist && tasklist.length) {
@@ -234,47 +267,6 @@
                     }
                 })
             },
-            addNewTask() {
-                this.task_type = '';
-                this.task_name = '';
-                this.dialogTableVisible = true;
-            },
-            submitTask() {
-                if (!this.task_name) {
-                    popup.alert({ title: '请填写任务名称!' })
-                    return;
-                }
-                if (!this.task_type) {
-                    popup.alert({ title: '请选择任务类型!' })
-                    return;
-                }
-                this.dialogTableVisible = false;
-                this.editableTabsValue = this.tasklist.length + '';
-                this.tasklist.push({
-                    task_name: this.task_name,
-                    task_type: this.task_type,
-                    git_type: 'https',
-                })
-            },
-            removeTab(targetName) {
-                popup.confirm({
-                    title: `确定删除此任务吗？`, yes: () => {
-                        let tabs = this.tasklist;
-                        let activeName = this.editableTabsValue;
-                        activeName = tabs[targetName + 1] ? targetName : activeName - 1;
-                        this.editableTabsValue = activeName + '';
-                        this.tasklist = tabs.filter((tab, index) => index != targetName);
-                    }
-                })
-            },
-            deleteItemTask(item, index) {
-                popup.confirm({
-                    title: `确定删除${item.task_name}任务吗？`, yes: () => {
-                        this.editableTabsValue = '0';
-                        this.tasklist.splice(index, 1);
-                    }
-                })
-            },
             goBack() {
                 location.href = "/build"
             },
@@ -283,10 +275,29 @@
                     popup.alert({title:'请先勾选需要部署的服务器!'});
                     return;
                 }
+                // 弹出框
+                this.dialogTableVisible = true;
 
-                // socket.io实现
-                util.socket(data=>{
-                    console.log(data);
+                if(socket && xteam) return;
+                setTimeout(()=>{
+                    const assetslist = this.multipleSelection.length ? this.multipleSelection : this.assetslist
+
+                    // 开始
+                    util.startSocketXteam(item,assetslist,'buildprocess');
+                        
+                    // xteam = util.xteam({id: 'terminal'})
+                    // // socket.io实现
+                    
+                    // socket = util.socket({
+                    //     callback: data => {xteam.write(data);},
+                    //     query:{
+                    //         type: 'buildprocess',
+                    //         data: { item, assetslist },
+                    //         socket: {},
+                    //     },
+                    //     xteam,
+                    //     close:() =>{ socket = xteam = null; },
+                    // })
                 })
             },
             generateBuildConfig(item){

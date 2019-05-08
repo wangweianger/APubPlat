@@ -385,19 +385,94 @@ class utilfn {
         return json
     }
 
+    startSocketXteam(taskitem,datalist, type) {
+        if (!Array.isArray(datalist) && !datalist.length) return;
+        const result = [];
+        // socket
+        const socket = io.connect('/');
+        Terminal.applyAddon(fit);
+        // list
+        datalist.forEach((item, index) => {
+            // 先执行 xteam
+            let xteam = new Terminal();
+            xteam.open(document.getElementById('terminal'+index));
+            xteam.focus()
+            xteam.fit()
+            xteam.setOption('cursorBlink', true)
+
+            const geometry = 'geometry_' + index;
+            const close = 'close_' + index;
+            const data = 'data_' + index;
+            const resize = 'resize_' + index;
+
+            xteam.on('data', function (res) {
+                socket.emit(data, res)
+            })
+            
+            // socket
+            socket.on(data, function (res) {
+                xteam.write(res);
+            });
+
+            result.push({
+                item:{
+                    host: item.outer_ip,
+                    port: item.port,
+                    username: item.user,
+                    password: item.password,
+                },
+                taskitem,geometry, close, data, resize
+            })
+
+            // socket.on('connect', function () {
+            //     if (xterm) socket.emit(geometry, xterm.cols, xterm.rows)
+            // })
+            // socket.on(close, msg => { 
+
+            // });
+            // socket.on('disconnect', msg => { json.close && json.close() });
+            // socket.on('disconnecting', () => { json.close && json.close() });
+            // socket.on('error', (err) => { json.close && json.close() });
+        })
+        socket.emit('socket', { data: result, type} || 'begin');
+    }
+
     /* socket.io实现
     *  fn 信息回调触发
     *  query socket 参数
     */
-    socket(fn, query) {
+    socket(json = {}) {
         const socket = io.connect('/');
-        socket.on('response', function (data) {
-            fn && fn(data);
+        socket.on('data', function (data) {
+            json.callback && json.callback(data);
         });
-        socket.on('disconnect', msg => { });
-        socket.on('disconnecting', () => { });
-        socket.on('error', (err) => { });
-        socket.emit('socket', query || 'begin');
+        socket.on('connect', function () {
+            if (json.xterm) socket.emit('geometry', json.xterm.cols, json.xterm.rows)
+        })
+        socket.on('close', msg => { json.close && json.close() });
+        socket.on('disconnect', msg => { json.close && json.close() });
+        socket.on('disconnecting', () => { json.close && json.close() });
+        socket.on('error', (err) => { json.close && json.close() });
+        socket.emit('socket', json.query || 'begin');
+        return socket;
+    }
+
+    /* xteam 实现
+    * id
+    */
+    xteam(json={}){
+        Terminal.applyAddon(fit);
+        let xteam = new Terminal();
+        xteam.open(document.getElementById(json.id));
+        xteam.focus()
+        xteam.fit()
+        xteam.setOption('cursorBlink', json.cursorBlink+'' || true)
+
+        xteam.on('data', function (data) {
+            socket.emit('data', data)
+        })
+
+        return xteam;
     }
 }
 
