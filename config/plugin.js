@@ -26,3 +26,13 @@ exports.email = {
     enable: true,
     path: path.join(__dirname, '../lib/plugin/egg-email'),
 };
+
+exports.redis = {
+    enable: true,
+    package: 'egg-redis',
+};
+
+exports.io = {
+    enable: true,
+    package: 'egg-socket.io',
+};

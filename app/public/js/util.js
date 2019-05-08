@@ -384,6 +384,21 @@ class utilfn {
 
         return json
     }
+
+    /* socket.io实现
+    *  fn 信息回调触发
+    *  query socket 参数
+    */
+    socket(fn, query) {
+        const socket = io.connect('/');
+        socket.on('response', function (data) {
+            fn && fn(data);
+        });
+        socket.on('disconnect', msg => { });
+        socket.on('disconnecting', () => { });
+        socket.on('error', (err) => { });
+        socket.emit('socket', query || 'begin');
+    }
 }
 
 //初始化util对象

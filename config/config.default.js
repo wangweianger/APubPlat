@@ -44,26 +44,25 @@ module.exports = appInfo => {
         },
     };
 
+    exports.io = {
+        namespace: {
+            '/': {
+                connectionMiddleware: [],
+                packetMiddleware: [],
+            },
+        },
+    };
+
     config.qiniu = {
         bucket: 'morning-star',
         ACCESS_KEY: 'F40SI1YWViFTYJOV3OYNk_xzugTX2SJ3Pybd9bOZ',
-        SECRET_KEY: 'qPBZPYblI1zJ60cc8XA9acYDEG-p8iMGh1ObgBHz'
-    }
+        SECRET_KEY: 'qPBZPYblI1zJ60cc8XA9acYDEG-p8iMGh1ObgBHz',
+    };
 
     config.login = {
-        usrname:'admin',
-        password:'123456789',
-    }
-
-    // mysql 数据库
-    config.mysql = {
-        run: true,
-        host: 'localhost',
-        user: 'root',
-        password: '123456',
-        database: 'cluster_star',
-        port: 3306,
-    }
+        usrname: 'admin',
+        password: '123456789',
+    };
 
     config.view = {
         defaultExtension: '.html',
@@ -119,5 +118,5 @@ module.exports = appInfo => {
         },
     };
 
-  return config;
+    return config;
 };

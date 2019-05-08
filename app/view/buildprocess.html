@@ -283,6 +283,11 @@
                     popup.alert({title:'请先勾选需要部署的服务器!'});
                     return;
                 }
+
+                // socket.io实现
+                util.socket(data=>{
+                    console.log(data);
+                })
             },
             generateBuildConfig(item){
                 util.ajax({

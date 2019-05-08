@@ -2,7 +2,7 @@
 
 module.exports = app => {
     const apiV1Router = app.router.namespace('/api/v1/');
-    const { controller, middleware } = app;
+    const { controller, io } = app;
     const {
         files,
         team,
@@ -101,4 +101,7 @@ module.exports = app => {
     // -------------------------- build 构建 ------------------------------
     apiV1Router.post('build/generateBuildConfig', build.generateBuildConfig);
 
+    // -------------------------- socket.io ------------------------------
+    // socket.io
+    io.of('/').route('socket', io.controller.nsp.socket);
 };
