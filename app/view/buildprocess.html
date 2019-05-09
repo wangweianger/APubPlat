@@ -223,7 +223,7 @@
                 <el-col :span="12">
                     <div class="block">
                         <div class="left">shell脚本运行命令</div>
-                        <div class="right">{{'sh ' + item.shell_path +' '+ item.shell_opction}}</div>
+                        <div class="right">{{'sh ' + item.shell_path +' '+ item.shell_opction||''}}</div>
                     </div>
                 </el-col>
                 <el-col :span="12">

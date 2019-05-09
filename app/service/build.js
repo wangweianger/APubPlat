@@ -18,7 +18,10 @@ class BuildService extends Service {
             throw new Error('shell脚本地址必须以/开头!');
         }
         // 本地创建文件
-        fs.writeFileSync(path.resolve(__dirname, '../tempFile/' + file), item.shell_body);
+        fs.writeFileSync(path.resolve(__dirname, '../tempFile/' + file), item.shell_body, {
+            encoding: 'utf8',
+            mode: 777,
+        });
         const result = [];
         for (let i = 0; i < assetslist.length; i++) {
             result.push(this.genConfigsForSsh(paths, file, assetslist[i], item));

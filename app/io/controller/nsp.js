@@ -38,7 +38,7 @@ class NspController extends Controller {
                     data: data[i].data,
                     resize: data[i].resize,
                 },
-                initial_task: `sh ${data[i].taskItem.shell_path} ${data[i].taskItem.shell_opction} \r\n`,
+                initial_task: `sh ${data[i].taskItem.shell_path} ${data[i].taskItem.shell_opction || ''} \r\n`,
             });
         }
     }

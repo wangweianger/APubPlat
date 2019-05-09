@@ -18,11 +18,11 @@ class CommtaskController extends Controller {
         const { ctx } = this;
         const query = ctx.request.body;
         const name = query.name;
-        const type = query.type || 1;
+        const handletype = query.handletype || 1;
         const _id = query._id;
         const shell_body = query.shell_body;
 
-        if (parseInt(type) === 2 && !_id) throw new Error('id参数不能为空!');
+        if (parseInt(handletype) === 2 && !_id) throw new Error('id参数不能为空!');
         if (!name) throw new Error('资产任务名称不能为空!');
         if (!shell_body) throw new Error('资产任务脚本内容不能为空!');
 
