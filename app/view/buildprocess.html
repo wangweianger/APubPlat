@@ -67,7 +67,6 @@
         margin-left:calc(20%);
         margin-top:calc(5%);
         background:#000;
-        padding:15px;
         border-radius:3px;
         overflow:hidden;
         z-index:110;
@@ -91,12 +90,16 @@
         right:50px;
     }
     .comm_shell_model .comm_shell_navs{
+        position: absolute;
+        left:0;
+        top:0;
+        width:100%;
         background:#ccc;
-        margin:-15px;
         display: flex;
         flex-direction: row;
         align-items: center;
         height:40px;
+        z-index:110;
     }
     .comm_shell_model .comm_shell_navs .item{
         display: flex;
@@ -127,6 +130,24 @@
         flex-direction: row;
         flex-wrap: wrap;
         overflow:auto;
+        padding: 10px;
+        height:calc(95%);
+        overflow:auto;
+        margin-top:20px;
+    }
+    .comm_content_body::-webkit-scrollbar {
+        width: 4px;     
+        height: 4px;
+    }
+    .comm_content_body::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.6);
+    }
+    .comm_content_body::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        border-radius: 0;
+        background: rgba(0,0,0,.1);
     }
     .com_content_list{
         background:#000;
@@ -187,22 +208,36 @@
             <el-row class="mt20">
                 <el-col :span="12">
                     <div class="block">
-                        <div class="left">shell脚本地址</div>
+                        <div class="left">shell脚本路径</div>
                         <div class="right">{{item.shell_path}}</div>
                     </div>
                 </el-col>
                 <el-col :span="12">
                     <div class="block">
-                        <div class="left">应用所在位置</div>
-                        <div class="right">{{item.project_path}}</div>
+                        <div class="left">shell脚本参数</div>
+                        <div class="right">{{item.shell_opction}}</div>
                     </div>
                 </el-col>
             </el-row>
             <el-row class="mt20">
                 <el-col :span="12">
                     <div class="block">
+                        <div class="left">shell脚本运行命令</div>
+                        <div class="right">{{'sh ' + item.shell_path +' '+ item.shell_opction}}</div>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="block">
                         <div class="left">发布前是否先做备份</div>
                         <div class="right"><el-switch v-model="item.is_backups"></el-switch></div>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row class="mt20">
+                <el-col :span="12">
+                    <div class="block">
+                        <div class="left">应用所在位置</div>
+                        <div class="right">{{item.project_path}}</div>
                     </div>
                 </el-col>
                 <el-col :span="12">
@@ -246,7 +281,7 @@
             <span class="el-icon-minus close minus" @click="handleShellModel(2)"></span>
             <div class="comm_shell_navs">
                 <div class="item" v-for="(item,index) in assetslist" :key="index" :class="{'active':shell_model_item===index}" @click="shell_model_item=index">
-                    ssh://{{item.user}}@{{item.outer_ip}}:{{item.port}}
+                    {{item.name}}
                 </div>
             </div>
             <div class="comm_content_body">

@@ -138,10 +138,16 @@
                     </div>
                 </div>
                 <div class="block mt30">
-                    <div class="left">服务器部署shell脚本<span class="red">*</span></div>
+                    <div class="left">部署shell脚本路径<span class="red">*</span></div>
                     <div class="right">
                         <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
                         <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
+                    </div>
+                </div>
+                <div class="block mt30">
+                    <div class="left">shell脚本参数</div>
+                    <div class="right">
+                        <el-input v-model="item.shell_opction" class="inp1" placeholder="shell脚本参数请以空格隔开"></el-input>
                     </div>
                 </div>
                 <div class="block mt30">

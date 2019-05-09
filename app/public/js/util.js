@@ -499,11 +499,12 @@ class utilfn {
             for (let i = 0; i < content_list.length; i++) {
                 content_list[i].style.marginTop = '25px'
                 content_list[i].style.position = 'relative'
-                content_list[i].style.width = 'calc(48%)'
-                content_list[i].style.marginRight = '2%'
+                content_list[i].style.width = 'calc(49%)'
+                if (i % 2 === 0) content_list[i].style.marginRight = '2%'
                 content_list[i].style.height = '500px'
             }
             comm_mocel.style.background = '#fff'
+            comm_mocel.style.overflow = 'auto'
         } else if (type === 4) {
             for (let i = 0; i < terminal_item.length; i++) {
                 terminal_item[i].style.top = '15px'
@@ -512,6 +513,7 @@ class utilfn {
                 content_list[i].style.position = 'static'
             }
             comm_mocel.style.background = '#000'
+            comm_mocel.style.overflow = 'hidden'
         }
         setTimeout(()=>{
             this.resizeScreen(xteamlist, socket)
