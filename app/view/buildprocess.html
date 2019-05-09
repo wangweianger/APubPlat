@@ -81,6 +81,9 @@
         color:#333;
         z-index:1000;
     }
+    .comm_shell_model .menu{
+        right:150px;
+    }
     .comm_shell_model .plus{
         right:100px;
     }
@@ -118,6 +121,15 @@
         width:calc(100% - 30px);
         height:calc(100% - 60px);
         z-index:1;
+    }
+    .comm_content_body{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow:auto;
+    }
+    .com_content_list{
+        background:#000;
     }
 </style>
 <div class="content" id="team" v-cloak>
@@ -229,6 +241,7 @@
         <div class="mask" @click="dialogTableVisible=false"></div>
         <div class="comm_shell_model_content">
             <span class="el-icon-close close" @click="dialogTableVisible=false"></span>
+            <span :class="{'el-icon-menu':model_icon===1,'el-icon-s-unfold':model_icon===2}"  class="close menu" @click="handleShellModel(3)"></span>
             <span class="el-icon-plus close plus" @click="handleShellModel(1)"></span>
             <span class="el-icon-minus close minus" @click="handleShellModel(2)"></span>
             <div class="comm_shell_navs">
@@ -236,12 +249,14 @@
                     ssh://{{item.user}}@{{item.outer_ip}}:{{item.port}}
                 </div>
             </div>
-            <div 
-                v-for="(item,index) in assetslist" 
-                :key="index" 
-                class="mt20 terminal" 
-                :style="{zIndex:shell_model_item==index?10:1}"
-                :id="'terminal'+index"></div>
+            <div class="comm_content_body">
+                <div class="com_content_list" v-for="(item,index) in assetslist" :key="index" >
+                    <div 
+                        class="mt20 terminal" 
+                        :style="{zIndex:shell_model_item==index?10:1}"
+                        :id="'terminal'+index"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -262,6 +277,7 @@
                 multipleSelection:[],
                 type:'',
                 shell_model_item: 0,
+                model_icon:1,
             }
         },
         mounted() {
@@ -355,6 +371,15 @@
                 })
             },
             handleShellModel(type){
+                if(type === 3){
+                    if(this.model_icon === 1){
+                        this.model_icon = 2;
+                        type = 3;
+                    }else{
+                        this.model_icon = 1;
+                        type = 4;
+                    }
+                }
                 util.setSocketXteam(type, xteamlist, socket);
             },
             generateBuildConfig(item){

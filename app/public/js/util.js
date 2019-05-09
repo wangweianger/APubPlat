@@ -478,6 +478,8 @@ class utilfn {
         if (MODELTYPE === type) return;
         MODELTYPE = type;
         const comm_mocel = document.querySelector('.comm_shell_model_content');
+        const terminal_item = document.querySelectorAll('.terminal');
+        const content_list = document.querySelectorAll('.com_content_list');
         if(type === 1){
             // 放大
             comm_mocel.style.width = 'calc(100% - 30px)'
@@ -490,8 +492,30 @@ class utilfn {
             comm_mocel.style.height = 'calc(80%)'
             comm_mocel.style.marginLeft = 'calc(20%)'
             comm_mocel.style.marginTop = 'calc(5%)'
+        } else if (type === 3){
+            for (let i = 0; i < terminal_item.length;i++) {
+                terminal_item[i].style.top = '0'
+            }
+            for (let i = 0; i < content_list.length; i++) {
+                content_list[i].style.marginTop = '25px'
+                content_list[i].style.position = 'relative'
+                content_list[i].style.width = 'calc(48%)'
+                content_list[i].style.marginRight = '2%'
+                content_list[i].style.height = '400px'
+            }
+            comm_mocel.style.background = '#fff'
+        } else if (type === 4) {
+            for (let i = 0; i < terminal_item.length; i++) {
+                terminal_item[i].style.top = '15px'
+            }
+            for (let i = 0; i < content_list.length; i++) {
+                content_list[i].style.position = 'static'
+            }
+            comm_mocel.style.background = '#000'
         }
-        this.resizeScreen(xteamlist, socket)
+        setTimeout(()=>{
+            this.resizeScreen(xteamlist, socket)
+        })
     }
 
     /* socket.io实现
