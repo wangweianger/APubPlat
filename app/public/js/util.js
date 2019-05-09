@@ -501,7 +501,7 @@ class utilfn {
                 content_list[i].style.position = 'relative'
                 content_list[i].style.width = 'calc(48%)'
                 content_list[i].style.marginRight = '2%'
-                content_list[i].style.height = '400px'
+                content_list[i].style.height = '500px'
             }
             comm_mocel.style.background = '#fff'
         } else if (type === 4) {
