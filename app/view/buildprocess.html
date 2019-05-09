@@ -56,30 +56,68 @@
         width:100%;
         height:100%;
         background: rgba(0,0,0,.6);
-        z-index:110;
+        z-index:100;
     }
-    .comm_shell_model .content{
+    .comm_shell_model .comm_shell_model_content{
         position: fixed;
-        left:50%;
-        top:50%;
-        width:1500px;
-        height:780px;
-        transform: translate(-50%,-50%);
+        left:0;
+        top:0;
+        width:calc(60%);
+        height: calc(80%);
+        margin-left:calc(20%);
+        margin-top:calc(5%);
         background:#000;
-        z-index:111;
+        padding:15px;
+        border-radius:3px;
+        overflow:hidden;
+        z-index:110;
     }
     .comm_shell_model .close{
         position: absolute;
         right:10px;
-        top:10px;
+        top:8px;
         font-size:28px;
         cursor:pointer;
-        color:#fff;
+        color:#333;
+        z-index:1000;
+    }
+    .comm_shell_model .plus{
+        right:100px;
+    }
+    .comm_shell_model .minus{
+        right:50px;
+    }
+    .comm_shell_model .comm_shell_navs{
+        background:#ccc;
+        margin:-15px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        height:40px;
+    }
+    .comm_shell_model .comm_shell_navs .item{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-right:solid 1px #aaa;
+        white-space: nowrap;
+        padding:0 10px;
+        height:100%;
+        font-size:12px;
+        font-weight:300;
+        cursor:pointer;
+    }
+    .comm_shell_model .comm_shell_navs .active{
+        color:#000;
+        background:#eee;
     }
     .comm_shell_model .terminal{
-        width:1200px;
-        height:700px;
-        margin:20px 0 0 10px;
+        position: absolute;
+        left:8px;
+        top:15px;
+        width:calc(100% - 30px);
+        height:calc(100% - 60px);
+        z-index:1;
     }
 </style>
 <div class="content" id="team" v-cloak>
@@ -186,25 +224,32 @@
         </div>
     </div>
 
-    <div style="display:flex;flex-direction: row;">
-        <div class="mt10" style="width:800px;height:600px;" id="terminal0"></div>
-        <div class="mt10" style="width:800px;height:600px;" id="terminal1"></div>
-    </div>
-
     <!-- xtrem弹出框 -->
-    <!-- <div class="comm_shell_model" v-show="dialogTableVisible">
+    <div class="comm_shell_model" v-show="dialogTableVisible">
         <div class="mask" @click="dialogTableVisible=false"></div>
-        <div class="content">
+        <div class="comm_shell_model_content">
             <span class="el-icon-close close" @click="dialogTableVisible=false"></span>
-            <div class="mt10" class="terminal" id="terminal0"></div>
+            <span class="el-icon-plus close plus" @click="handleShellModel(1)"></span>
+            <span class="el-icon-minus close minus" @click="handleShellModel(2)"></span>
+            <div class="comm_shell_navs">
+                <div class="item" v-for="(item,index) in assetslist" :key="index" :class="{'active':shell_model_item===index}" @click="shell_model_item=index">
+                    ssh://{{item.user}}@{{item.outer_ip}}:{{item.port}}
+                </div>
+            </div>
+            <div 
+                v-for="(item,index) in assetslist" 
+                :key="index" 
+                class="mt20 terminal" 
+                :style="{zIndex:shell_model_item==index?10:1}"
+                :id="'terminal'+index"></div>
         </div>
-    </div> -->
+    </div>
 
 </div>
 <script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
 <script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
 <script>
-    let xteam = null;
+    let xteamlist = null;
     let socket = null;
     new Vue({
         el: '#team',
@@ -215,6 +260,8 @@
                 dialogTableVisible: false,
                 tasklist: [],
                 multipleSelection:[],
+                type:'',
+                shell_model_item: 0,
             }
         },
         mounted() {
@@ -275,30 +322,40 @@
                     popup.alert({title:'请先勾选需要部署的服务器!'});
                     return;
                 }
+
+                let startType = '';
+
+                if(!xteamlist) {
+                    // 第一次点击发布
+                    startType = 'new';
+                } else if(type === this.type && xteamlist){
+                    // 第二次点击发布
+                    startType = 'agein';
+                } else if(type !== this.type && xteamlist) {
+                    // 切换了发布方式
+                    startType = 'switch';
+                }
+
+                this.type = type;
                 // 弹出框
                 this.dialogTableVisible = true;
 
-                if(socket && xteam) return;
                 setTimeout(()=>{
-                    const assetslist = this.multipleSelection.length ? this.multipleSelection : this.assetslist
+                    const assetsList = this.multipleSelection.length ? this.multipleSelection : this.assetslist
 
                     // 开始
-                    util.startSocketXteam(item,assetslist,'buildprocess');
-                        
-                    // xteam = util.xteam({id: 'terminal'})
-                    // // socket.io实现
-                    
-                    // socket = util.socket({
-                    //     callback: data => {xteam.write(data);},
-                    //     query:{
-                    //         type: 'buildprocess',
-                    //         data: { item, assetslist },
-                    //         socket: {},
-                    //     },
-                    //     xteam,
-                    //     close:() =>{ socket = xteam = null; },
-                    // })
+                    const result = util.startSocketXteam({
+                        taskItem: item,
+                        buildType: 'buildprocess',
+                        assetsList,
+                        startType,
+                    });
+                    socket = result.socket;
+                    xteamlist = result.xteamList;
                 })
+            },
+            handleShellModel(type){
+                util.setSocketXteam(type, xteamlist, socket);
             },
             generateBuildConfig(item){
                 util.ajax({

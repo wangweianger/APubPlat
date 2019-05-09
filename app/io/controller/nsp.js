@@ -9,8 +9,8 @@ class NspController extends Controller {
         const { ctx } = this;
         const query = ctx.args[0];
 
-        const type = query.type;
-        switch (type) {
+        const buildType = query.buildType;
+        switch (buildType) {
         case 'buildprocess':
             this.buildProcess(query.data);
             break;
@@ -24,10 +24,10 @@ class NspController extends Controller {
         const { ctx } = this;
         for (let i = 0; i < data.length; i++) {
             socket({
-                host: data[i].item.host,
-                port: data[i].item.port,
-                username: data[i].item.username,
-                password: data[i].item.password,
+                host: data[i].assitsItem.host,
+                port: data[i].assitsItem.port,
+                username: data[i].assitsItem.username,
+                password: data[i].assitsItem.password,
                 cols: 138,
                 rows: 46,
                 term: 'xterm-color',
@@ -38,7 +38,7 @@ class NspController extends Controller {
                     data: data[i].data,
                     resize: data[i].resize,
                 },
-                initial_task: `sh ${data[i].taskitem.shell_path}\r\n`,
+                initial_task: `sh ${data[i].taskItem.shell_path}\r\n`,
             });
         }
     }

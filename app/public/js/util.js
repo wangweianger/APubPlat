@@ -22,6 +22,10 @@ if (!new Date().format) {
     }
 };
 
+let XTEAMLIST = [];
+let MODELTYPE = '';
+let SOCKET = null;
+
 // util 公共对象函数
 class utilfn {
     // 初始化对象
@@ -385,14 +389,33 @@ class utilfn {
         return json
     }
 
-    startSocketXteam(taskitem,datalist, type) {
-        if (!Array.isArray(datalist) && !datalist.length) return;
+    startSocketXteam(json = {}) {
+        const assetsList = json.assetsList || [];
+        const taskItem = json.taskItem || {};
+        const buildType = json.buildType || '';
+        const startType = json.startType || 'new';
+        if (!Array.isArray(assetsList) && !assetsList.length) return;
+
+        console.log(startType)
+
         const result = [];
+        if (startType === 'switch') {
+            for (let i = 0; i < XTEAMLIST.length; i++) { XTEAMLIST[i] && XTEAMLIST[i].destroy() }
+            XTEAMLIST = [];
+        } else if (startType === 'agein') {
+            return {
+                xteamList: XTEAMLIST,
+                socket: SOCKET,
+            };
+        } else if (startType === 'new') {
+            XTEAMLIST = [];
+        }
+
         // socket
-        const socket = io.connect('/');
+        const socket = SOCKET = io.connect('/');
         Terminal.applyAddon(fit);
         // list
-        datalist.forEach((item, index) => {
+        assetsList.forEach((item, index) => {
             // 先执行 xteam
             let xteam = new Terminal();
             xteam.open(document.getElementById('terminal'+index));
@@ -413,15 +436,15 @@ class utilfn {
             socket.on(data, function (res) {
                 xteam.write(res);
             });
-
+            XTEAMLIST.push(xteam);
             result.push({
-                item:{
+                assitsItem:{
                     host: item.outer_ip,
                     port: item.port,
                     username: item.user,
                     password: item.password,
                 },
-                taskitem,geometry, close, data, resize
+                taskItem,geometry, close, data, resize
             })
 
             // socket.on('connect', function () {
@@ -434,7 +457,41 @@ class utilfn {
             // socket.on('disconnecting', () => { json.close && json.close() });
             // socket.on('error', (err) => { json.close && json.close() });
         })
-        socket.emit('socket', { data: result, type} || 'begin');
+        socket.emit('socket', { data: result, buildType} || 'begin');
+
+        window.addEventListener('resize', this.resizeScreen.bind(this, XTEAMLIST, socket), false)
+
+        return {
+            xteamList: XTEAMLIST,
+            socket,
+        };
+        // xteam.clear()  xteam.reset()  xteam.destroy()
+    }
+
+    resizeScreen(XTEAMLIST, socket) {
+        for (let i = 0; i < XTEAMLIST.length; i++) { XTEAMLIST[i] && XTEAMLIST[i].fit() }
+        socket.emit('resize', { cols: XTEAMLIST[0].cols, rows: XTEAMLIST[0].rows })
+    }
+
+    // 设置xteam窗口大小
+    setSocketXteam(type, xteamlist = [], socket) {
+        if (MODELTYPE === type) return;
+        MODELTYPE = type;
+        const comm_mocel = document.querySelector('.comm_shell_model_content');
+        if(type === 1){
+            // 放大
+            comm_mocel.style.width = 'calc(100% - 30px)'
+            comm_mocel.style.height = 'calc(100% - 20px)'
+            comm_mocel.style.marginLeft = '15px'
+            comm_mocel.style.marginTop = '10px'
+        }else if(type === 2){
+            // 缩小
+            comm_mocel.style.width = 'calc(60%)'
+            comm_mocel.style.height = 'calc(80%)'
+            comm_mocel.style.marginLeft = 'calc(20%)'
+            comm_mocel.style.marginTop = 'calc(5%)'
+        }
+        this.resizeScreen(xteamlist, socket)
     }
 
     /* socket.io实现
