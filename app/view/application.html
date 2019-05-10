@@ -19,7 +19,7 @@
     .model_assets_list .common_pages{
         justify-content: flex-start;
     }
-    .assets_item_list:nth-child(odd){
+    .assets_item_list:not(:last-child){
         border-bottom:solid 1px #eee;
         padding-bottom:5px;
         margin-bottom:5px;
@@ -84,7 +84,7 @@
         </div>
         <div class="table_body">
             <el-table :data="datalist" style="width: 100%" :row-class-name="tableRowClassName">
-                <el-table-column prop="name" label="应用名称" width="120">
+                <el-table-column prop="name" label="应用名称" width="150">
                 </el-table-column>
                 <el-table-column label="所属团队" width="120">
                     <template slot-scope="scope">
@@ -106,7 +106,7 @@
                                 <span class="as_1">资产名称：{{item.name}}</span>
                                 <span class="as_2" v-if="scope.row.net_type==1?true:false">外网IP：{{item.outer_ip}}</span>
                                 <span class="as_2" v-if="scope.row.net_type==2?true:false">内网IP：{{item.lan_ip}}</span>
-                                <el-button type="primary" size="mini" @click="buildApplication(scope.row,index)">单机部署</el-button>
+                                <el-button type="primary" size="mini" @click="buildApplication(scope.row,item)">单机部署</el-button>
                             </div>
                         </div>
                     </template>
@@ -565,9 +565,9 @@
                     }
                 })
             },
-            buildApplication(item,index){
+            buildApplication(item,assetsItem){
                 let url = '/buildprocess?id=' + item._id;
-                if(index+'') url = url + '&index=' + index;
+                if(assetsItem) url = url + '&assetsId=' + assetsItem._id;
                 location.href = url;
             },
         }

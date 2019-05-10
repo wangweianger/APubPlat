@@ -63,7 +63,12 @@
                     <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
                     </span>
                 </div>
-                <el-table :data="assetslist" ref="assetsTable" border @selection-change="handleSelectionChange" style="width:auto;font-size:13px;">
+                <el-table 
+                    :data="assetslist" 
+                    ref="assetsTable" 
+                    border 
+                    @selection-change="handleSelectionChange" 
+                    style="width:auto;font-size:13px;">
                     <el-table-column type="selection" width="55"></el-table-column>
                     <el-table-column prop="name" label="资产名称" width="200"></el-table-column>
                     <el-table-column prop="code" label="资产编码" width="200"></el-table-column>
@@ -189,7 +194,7 @@
             <span class="el-icon-minus close minus" @click="handleShellModel(2)"></span>
             <div class="comm_shell_navs">
                 <div class="item" v-for="(item,index) in assetslist" :key="index" :class="{'active':shell_model_item===index}" @click="shell_model_item=index">
-                    {{item.name}}
+                    {{item.name+'-'+item.outer_ip}}
                 </div>
             </div>
             <div class="comm_content_body">
@@ -214,7 +219,6 @@
         data: function () {
             return {
                 id: util.getQueryString('id'),
-                index: util.getQueryString('index'),
                 assetslist: [],
                 dialogTableVisible: false,
                 tasklist: [],
@@ -271,7 +275,14 @@
                             })
                         }
                         this.tasklist = tasklist;
-                        setTimeout(() => { if (this.index) { this.$refs.assetsTable.toggleRowSelection(this.assetslist[this.index], true); } })
+                        const assetsId = util.getQueryString('assetsId');
+                        setTimeout(() => { 
+                            if(assetsId){
+                                this.assetslist.forEach(item => {if(assetsId == item._id) this.$refs.assetsTable.toggleRowSelection(item, true)})
+                            }else{
+                                this.assetslist.forEach(item => {this.$refs.assetsTable.toggleRowSelection(item, true);})
+                            }
+                        })
                     }
                 })
             },

@@ -37,7 +37,10 @@
                 <div>资产列表</div> 
                 <el-button @click="addNewCommTask" type="primary" icon="el-icon-plus" size="small">新建资产任务</el-button>
             </div>
-            <el-table :data="assetslist" border @selection-change="handleSelectionChange"
+            <el-table 
+                :data="assetslist" border 
+                ref="multipleTable"
+                @selection-change="handleSelectionChange"
                 style="width:100%;font-size:13px;">
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column prop="name" label="资产名称">
@@ -225,6 +228,7 @@
             getDatas(){
                 const asslist = util.getStorage('session','assets_list_configs');
                 this.assetslist = asslist ? JSON.parse(asslist) : [];
+                setTimeout(() => { this.assetslist.forEach(item => { this.$refs.multipleTable.toggleRowSelection(item, true); }) })
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;

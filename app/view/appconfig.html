@@ -62,23 +62,25 @@
                     <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
                     </span>
                 </div>
-                <el-table :data="assetslist" border @selection-change="handleSelectionChange" style="width:1000px;font-size:12px;">
+                <el-table 
+                    :data="assetslist" 
+                    ref="multipleTable" 
+                    border 
+                    @selection-change="handleSelectionChange" 
+                    style="width:1000px;font-size:12px;">
                     <el-table-column type="selection" width="55"></el-table-column>
                     <el-table-column prop="name" label="资产名称" width="200">
                     </el-table-column>
-                    <el-table-column prop="outer_ip" label="外网IP" width="150">
+                    <el-table-column prop="outer_ip" label="外网IP" width="200">
                     </el-table-column>
-                    <el-table-column prop="lan_ip" label="内网IP" width="150">
+                    <el-table-column prop="lan_ip" label="内网IP" width="200">
                     </el-table-column>
-                    <el-table-column prop="user" label="用户名" width="80">
+                    <el-table-column prop="user" label="用户名" width="150">
                     </el-table-column>
                     <el-table-column label="操作">
                         <template slot-scope="scope">
                             <div>
                                 <el-button @click="serverConfigs(scope.row)" type="primary" size="mini" plain>资产配置</el-button>
-                                <el-button @click="checkGit(scope.row)" type="info" size="mini" plain>检测GIT环境</el-button>
-                                <el-button @click="installGit(scope.row)" type="primary" size="mini" plain>安装GIT环境</el-button>
-                                <el-button @click="showSshKey(scope.row)" type="danger" size="mini" plain>获得SSH KEY</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -222,26 +224,6 @@
                 </div>
             </div>
         </el-dialog>
-
-        <!-- ssk 弹出框 -->
-        <el-dialog width="800px" title="SSH KEY" :visible.sync="sshkey.dialogSshKeyVisible">
-            <div class="com_model_main">
-                <div class="mb20 common_tops"><i class="el-icon-warning"></i>请尽量使用获得ssh key按钮，若生成新的ssh key则相关地方均需要更改（例如：github ssk）</div>
-                <div>
-                    <el-button @click="getSshKey(1)" type="primary" plain>获得SSH KEY</el-button>
-                </div>
-                <div class="block mt30">
-                    <div class="left" style="width:80px;">邮箱地址</div>
-                    <div class="right">
-                        <el-input v-model="sshkey.email" style="width:200px;margin-right:15px;" placeholder="用来生成ssh key的邮箱备注"></el-input>
-                        <el-button @click="getSshKey(2)" class="ml10" type="danger" plain>生成新的SSH KEY</el-button>
-                    </div>
-                </div>
-                <div class="mt30 mb20">ssh key</div>
-                <el-input type="textarea" :rows="6" v-model="sshkey.sshKey"></el-input>
-            </div>
-        </el-dialog>
-
     </div>
 </div>
 <script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
@@ -274,12 +256,6 @@
                 task_type: '',
                 tasklist:[],
                 editableTabsValue: util.getQueryString('tab') || '0',
-                sshkey:{
-                    dialogSshKeyVisible: false,
-                    sshKey: '',
-                    email:'',
-                    assetsItem: {},
-                },
                 multipleSelection:[],
             }
         },
@@ -333,6 +309,7 @@
                             })
                         }
                         this.tasklist = tasklist;
+                        setTimeout(()=>{ this.assetslist.forEach(item => {this.$refs.multipleTable.toggleRowSelection(item, true);})})
                     }
                 })
             },
@@ -401,47 +378,6 @@
             goBack(){
                 location.href="/application"
             },
-            checkGit(item){
-                util.ajax({
-                    url: `${config.baseApi}api/v1/util/checkGitEnviron`,
-                    data: {
-                        host: item.outer_ip,
-                        port: item.port,
-                        username: item.user,
-                        password: item.password,
-                    },
-                    success: data => {
-                        if(data.data) {
-                            const version = data.data.match(/\d[\d\.]+\d/)[0]
-                            popup.miss({title:'检测到服务器已安装GIT 环境版本为'+ version})
-                        }else{
-                            popup.miss({ title: '检测到服务器未安装GIT环境！' })
-                        }
-                    }
-                })
-            },
-            installGit(item) {
-                popup.confirm({
-                    title: `确定为${item.name}安装GIT环境吗？`, yes: () => {
-                        util.ajax({
-                            url: `${config.baseApi}api/v1/util/installGitEnviron`,
-                            data: {
-                                host: item.outer_ip,
-                                port: item.port,
-                                username: item.user,
-                                password: item.password,
-                            },
-                            success: data => {
-                                if (data.data) {
-                                    popup.miss({ title: '安装成功！'})
-                                } else {
-                                    popup.miss({ title: '安装失败!' })
-                                }
-                            }
-                        })
-                    }
-                })
-            },
             submitConfigs(){
                 this.tasklist.forEach((item,index)=>{
                     item.is_backups = item.is_backups ? 1 : 0;
@@ -456,27 +392,6 @@
                     success: data => {
                         this.itemdetail(true);
                         popup.miss({title:'操作成功!'})
-                    }
-                })
-            },
-            showSshKey(item) {
-                if (this.sshkey.assetsItem._id !== item._id) this.sshkey.sshKey = '';
-                this.sshkey.assetsItem = item;
-                this.sshkey.dialogSshKeyVisible = true;
-            },
-            getSshKey(type){
-                util.ajax({
-                    url: `${config.baseApi}api/v1/util/getAssetSshKey`,
-                    data: {
-                        type: type,
-                        email:this.sshkey.email,
-                        host: this.sshkey.assetsItem.outer_ip,
-                        port: this.sshkey.assetsItem.port,
-                        username: this.sshkey.assetsItem.user,
-                        password: this.sshkey.assetsItem.password,
-                    },
-                    success: data => {
-                        this.sshkey.sshKey = data.data;
                     }
                 })
             },

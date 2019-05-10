@@ -36,4 +36,6 @@ module.exports = app => {
     // 资产任务
     router.get('/commtask', web.commtask);
 
+    // 控制台
+    router.get('/console', web.console);
 };

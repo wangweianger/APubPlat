@@ -99,6 +99,14 @@ class WebController extends Controller {
         });
     }
 
+    // 控制台
+    async console() {
+        const { ctx } = this;
+        await ctx.render('console', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;
