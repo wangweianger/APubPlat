@@ -106,7 +106,7 @@
                                 <span class="as_1">资产名称：{{item.name}}</span>
                                 <span class="as_2" v-if="scope.row.net_type==1?true:false">外网IP：{{item.outer_ip}}</span>
                                 <span class="as_2" v-if="scope.row.net_type==2?true:false">内网IP：{{item.lan_ip}}</span>
-                                <el-button type="primary" size="mini" @click="buildApplication(scope.row,item)">单机部署</el-button>
+                                <el-button type="primary" size="mini" @click="buildApplication(scope.row,item)" plain>单机部署</el-button>
                             </div>
                         </div>
                     </template>
@@ -445,9 +445,17 @@
             },
             handleApplication(type, item) {
                 if (item) item = JSON.parse(JSON.stringify(item));
+                console.log(item)
                 if (item) {
-                    this.team = item;
-                    this.team.status = item.status == 1 ? true : false;
+                    this.team = {
+                        team_code: item.team_code,
+                        environ_code: item.environ_code,
+                        type: item.type,
+                        _id: item._id,
+                        name: item.name,
+                        code: item.code,
+                        status: item.status == 1 ? true : false,
+                    };
                 } else {
                     this.team = {
                         team_code: '',
@@ -461,9 +469,6 @@
                 }
                 this.team.type = type;
                 this.dialogTableVisible = true;
-            },
-            handleSizeChange(val) {
-                console.log(`每页 ${val} 条`);
             },
             handleCurrentChange(val) {
                 this.currentPage = val;

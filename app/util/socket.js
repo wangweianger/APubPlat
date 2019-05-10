@@ -20,9 +20,8 @@ module.exports = function socket(json) {
             cols: json.cols,
             rows: json.rows,
         }, function connShell(err, stream) {
-            if (json.initial_task) {
-                stream.write(json.initial_task);
-            }
+            setTimeout(() => { json.initial_task && stream.write(json.initial_task); }, 1000);
+
             if (err) {
                 socket.emit(json.socket.close || 'close', 1);
                 conn.end();

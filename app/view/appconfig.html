@@ -113,81 +113,87 @@
                 </div>
                 <div class="block mt30">
                     <div class="left">任务类型<span class="red">*</span></div>
-                    <div class="right">{{item.task_type=='git'?'git hooks任务':''}}{{item.task_type=='shell'?'shell脚本任务':''}}</div>
+                    <div class="right">
+                        {{item.task_type=='git'?'git hooks任务':''}}
+                        {{item.task_type=='shell'?'shell脚本任务':''}}
+                        {{item.task_type=='command'?'命令行运行任务':''}}
+                    </div>
                 </div>
-                <div v-show="item.task_type=='git'?true:false">
-                    <div class="block mt30">
-                        <div class="left">选择git部署方式<span class="red">*</span></div>
-                        <div class="right">
-                            <el-button :type="item.git_type=='https'?'primary':'default'" size="small" @click="selectGitType(index,item,'https')" round>https方式
-                            </el-button>
-                            <el-button :type="item.git_type=='ssh'?'primary':'default'" size="small" @click="selectGitType(index,item,'ssh')" class="ml30" round>
-                                ssh方式</el-button>
+                <div v-show="item.task_type!='command'?true:false">
+                    <div v-show="item.task_type=='git'?true:false">
+                        <div class="block mt30">
+                            <div class="left">选择git部署方式<span class="red">*</span></div>
+                            <div class="right">
+                                <el-button :type="item.git_type=='https'?'primary':'default'" size="small" @click="selectGitType(index,item,'https')" round>https方式
+                                </el-button>
+                                <el-button :type="item.git_type=='ssh'?'primary':'default'" size="small" @click="selectGitType(index,item,'ssh')" class="ml30" round>
+                                    ssh方式</el-button>
+                            </div>
+                        </div>
+                        <div class="block mt30">
+                            <div class="left"></div>
+                            <div class="right light">
+                                <span v-if="item.git_type=='https'?true:false">
+                                    <i class="el-icon-warning fs-16 mr5 primary"></i>
+                                    使用https方式拉取代码时需要用户名和密码，若用户名中有<span class="red">@</span>时需要转换为<span class="red">%40</span>。
+                                </span>
+                                <span v-if="item.git_type=='ssh'?true:false">
+                                    <i class="el-icon-warning fs-16 mr5 primary"></i>
+                                    使用ssh方式拉取代码时请确认git端项目已填写ssh key秘钥。
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="block mt30">
-                        <div class="left"></div>
-                        <div class="right light">
-                            <span v-if="item.git_type=='https'?true:false">
-                                <i class="el-icon-warning fs-16 mr5 primary"></i>
-                                使用https方式拉取代码时需要用户名和密码，若用户名中有<span class="red">@</span>时需要转换为<span class="red">%40</span>。
-                            </span>
-                            <span v-if="item.git_type=='ssh'?true:false">
-                                <i class="el-icon-warning fs-16 mr5 primary"></i>
-                                使用ssh方式拉取代码时请确认git端项目已填写ssh key秘钥。
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="block mt30">
-                    <div class="left">部署shell脚本路径<span class="red">*</span></div>
-                    <div class="right">
-                        <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
-                        <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
-                    </div>
-                </div>
-                <div class="block mt30">
-                    <div class="left">shell脚本参数</div>
-                    <div class="right">
-                        <el-input v-model="item.shell_opction" class="inp1" placeholder="shell脚本参数请以空格隔开"></el-input>
-                    </div>
-                </div>
-                <div class="block mt30">
-                    <div class="left">shell脚本写入方式<span class="red">*</span></div>
-                    <div class="right">
-                        <el-select v-model="item.shell_write_type" class="inp1" placeholder="请选择">
-                            <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value">
-                            </el-option>
-                        </el-select>
-                    </div>
-                </div>
-                <div class="block mt30">
-                    <div class="left">发布前是否先做备份</div>
-                    <div class="right">
-                        <el-switch v-model="item.is_backups"></el-switch>
-                    </div>
-                </div>
-                <div class="row-col mt30">
-                    <div class="block">
-                        <div class="left">应用所在位置<span class="red">*</span></div>
+                        <div class="left">部署shell脚本路径<span class="red">*</span></div>
                         <div class="right">
-                            <el-input v-model="item.project_path" class="inp2" placeholder="应用所在路径"></el-input>
+                            <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
+                            <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
                         </div>
                     </div>
-                    <div class="block ml20">
-                        <div class="left">应用备份的路径</div>
+                    <div class="block mt30">
+                        <div class="left">shell脚本参数</div>
                         <div class="right">
-                            <el-input v-model="item.backups_path" class="inp2" placeholder="应用备份的路径"></el-input>
+                            <el-input v-model="item.shell_opction" class="inp1" placeholder="shell脚本参数请以空格隔开"></el-input>
+                        </div>
+                    </div>
+                    <div class="block mt30">
+                        <div class="left">shell脚本写入方式<span class="red">*</span></div>
+                        <div class="right">
+                            <el-select v-model="item.shell_write_type" class="inp1" placeholder="请选择">
+                                <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                    <div class="block mt30">
+                        <div class="left">发布前是否先做备份</div>
+                        <div class="right">
+                            <el-switch v-model="item.is_backups"></el-switch>
+                        </div>
+                    </div>
+                    <div class="row-col mt30">
+                        <div class="block">
+                            <div class="left">应用所在位置<span class="red">*</span></div>
+                            <div class="right">
+                                <el-input v-model="item.project_path" class="inp2" placeholder="应用所在路径"></el-input>
+                            </div>
+                        </div>
+                        <div class="block ml20">
+                            <div class="left">应用备份的路径</div>
+                            <div class="right">
+                                <el-input v-model="item.backups_path" class="inp2" placeholder="应用备份的路径"></el-input>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="block mt30">
-                    <div class="left">部署shell脚本<span class="red">*</span></div>
+                    <div class="left">{{item.task_type=='command'?'命令行脚本内容':'部署shell脚本'}}<span class="red">*</span></div>
                     <div>
                         <div class="mt10 right">
                             <div :id="'editor_'+index" style="width:1000px;height:350px;"></div>
                         </div>
-                        <div class="mt10 light">备注：服务器初始shell脚本。</div>
+                        <div class="mt10 light" v-show="item.task_type!='command'?true:false">备注：服务器初始shell脚本。</div>
                     </div>
                 </div>
                 <div class="block mt30">
@@ -244,6 +250,9 @@
                 },{
                     value: 'shell',
                     label: 'SHELL任务'
+                }, {
+                    value: 'command',
+                    label: '命令行运行任务'
                 }],
                 options1: [{
                     value: 1,
@@ -348,9 +357,13 @@
                 }
                 this.dialogTableVisible = false;
                 this.editableTabsValue = this.tasklist.length + '';
-                const default_shell_body = this.task_type === 'git' ? 
-                    '#!/bin/bash\r\ngit clone https://xxx%40qq.com:123456@git.xxx.com/www.git\r\n' : 
-                    '#!/bin/bash\r\n';
+                let default_shell_body = '';
+                if(this.task_type === 'git'){
+                    default_shell_body = '#!/bin/bash\r\ngit clone https://xxx%40qq.com:123456@git.xxx.com/www.git\r\n'
+                } else if(this.task_type === 'shell'){
+                    default_shell_body = '#!/bin/bash\r\n';
+                }
+
                 this.tasklist.push({
                     task_name:this.task_name,
                     task_type: this.task_type,

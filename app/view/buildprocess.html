@@ -47,6 +47,14 @@
         font-size:25px;
         font-weight: 300;
     }
+    .tab-btns{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    .tab-btns .btn-item{
+        margin-right:10px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -56,7 +64,7 @@
     </el-row>
     <div class="config_main mt30">
         <div class="block">
-            <div class="bottom">
+            <div class="bottom" style="width:100%;">
                 <div class="top mb20">资产列表</div>
                 <div class="mb10">
                     <el-button @click="serverConfigs()" type="primary" icon="el-icon-s-tools" size="small">资产配置</el-button>
@@ -75,10 +83,20 @@
                     <el-table-column prop="outer_ip" label="外网IP" width="150"></el-table-column>
                     <el-table-column prop="lan_ip" label="内网IP" width="150"></el-table-column>
                     <el-table-column prop="user" label="用户名" width="80"></el-table-column>
-                    <el-table-column label="操作" width="120">
+                    <el-table-column label="操作">
                         <template slot-scope="scope">
-                            <div>
-                                <el-button @click="serverConfigs(scope.row)" type="primary" size="mini" plain>资产配置</el-button>
+                            <div class="tab-btns">
+                                <el-button 
+                                    class="btn-item" 
+                                    @click="serverConfigs(scope.row)"
+                                    type="primary" size="mini">资产配置</el-button>
+                                <div v-for="(item,index) in tasklist" :key="index">
+                                    <el-button 
+                                        class="btn-item" 
+                                        @click="deployApplications(item, 3, scope.row)" 
+                                        :type="item.btntype" 
+                                        size="mini">{{item.task_name}}</el-button>
+                                </div>
                             </div>
                         </template>
                     </el-table-column>
@@ -95,72 +113,77 @@
                     <div class="block">
                         <div class="left">任务类型</div>
                         <div class="right">
-                            {{item.task_type=='git'?'git hooks任务':''}}{{item.task_type=='shell'?'shell脚本任务':''}}</div>
+                            {{item.task_type=='git'?'git hooks任务':''}}
+                            {{item.task_type=='shell'?'shell脚本任务':''}}
+                            {{item.task_type=='command'?'命令行运行任务':''}}
+                        </div>
                     </div>
                 </el-col>
-                <el-col :span="12">
+                <el-col :span="12" v-if="item.task_type!='command'?true:false">
                     <div class="block">
                         <div class="left">git部署方式</div>
                         <div class="right">{{item.task_type=='git'?'https方式':''}}{{item.task_type=='ssh'?'ssh方式':''}}</div>
                     </div>
                 </el-col>
             </el-row>
-            <el-row class="mt20">
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">shell脚本路径</div>
-                        <div class="right">{{item.shell_path}}</div>
-                    </div>
-                </el-col>
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">shell脚本参数</div>
-                        <div class="right">{{item.shell_opction}}</div>
-                    </div>
-                </el-col>
-            </el-row>
-            <el-row class="mt20">
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">shell脚本运行命令</div>
-                        <div class="right">{{'sh ' + item.shell_path +' '+ (item.shell_opction?item.shell_opction:'')}}</div>
-                    </div>
-                </el-col>
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">shell脚本上传方式</div>
-                        <div class="right">
-                            {{item.shell_write_type == 1 ? '新建文件并上传方式' :''}}
-                            {{item.shell_write_type == 2 ? 'shell窗口命令行创建方式' :''}}
+            <div v-if="item.task_type!='command'?true:false">
+                <el-row class="mt20">
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">shell脚本路径</div>
+                            <div class="right">{{item.shell_path}}</div>
                         </div>
-                    </div>
-                </el-col>
-            </el-row>
-            <el-row class="mt20">
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">发布前是否先做备份</div>
-                        <div class="right">
-                            <el-switch v-model="item.is_backups"></el-switch>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">shell脚本参数</div>
+                            <div class="right">{{item.shell_opction}}</div>
                         </div>
-                    </div>
-                </el-col>
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">应用所在位置</div>
-                        <div class="right">{{item.project_path}}</div>
-                    </div>
-                </el-col>
-            </el-row>
-            <el-row class="mt20">
-                <el-col :span="12">
-                    <div class="block">
-                        <div class="left">应用备份的路径</div>
-                        <div class="right">{{item.backups_path}}</div>
-                    </div>
-                </el-col>
-            </el-row>
-            <el-row class="mt20">
+                    </el-col>
+                </el-row>
+                <el-row class="mt20">
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">shell脚本运行命令</div>
+                            <div class="right">{{'sh ' + item.shell_path +' '+ (item.shell_opction?item.shell_opction:'')}}</div>
+                        </div>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">shell脚本上传方式</div>
+                            <div class="right">
+                                {{item.shell_write_type == 1 ? '新建文件并上传方式' :''}}
+                                {{item.shell_write_type == 2 ? 'shell窗口命令行创建方式' :''}}
+                            </div>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row class="mt20">
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">发布前是否先做备份</div>
+                            <div class="right">
+                                <el-switch v-model="item.is_backups"></el-switch>
+                            </div>
+                        </div>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">应用所在位置</div>
+                            <div class="right">{{item.project_path}}</div>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row class="mt20">
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">应用备份的路径</div>
+                            <div class="right">{{item.backups_path}}</div>
+                        </div>
+                    </el-col>
+                </el-row>
+            </div>
+            <el-row class="mt20" v-if="item.remarks?true:false">
                 <el-col :span="24">
                     <div class="block">
                         <div class="left">备注</div>
@@ -175,10 +198,10 @@
                 </div>
             </div>
             <div class="btns mb20">
-                <el-button type="primary" @click="deployApplications(item,1)">全量部署</el-button>
-                <el-button type="success" @click="deployApplications(item,2)" plain>部分部署</el-button>
+                <el-button type="primary" @click="deployApplications(item,1)">全量{{item.task_type!='command'?'部署':'运行'}}</el-button>
+                <el-button type="success" @click="deployApplications(item,2)" plain>部分{{item.task_type!='command'?'部署':'运行'}}</el-button>
                 <el-button type="primary" @click="updageAppConfigs(index)" plain>修改构建配置</el-button>
-                <el-button type="danger" @click="generateBuildConfig(item)" plain>生成构建配置</el-button>
+                <el-button v-if="item.task_type!='command'?true:false" type="danger" @click="generateBuildConfig(item)" plain>生成构建配置</el-button>
                 <el-button type="default" @click="goBack">返回</el-button>
             </div>
         </div>
@@ -226,6 +249,7 @@
                 type:'',
                 shell_model_item: 0,
                 model_icon:1,
+                taskName:'',
             }
         },
         mounted() {
@@ -270,6 +294,7 @@
                         const tasklist = data.data.task_list || [];
                         if (tasklist && tasklist.length) {
                             tasklist.forEach((item, index) => {
+                                item.btntype = index % 3 == 0 ? 'danger' : '' + index % 2 == 0 ? 'primary' : '' + index % 1 == 0 ? 'success' : '';
                                 item.is_backups = item.is_backups == 1 ? true : false;
                                 this.runMonaco(index, item.shell_body)
                             })
@@ -289,7 +314,7 @@
             goBack() {
                 location.href = "/build"
             },
-            deployApplications(item,type) {
+            deployApplications(taskItem, type, assetsItem) {
                 if(type === 2 && !this.multipleSelection.length){
                     popup.alert({title:'请先勾选需要部署的服务器!'});
                     return;
@@ -300,24 +325,26 @@
                 if(!xteamlist) {
                     // 第一次点击发布
                     startType = 'new';
-                } else if(type === this.type && xteamlist){
+                } else if(type === this.type && this.taskName === taskItem.task_name && xteamlist){
                     // 第二次点击发布
                     startType = 'agein';
-                } else if(type !== this.type && xteamlist) {
+                } else if(type !== this.type && this.taskName !== taskItem.task_name && xteamlist) {
                     // 切换了发布方式
                     startType = 'switch';
                 }
 
                 this.type = type;
+                this.taskName = taskItem.task_name;
                 // 弹出框
                 this.dialogTableVisible = true;
 
                 setTimeout(()=>{
-                    const assetsList = this.multipleSelection.length ? this.multipleSelection : this.assetslist
+                    let assetsList = this.multipleSelection.length ? this.multipleSelection : this.assetslist
+                    if(type === 3) assetsList = [assetsItem];
 
                     // 开始
                     const result = util.startSocketXteam({
-                        taskItem: item,
+                        taskItem,
                         buildType: 'buildprocess',
                         assetsList,
                         startType,
