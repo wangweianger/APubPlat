@@ -216,7 +216,7 @@
             <el-table-column label="操作">
                 <template slot-scope="scope">
                     <el-button v-if="!scope.row.selected" @click="handleEmails(1,scope.row)" type="primary" size="small">绑定</el-button>
-                    <el-button v-if="scope.row.selected" @click="handleEmails(2,scope.row)" type="primary" size="small" plain>取消</el-button>
+                    <el-button v-if="scope.row.selected" @click="handleEmails(2,scope.row)" type="danger" size="small" plain>取消</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -532,16 +532,14 @@
                 this.email.emailItem = itemEmailList;
                 this.email.appId = item._id;
                 this.email.dialogEmailVisible = true;
-                if(itemEmailList && itemEmailList.length){
-                    const emailsList = this.email.emailsList;
-                    emailsList.forEach(item=>{
-                        item.selected = false;
-                        if(itemEmailList.includes(item.email)){
-                            item.selected = true;
-                        }
-                    })
-                    this.email.emailsList = emailsList;
-                }
+                const emailsList = this.email.emailsList;
+                emailsList.forEach(item=>{
+                    item.selected = false;
+                    if(itemEmailList.includes(item.email)){
+                        item.selected = true;
+                    }
+                })
+                this.email.emailsList = emailsList;
             },
             handleEmails(type,item){
                 if(type === 1){
