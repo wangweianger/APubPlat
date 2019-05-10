@@ -9,6 +9,21 @@
         align-items: center;
         justify-content: space-between;
     }
+    .btns{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-top:30px;
+        align-items: center;
+        justify-content: center;
+    }
+    .comm_build_textarea {
+        width: 840px;
+        height: 220px;
+    }
+    .com_model_block .left{
+        width:130px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -40,7 +55,7 @@
                         <div>
                             <span v-for="(item,index) in tasklist" :key="index">
                                 <el-button 
-                                    @click="handleTask(scope.row,item)" 
+                                    @click="showTaskOpctions(2,item,scope.row)"
                                     :type="item.btn_color" 
                                     :plain="item.is_plain==1?true:false"
                                     size="mini" 
@@ -54,7 +69,19 @@
                 </el-table-column>
             </el-table>
         </div>
-        
+        <div class="btns">
+            <span 
+                v-for="(item,index) in tasklist" 
+                :key="index" 
+                v-if="item.type==2?true:false" 
+                class="ml10" >
+                <el-button 
+                    @click="showTaskOpctions(1,item)"
+                    :type="item.btn_color" 
+                    :plain="item.is_plain==1?true:false"
+                    size="medium">{{item.name}}</el-button>
+            </span>
+        </div>
         <!-- ssk 弹出框 -->
         <el-dialog width="800px" title="SSH KEY" :visible.sync="sshkey.dialogSshKeyVisible">
             <div class="com_model_main">
@@ -76,10 +103,88 @@
             </div>
         </el-dialog>
 
+        <!-- model弹出框 -->
+        <el-dialog width="1000px" title="资产任务编辑" :visible.sync="dialogTableVisible">
+            <div class="com_model_main">
+                <el-row>
+                    <el-col :span="12">
+                        <div class="com_model_block">
+                            <div class="left">任务名称：</div>
+                            <div>{{taskItem.name}}</div>
+                        </div>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="com_model_block">
+                            <div class="left">任务类型：</div>
+                            <div>{{taskItem.type==1?'窗口运行命令':''}}{{taskItem.type==2?'shell脚本命令':''}}</div>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <div class="com_model_block" v-if="taskItem.type==2?true:false">
+                            <div class="left">shell脚本路径：</div>
+                            <div>{{taskItem.shell_path}}</div>
+                        </div>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="com_model_block" v-if="taskItem.type==2?true:false">
+                            <div class="left">shell脚本参数：</div>
+                            <div>{{taskItem.shell_opction}}</div>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="12">
+                        <div class="com_model_block" v-if="taskItem.type==2?true:false">
+                            <div class="left">shell脚本写入方式：</div>
+                            <div>{{taskItem.shell_write_type==1?'本地新建文件并上传方式':''}}{{taskItem.shell_write_type==2?'shell窗口命令行创建方式':''}}</div>
+                        </div>
+                    </el-col>
+                </el-row>
+                <div class="com_model_block">
+                    <div class="left">任务脚本内容：</div>
+                    <div id="editor" class="comm_build_textarea"></div>
+                </div>
+                <div class="btns">
+                    <el-button type="primary" @click="deployApplications">执行任务</el-button>
+                    <el-button type="success" @click="updageAppConfigs" plain>修改配置</el-button>
+                    <el-button type="danger" v-if="taskItem.type==2?true:false" @click="generateBuildConfig" plain>生成配置</el-button>
+                </div>
+            </div>
+        </el-dialog>
+
+        <!-- xtrem弹出框 -->
+        <div class="comm_shell_model" v-show="dialogBuildVisible">
+            <div class="mask" @click="dialogBuildVisible=false"></div>
+            <div class="comm_shell_model_content">
+                <span class="el-icon-close close" @click="dialogBuildVisible=false"></span>
+                <span :class="{'el-icon-menu':model_icon===1,'el-icon-s-unfold':model_icon===2}" class="close menu"
+                    @click="handleShellModel(3)"></span>
+                <span class="el-icon-plus close plus" @click="handleShellModel(1)"></span>
+                <span class="el-icon-minus close minus" @click="handleShellModel(2)"></span>
+                <div class="comm_shell_navs">
+                    <div class="item" v-for="(item,index) in resultList" :key="index"
+                        :class="{'active':shell_model_item===index}" @click="shell_model_item=index">
+                        {{item.name}}
+                    </div>
+                </div>
+                <div class="comm_content_body">
+                    <div class="com_content_list" v-for="(item,index) in assetslist" :key="index">
+                        <div class="mt20 terminal" :style="{zIndex:shell_model_item==index?10:1}" :id="'terminal'+index"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
+    <script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
+    <script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
 </div>
 <script>
-    const monacos = {};
+    let editor = null;
+    let xteamlist = null;
+    let socket = null;
     new Vue({
         el: '#team',
         data: function () {
@@ -93,6 +198,14 @@
                     assetsItem: {},
                 },
                 tasklist:[],
+                dialogTableVisible:false,
+                taskItem: {},
+                type:'',
+                resultList:[],
+                dialogBuildVisible:false,
+                shell_model_item: 0,
+                model_icon: 1,
+                is_build:false,
             }
         },
         mounted() {
@@ -116,47 +229,6 @@
             handleSelectionChange(val) {
                 this.multipleSelection = val;
             },
-            checkGit(item) {
-                util.ajax({
-                    url: `${config.baseApi}api/v1/util/checkGitEnviron`,
-                    data: {
-                        host: item.outer_ip,
-                        port: item.port,
-                        username: item.user,
-                        password: item.password,
-                    },
-                    success: data => {
-                        if (data.data) {
-                            const version = data.data.match(/\d[\d\.]+\d/)[0]
-                            popup.miss({ title: '检测到服务器已安装GIT 环境版本为' + version })
-                        } else {
-                            popup.miss({ title: '检测到服务器未安装GIT环境！' })
-                        }
-                    }
-                })
-            },
-            installGit(item) {
-                popup.confirm({
-                    title: `确定为${item.name}安装GIT环境吗？`, yes: () => {
-                        util.ajax({
-                            url: `${config.baseApi}api/v1/util/installGitEnviron`,
-                            data: {
-                                host: item.outer_ip,
-                                port: item.port,
-                                username: item.user,
-                                password: item.password,
-                            },
-                            success: data => {
-                                if (data.data) {
-                                    popup.miss({ title: '安装成功！' })
-                                } else {
-                                    popup.miss({ title: '安装失败!' })
-                                }
-                            }
-                        })
-                    }
-                })
-            },
             showSshKey(item) {
                 if (this.sshkey.assetsItem._id !== item._id) this.sshkey.sshKey = '';
                 this.sshkey.assetsItem = item;
@@ -179,31 +251,128 @@
                 })
             },
             handleTask(assetsItem,commItem){
-                popup.confirm({ title: `确定执行${commItem.name}任务吗？`, yes: () => {
-                        util.ajax({
-                        url: `${config.baseApi}api/v1/util/handleShellTasks`,
-                        data: {
-                            shell_type: commItem.type,
-                            shell_body: commItem.shell_body,
-                            shell_opction: commItem.shell_opction,
-                            shell_path: commItem.shell_path,
-                            host: assetsItem.outer_ip,
-                            port: assetsItem.port,
-                            username: assetsItem.user,
-                            password: assetsItem.password,
-                        },
-                        success: data => {
-                            if (data.data.type == 1) {
-                                popup.miss({ title: data.data.result })
-                            } else if (data.data.type == 2) {
-                                popup.miss({ title: '操作成功!' })
-                            }
-                        }
-                    })
-                }})
+                util.ajax({
+                url: `${config.baseApi}api/v1/util/handleShellTasks`,
+                data: {
+                    shell_type: commItem.type,
+                    shell_body: commItem.shell_body,
+                    shell_opction: commItem.shell_opction,
+                    shell_path: commItem.shell_path,
+                    host: assetsItem.outer_ip,
+                    port: assetsItem.port,
+                    username: assetsItem.user,
+                    password: assetsItem.password,
+                },
+                success: data => {
+                    popup.miss({ title: data.data.result })
+                }
+            })
             },
             addNewCommTask(){
                 location.href="/commtask?model=1"
+            },
+            showTaskOpctions(type, taskItem, assetsItem) {
+                if(type === 1){
+                    if(!this.multipleSelection.length){
+                        popup.alert({title:'请选择需要执行任务的资产列表'})
+                        return
+                    } else {
+                        this.resultList = this.multipleSelection;
+                    }
+                }else if(type === 2){
+                    this.resultList = [assetsItem]
+                }
+                this.is_build = false;
+                this.type = type;
+                this.taskItem = taskItem;
+                editor ? editor.setValue(taskItem.shell_body) : setTimeout(() => { this.runMonaco('editor', taskItem.shell_body); });
+                this.dialogTableVisible = true;
+            },
+            runMonaco(id, data) {
+                //载入Monaco
+                const _this = this;
+                require(['vs/editor/editor.main'], function () {
+                    //得到支持的语言
+                    var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
+                    //创建编辑器
+                    editor = monaco.editor.create(document.getElementById(id), {
+                        //内容
+                        value: data,
+                        //语言
+                        language: 'shell',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        //主题，三款：vs、vs-dark、hc-black
+                        theme: 'vs-dark',
+                        readOnly:true,
+                        //代码略缩图
+                        minimap: {
+                            enabled: true
+                        }
+                    });
+                });
+            },
+            generateBuildConfig() {
+                util.ajax({
+                    url: `${config.baseApi}api/v1/build/generateBuildConfig`,
+                    data: {
+                        taskItem: this.taskItem,
+                        assetsList: this.resultList,
+                    },
+                    success: data => {
+                        popup.miss({ title: '操作成功!' })
+                    }
+                })
+            },
+            updageAppConfigs(){
+                location.href="/commtask?taskId=" + this.taskItem._id
+            },
+            deployApplications(type){
+                if(this.taskItem.type == 1){
+                    this.handleTask(this.resultList[0],this.taskItem);
+                    return;
+                }
+
+                let startType = '';
+
+                if (!xteamlist && !this.is_build) {
+                    // 第一次点击发布
+                    startType = 'new';
+                } else if (this.is_build) {
+                    // 第二次点击发布
+                    startType = 'agein';
+                } else if (!this.is_build && xteamlist) {
+                    // 切换了发布方式
+                    startType = 'switch';
+                }
+
+                // 弹出框
+                this.dialogBuildVisible = true;
+                this.is_build = true;
+
+                setTimeout(() => {
+                    // 开始
+                    const result = util.startSocketXteam({
+                        taskItem: this.taskItem,
+                        buildType: 'buildtasks',
+                        assetsList: this.resultList,
+                        startType,
+                    });
+                    socket = result.socket;
+                    xteamlist = result.xteamList;
+                })
+            },
+            handleShellModel(type) {
+                if (type === 3) {
+                    if (this.model_icon === 1) {
+                        this.model_icon = 2;
+                        type = 3;
+                    } else {
+                        this.model_icon = 1;
+                        type = 4;
+                    }
+                }
+                util.setSocketXteam(type, xteamlist, socket);
             },
         }
     })

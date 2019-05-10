@@ -47,111 +47,6 @@
         font-size:25px;
         font-weight: 300;
     }
-    .comm_shell_model{
-    }
-    .comm_shell_model .mask {
-        position: fixed;
-        left:0;
-        top:0;
-        width:100%;
-        height:100%;
-        background: rgba(0,0,0,.6);
-        z-index:100;
-    }
-    .comm_shell_model .comm_shell_model_content{
-        position: fixed;
-        left:0;
-        top:0;
-        width:calc(60%);
-        height: calc(80%);
-        margin-left:calc(20%);
-        margin-top:calc(5%);
-        background:#000;
-        border-radius:3px;
-        overflow:hidden;
-        z-index:110;
-    }
-    .comm_shell_model .close{
-        position: absolute;
-        right:10px;
-        top:8px;
-        font-size:28px;
-        cursor:pointer;
-        color:#333;
-        z-index:1000;
-    }
-    .comm_shell_model .menu{
-        right:150px;
-    }
-    .comm_shell_model .plus{
-        right:100px;
-    }
-    .comm_shell_model .minus{
-        right:50px;
-    }
-    .comm_shell_model .comm_shell_navs{
-        position: absolute;
-        left:0;
-        top:0;
-        width:100%;
-        background:#ccc;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        height:40px;
-        z-index:110;
-    }
-    .comm_shell_model .comm_shell_navs .item{
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        border-right:solid 1px #aaa;
-        white-space: nowrap;
-        padding:0 10px;
-        height:100%;
-        font-size:12px;
-        font-weight:300;
-        cursor:pointer;
-    }
-    .comm_shell_model .comm_shell_navs .active{
-        color:#000;
-        background:#eee;
-    }
-    .comm_shell_model .terminal{
-        position: absolute;
-        left:8px;
-        top:15px;
-        width:calc(100% - 30px);
-        height:calc(100% - 60px);
-        z-index:1;
-    }
-    .comm_content_body{
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        overflow:auto;
-        padding: 10px;
-        height:calc(95%);
-        overflow:auto;
-        margin-top:20px;
-    }
-    .comm_content_body::-webkit-scrollbar {
-        width: 4px;     
-        height: 4px;
-    }
-    .comm_content_body::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        background: rgba(0,0,0,0.6);
-    }
-    .comm_content_body::-webkit-scrollbar-track {
-        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        border-radius: 0;
-        background: rgba(0,0,0,.1);
-    }
-    .com_content_list{
-        background:#000;
-    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -168,7 +63,7 @@
                     <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
                     </span>
                 </div>
-                <el-table :data="assetslist" border @selection-change="handleSelectionChange" style="width:auto;font-size:13px;">
+                <el-table :data="assetslist" ref="assetsTable" border @selection-change="handleSelectionChange" style="width:auto;font-size:13px;">
                     <el-table-column type="selection" width="55"></el-table-column>
                     <el-table-column prop="name" label="资产名称" width="200"></el-table-column>
                     <el-table-column prop="code" label="资产编码" width="200"></el-table-column>
@@ -223,23 +118,36 @@
                 <el-col :span="12">
                     <div class="block">
                         <div class="left">shell脚本运行命令</div>
-                        <div class="right">{{'sh ' + item.shell_path +' '+ item.shell_opction||''}}</div>
+                        <div class="right">{{'sh ' + item.shell_path +' '+ (item.shell_opction?item.shell_opction:'')}}</div>
                     </div>
                 </el-col>
                 <el-col :span="12">
                     <div class="block">
-                        <div class="left">发布前是否先做备份</div>
-                        <div class="right"><el-switch v-model="item.is_backups"></el-switch></div>
+                        <div class="left">shell脚本上传方式</div>
+                        <div class="right">
+                            {{item.shell_write_type == 1 ? '本地新建文件并上传方式' :''}}
+                            {{item.shell_write_type == 2 ? 'shell窗口命令行创建方式' :''}}
+                        </div>
                     </div>
                 </el-col>
             </el-row>
             <el-row class="mt20">
                 <el-col :span="12">
                     <div class="block">
+                        <div class="left">发布前是否先做备份</div>
+                        <div class="right">
+                            <el-switch v-model="item.is_backups"></el-switch>
+                        </div>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="block">
                         <div class="left">应用所在位置</div>
                         <div class="right">{{item.project_path}}</div>
                     </div>
                 </el-col>
+            </el-row>
+            <el-row class="mt20">
                 <el-col :span="12">
                     <div class="block">
                         <div class="left">应用备份的路径</div>
@@ -306,6 +214,7 @@
         data: function () {
             return {
                 id: util.getQueryString('id'),
+                index: util.getQueryString('index'),
                 assetslist: [],
                 dialogTableVisible: false,
                 tasklist: [],
@@ -362,6 +271,7 @@
                             })
                         }
                         this.tasklist = tasklist;
+                        setTimeout(() => { if (this.index) { this.$refs.assetsTable.toggleRowSelection(this.assetslist[this.index], true); } })
                     }
                 })
             },
@@ -422,8 +332,8 @@
                     url: `${config.baseApi}api/v1/build/generateBuildConfig`,
                     data: {
                         id: this.id,
-                        item: item,
-                        assetslist:this.assetslist,
+                        taskItem: item,
+                        assetsList:this.assetslist,
                     },
                     success: data => {
                         popup.miss({ title: '操作成功!' })

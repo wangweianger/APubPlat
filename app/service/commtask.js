@@ -14,7 +14,7 @@ class CommtaskService extends Service {
 
     // add | update
     async handle(query) {
-        let { _id, name, type, btn_color, is_plain, shell_body, handletype, shell_opction, shell_path } = query;
+        let { _id, name, type, btn_color, is_plain, shell_body, handletype, shell_opction, shell_path, shell_write_type } = query;
         handletype = handletype * 1;
         let result = '';
         if (handletype === 1) {
@@ -27,13 +27,14 @@ class CommtaskService extends Service {
             commtask.shell_body = shell_body;
             commtask.shell_opction = shell_opction;
             commtask.shell_path = shell_path;
+            commtask.shell_write_type = shell_write_type || 1;
             commtask.create_time = new Date();
             result = await commtask.save();
         } else if (handletype === 2) {
             // update
             result = await this.ctx.model.Commtask.update(
                 { _id },
-                { $set: { name, type, btn_color, is_plain, shell_body, shell_opction, shell_path } },
+                { $set: { name, type, btn_color, is_plain, shell_body, shell_opction, shell_path, shell_write_type } },
                 { multi: true }
             );
         }

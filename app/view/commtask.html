@@ -41,7 +41,7 @@
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <div class="mb10">
+                        <div>
                             <el-button @click="handleCommTask(2,scope.row)" type="primary" size="small">查看|编辑</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small" plain>删除</el-button>
                         </div>
@@ -53,41 +53,72 @@
     <!-- model弹出框 -->
     <el-dialog width="1000px" title="资产任务编辑" :visible.sync="dialogTableVisible">
         <div class="com_model_main">
-            <div class="com_model_block">
-                <div class="left">任务名称<span class="red">*</span></div>
-                <el-input class="inp" v-model="team.name" placeholder="请输任务名称"></el-input>
-            </div>
-            <div class="com_model_block">
-                <div class="left">任务类型<span class="red">*</span></div>
-                <el-select v-model="team.type" class="inp" placeholder="请选择">
-                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-                    </el-option>
-                </el-select>
-            </div>
-            <div class="com_model_block" v-if="team.type==2?true:false">
-                <div class="left">shell脚本路径</div>
-                <el-input class="inp" v-model="team.shell_path" placeholder="例如：/usr/src/build.sh"></el-input>
-            </div>
-            <div class="com_model_block" v-if="team.type==2?true:false">
-                <div class="left">shell脚本参数</div>
-                <el-input class="inp" v-model="team.shell_opction" placeholder="shell脚本参数请以空格隔开"></el-input>
-            </div>
-            <div class="com_model_block">
-                <div class="left">按钮颜色<span class="red">*</span></div>
-                <el-select v-model="team.btn_color" class="inp" placeholder="请选择">
-                    <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value">
-                    </el-option>
-                </el-select>
-            </div>
-            <div class="com_model_block">
-                <div class="left">是否是plain样式<span class="red">*</span></div>
-                <el-radio v-model="team.is_plain" :label="1">是</el-radio>
-                <el-radio v-model="team.is_plain" :label="2">否</el-radio>
-            </div>
-            <div class="com_model_block">
-                <div class="left">按钮预览</div>
-                <el-button :type="team.btn_color" :plain="team.is_plain==1?true:false" size="mini">按钮预览</el-button>
-            </div>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">任务名称<span class="red">*</span></div>
+                        <el-input class="inp" v-model="team.name" placeholder="请输任务名称"></el-input>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">任务类型<span class="red">*</span></div>
+                        <el-select v-model="team.type" class="inp" placeholder="请选择">
+                            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block" v-if="team.type==2?true:false">
+                        <div class="left">shell脚本路径</div>
+                        <el-input class="inp" v-model="team.shell_path" placeholder="例如：/usr/src/build.sh"></el-input>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block" v-if="team.type==2?true:false">
+                        <div class="left">shell脚本参数</div>
+                        <el-input class="inp" v-model="team.shell_opction" placeholder="shell脚本参数请以空格隔开"></el-input>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block" v-if="team.type==2?true:false">
+                        <div class="left">shell脚本写入方式</div>
+                        <el-select v-model="team.shell_write_type" class="inp" placeholder="请选择">
+                            <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">按钮颜色<span class="red">*</span></div>
+                        <el-select v-model="team.btn_color" class="inp" placeholder="请选择">
+                            <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </div>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">是否是plain样式<span class="red">*</span></div>
+                        <el-radio v-model="team.is_plain" :label="1">是</el-radio>
+                        <el-radio v-model="team.is_plain" :label="2">否</el-radio>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">按钮预览</div>
+                        <el-button :type="team.btn_color" :plain="team.is_plain==1?true:false" size="mini">按钮预览</el-button>
+                    </div>
+                </el-col>
+            </el-row>
             <div class="com_model_block">
                 <div class="left">任务脚本内容<span class="red">*</span></div>
                 <div id="editor" class="comm_build_textarea"></div>
@@ -135,6 +166,13 @@
                     value: 'danger',
                     label: 'danger'
                 }],
+                options2: [{
+                    value: 1,
+                    label: '本地新建文件并上传方式'
+                }, {
+                    value: 2,
+                    label: 'shell窗口命令行创建方式'
+                }],
                 team: {},
             }
         },
@@ -149,18 +187,24 @@
                     url: `${config.baseApi}api/v1/commtask/list`,
                     success:data=>{
                         this.datalist = data.data || [];
+                        const taskId = util.getQueryString('taskId');
+                        this.datalist.forEach(item=>{
+                            if(item._id == taskId) this.handleCommTask(2, item);
+                        })
                     }
                 })
             },
             handleCommTask(type, item){
                 if (item) item = JSON.parse(JSON.stringify(item));
                 if (item) {
+                    item.shell_write_type = item.shell_write_type?parseInt(item.shell_write_type):1;
                     this.team = item;
                     editor ? editor.setValue(item.shell_body) : setTimeout(() => { this.runMonaco('editor', item.shell_body); });
                 } else {
                     this.team = {
                         name: '',
                         type: 1,
+                        shell_write_type:1,
                         shell_body: '',
                         btn_color: 'primary',
                         is_plain: 2,

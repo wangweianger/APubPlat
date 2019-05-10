@@ -151,6 +151,15 @@
                     </div>
                 </div>
                 <div class="block mt30">
+                    <div class="left">shell脚本写入方式<span class="red">*</span></div>
+                    <div class="right">
+                        <el-select v-model="item.shell_write_type" class="inp1" placeholder="请选择">
+                            <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </div>
+                </div>
+                <div class="block mt30">
                     <div class="left">发布前是否先做备份</div>
                     <div class="right">
                         <el-switch v-model="item.is_backups"></el-switch>
@@ -254,6 +263,13 @@
                     value: 'shell',
                     label: 'SHELL任务'
                 }],
+                options1: [{
+                    value: 1,
+                    label: '本地新建文件并上传方式'
+                }, {
+                    value: 2,
+                    label: 'shell窗口命令行创建方式'
+                }],
                 task_name:'',
                 task_type: '',
                 tasklist:[],
@@ -310,6 +326,7 @@
                         const tasklist = data.data.task_list || [];
                         if (tasklist && tasklist.length) {
                             tasklist.forEach((item, index) => {
+                                item.shell_write_type = item.shell_write_type ? parseInt(item.shell_write_type) : 1;
                                 item.is_backups = item.is_backups == 1 ? true : false;
                                 if(!item.shell_body) item.shell_body = '#!/bin/bash\r\n'
                                 if(!type) this.runMonaco(index, item.shell_body)

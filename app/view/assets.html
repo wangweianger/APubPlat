@@ -48,8 +48,6 @@
                 </el-table-column>
                 <el-table-column prop="port" label="端口号" width="100">
                 </el-table-column>
-                <el-table-column prop="password" label="密码">
-                </el-table-column>
                 <el-table-column label="可用状态" width="100">
                     <template slot-scope="scope">
                         <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
@@ -58,17 +56,15 @@
                 <el-table-column label="操作" width="300" fixed="right">
                     <template slot-scope="scope">
                         <div class="mb10">
-                            <el-button @click="handleAssets(2,scope.row)" type="primary" size="small">编辑
-                            </el-button>
+                            <el-button type="primary" size="small">控制台</el-button>
+                            <el-button type="success" size="small" @click="serverConfigs(scope.row)">资产配置</el-button>
                             <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger"
                                 size="small" plain>禁用</el-button>
                             <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success"
                                 size="small">启用</el-button>
-                            <el-button @click="showSshKey(scope.row)" type="primary" size="mini" plain>获得SSH KEY</el-button>
                         </div>
                         <div class="mb10">
-                            <el-button type="success" size="small" disabled>ssh登录</el-button>
-                            <el-button type="primary" size="small" @click="serverConfigs(scope.row)">资产配置</el-button>
+                            <el-button @click="handleAssets(2,scope.row)" type="primary" size="small" plain>编辑</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                     </template>
@@ -157,26 +153,6 @@
         </div>
     </el-dialog>
 
-    <!-- ssk 弹出框 -->
-    <el-dialog width="800px" title="SSH KEY" :visible.sync="sshkey.dialogSshKeyVisible">
-        <div class="com_model_main">
-            <div class="mb20 common_tops"><i class="el-icon-warning"></i>请尽量使用获得ssh key按钮，若生成新的ssh key则相关地方均需要更改（例如：github
-                ssk）</div>
-            <div>
-                <el-button @click="getSshKey(1)" type="primary" plain>获得SSH KEY</el-button>
-            </div>
-            <div class="block mt30">
-                <div class="left" style="width:80px;">邮箱地址</div>
-                <div class="right">
-                    <el-input v-model="sshkey.email" style="width:200px;margin-right:15px;" placeholder="用来生成ssh key的邮箱备注">
-                    </el-input>
-                    <el-button @click="getSshKey(2)" class="ml10" type="danger" plain>生成新的SSH KEY</el-button>
-                </div>
-            </div>
-            <div class="mt30 mb20">ssh key</div>
-            <el-input type="textarea" :rows="6" v-model="sshkey.sshKey"></el-input>
-        </div>
-    </el-dialog>
 </div>
 <script>
     new Vue({
@@ -203,12 +179,6 @@
                     port:'',
                     password:'',
                     status: true,
-                },
-                sshkey: {
-                    dialogSshKeyVisible: false,
-                    sshKey: '',
-                    email: '',
-                    assetsItem: {},
                 },
                 multipleSelection:[],
             }
@@ -349,31 +319,6 @@
                     return 'disabled-row';
                 }
                 return '';
-            },
-            showSshKey(item) {
-                if(this.sshkey.assetsItem._id !== item._id) this.sshkey.sshKey = '';
-                this.sshkey.assetsItem = item;
-                this.sshkey.dialogSshKeyVisible = true;
-            },
-            getSshKey(type) {
-                util.ajax({
-                    url: `${config.baseApi}api/v1/util/getAssetSshKey`,
-                    data: {
-                        type: type,
-                        email: this.sshkey.email,
-                        host: this.sshkey.assetsItem.outer_ip,
-                        port: this.sshkey.assetsItem.port,
-                        username: this.sshkey.assetsItem.user,
-                        password: this.sshkey.assetsItem.password,
-                    },
-                    success: data => {
-                        if(!data.data){
-                            popup.miss({title:'无ssh key,您可以先生成一个！'})
-                            return;
-                        }
-                        this.sshkey.sshKey = data.data;
-                    }
-                })
             },
             handleSelectionChange(val) {
                 this.multipleSelection = val;

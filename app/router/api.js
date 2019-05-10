@@ -89,10 +89,6 @@ module.exports = app => {
     apiV1Router.post('files/addfile', files.addfile);
 
     // --------------------------工具方法------------------------------
-    // 检测服务器是否安装GIT环境
-    apiV1Router.post('util/checkGitEnviron', util.checkGitEnviron);
-    // 服务器是安装GIT环境
-    apiV1Router.post('util/installGitEnviron', util.installGitEnviron);
     // 获得ssh key
     apiV1Router.post('util/getAssetSshKey', util.getAssetSshKey);
     // 执行shell任务

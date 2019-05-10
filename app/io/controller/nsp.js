@@ -14,6 +14,9 @@ class NspController extends Controller {
         case 'buildprocess':
             this.buildProcess(query.data);
             break;
+        case 'buildtasks':
+            this.buildProcess(query.data);
+            break;
         default:
         }
     }

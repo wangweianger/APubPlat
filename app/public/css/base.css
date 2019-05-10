@@ -212,3 +212,110 @@ iframe { display: none; }
     border-radius: 0;
     background: rgba(0,0,0,.1);
 }
+
+/* build model */
+.comm_shell_model{
+    }
+    .comm_shell_model .mask {
+        position: fixed;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        background: rgba(0,0,0,.6);
+        z-index:10000;
+    }
+    .comm_shell_model .comm_shell_model_content{
+        position: fixed;
+        left:0;
+        top:0;
+        width:calc(60%);
+        height: calc(80%);
+        margin-left:calc(20%);
+        margin-top:calc(5%);
+        background:#000;
+        border-radius:3px;
+        overflow:hidden;
+        z-index:10002;
+    }
+    .comm_shell_model .close{
+        position: absolute;
+        right:10px;
+        top:8px;
+        font-size:28px;
+        cursor:pointer;
+        color:#333;
+        z-index:10001;
+    }
+    .comm_shell_model .menu{
+        right:150px;
+    }
+    .comm_shell_model .plus{
+        right:100px;
+    }
+    .comm_shell_model .minus{
+        right:50px;
+    }
+    .comm_shell_model .comm_shell_navs{
+        position: absolute;
+        left:0;
+        top:0;
+        width:100%;
+        background:#ccc;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        height:40px;
+        z-index:110;
+    }
+    .comm_shell_model .comm_shell_navs .item{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-right:solid 1px #aaa;
+        white-space: nowrap;
+        padding:0 10px;
+        height:100%;
+        font-size:12px;
+        font-weight:300;
+        cursor:pointer;
+    }
+    .comm_shell_model .comm_shell_navs .active{
+        color:#000;
+        background:#eee;
+    }
+    .comm_shell_model .terminal{
+        position: absolute;
+        left:8px;
+        top:15px;
+        width:calc(100% - 30px);
+        height:calc(100% - 60px);
+        z-index:1;
+    }
+    .comm_shell_model .comm_content_body{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow:auto;
+        padding: 10px;
+        height:calc(95%);
+        overflow:auto;
+        margin-top:20px;
+    }
+    .comm_shell_model .comm_content_body::-webkit-scrollbar {
+        width: 4px;     
+        height: 4px;
+    }
+    .comm_shell_model .comm_content_body::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.6);
+    }
+    .comm_shell_model .comm_content_body::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        border-radius: 0;
+        background: rgba(0,0,0,.1);
+    }
+    .comm_shell_model .com_content_list{
+        background:#000;
+    }

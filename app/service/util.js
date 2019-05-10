@@ -4,24 +4,7 @@
 const Service = require('egg').Service;
 const ssh2 = require('../util/ssh2');
 const path = require('path');
-const fs = require('fs');
 class UtilService extends Service {
-
-    // 检测git环境
-    async checkGitEnviron(query) {
-        await ssh2.init(query);
-        const result = await ssh2.exec('git --version');
-        ssh2.end();
-        return result;
-    }
-
-    // 安装git环境
-    async installGitEnviron(query) {
-        await ssh2.init(query);
-        const result = await ssh2.exec('yum -y install git');
-        ssh2.end();
-        return result;
-    }
 
     // 获得服务器的ssh key
     async getAssetSshKey(query) {
@@ -45,32 +28,12 @@ class UtilService extends Service {
     // 执行shell任务
     // 安装git环境
     async handleShellTasks(query) {
-        let { host, port, username, password, shell_type, shell_body, shell_path } = query;
-        let result = '';
-        shell_type = shell_type * 1;
-        if (shell_type === 1) {
-            // 窗口运行命令
-            await ssh2.init(query);
-            result = await ssh2.exec(shell_body);
-            ssh2.end();
-        } else if (shell_type === 2) {
-            // shell脚本命令
-            let file = '';
-            let paths = '/';
-            if (shell_path && shell_path.indexOf('/') > -1) {
-                file = path.basename(shell_path);
-                paths = path.dirname(shell_path);
-            } else {
-                throw new Error('shell脚本地址必须以/开头!');
-            }
-            // 本地创建文件
-            fs.writeFileSync(path.resolve(__dirname, '../tempFile/' + file), shell_body);
-            await this.genConfigsForSsh({ paths, file, host, port, username, password, shell_path });
-            // 删除
-            fs.unlinkSync(path.resolve(__dirname, '../tempFile/' + file));
-        }
+        const { shell_body } = query;
+        // 窗口运行命令
+        await ssh2.init(query);
+        const result = await ssh2.exec(shell_body);
+        ssh2.end();
         return {
-            type: shell_type,
             result,
         };
     }

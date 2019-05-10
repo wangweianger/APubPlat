@@ -10,6 +10,7 @@ module.exports = app => {
         shell_body: { type: String }, // 运行内容
         shell_opction: { type: String }, // shell 参数
         shell_path: { type: String }, // shell存放路径
+        shell_write_type: { type: String }, // 脚本写入服务器方式  1：本地新建文件并上传方式 2：shell窗口命令行创建方式
         btn_color: { type: String, default: 'primary' }, // 按钮颜色 可选类型 ：primary|success|info|warning|danger|default
         is_plain: { type: Number, default: 2 }, // 是:1 否：2
         create_time: { type: Date, default: Date.now }, // 创建时间
