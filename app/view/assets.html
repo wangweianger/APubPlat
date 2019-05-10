@@ -81,6 +81,10 @@
     <!-- model弹出框 -->
     <el-dialog width="50%" title="资产编辑" :visible.sync="dialogTableVisible">
         <div class="com_model_main">
+            <div class="mb20 light" v-if="team.type==2?true:false">
+                <i class="el-icon-warning fs-16 mr5 primary"></i>
+                更改了资产配置项后，所有相关应用需要手动更新分配资产按钮，以达到资产数据的同步更新!
+            </div>
             <el-row>
                 <el-col :span="12">
                     <div class="com_model_block">
