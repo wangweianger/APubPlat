@@ -417,14 +417,15 @@ class utilfn {
         // list
         assetsList.forEach((item, index) => {
             // 先执行 xteam
-            let xteam = new Terminal();
+            let xteam = new Terminal({
+                cursorBlink:true,
+                fontSize:14,
+                fontFamily: '"Monaco", "Consolas", "monospace"',
+            });
             xteam.open(document.getElementById('terminal'+index));
             xteam.focus()
             xteam.fit()
-            xteam.setOption('cursorBlink', true)
 
-            const geometry = 'geometry_' + index;
-            const close = 'close_' + index;
             const data = 'data_' + index;
             const resize = 'resize_' + index;
 
@@ -434,6 +435,7 @@ class utilfn {
             
             // socket
             socket.on(data, function (res) {
+                res = res.replace('\r', '\r\n')
                 xteam.write(res);
             });
             XTEAMLIST.push(xteam);
@@ -444,22 +446,27 @@ class utilfn {
                     username: item.user,
                     password: item.password,
                 },
-                taskItem,geometry, close, data, resize
+                taskItem, data, resize
             })
-
             // socket.on('connect', function () {
             //     if (xterm) socket.emit(geometry, xterm.cols, xterm.rows)
             // })
-            // socket.on(close, msg => { 
-
-            // });
-            // socket.on('disconnect', msg => { json.close && json.close() });
-            // socket.on('disconnecting', () => { json.close && json.close() });
-            // socket.on('error', (err) => { json.close && json.close() });
+            
         })
         socket.emit('socket', { data: result, buildType} || 'begin');
 
         window.addEventListener('resize', this.resizeScreen.bind(this, XTEAMLIST, socket), false)
+
+        socket.on('close', msg => { close(msg); });
+        socket.on('disconnect', msg => { close(msg); });
+        socket.on('disconnecting', () => { close(); });
+        socket.on('error', (err) => { close(err); });
+
+        function close(msg){
+            XTEAMLIST.forEach(item => {
+                item.write(err || '服务器close.');
+            })
+        }
 
         return {
             xteamList: XTEAMLIST,
