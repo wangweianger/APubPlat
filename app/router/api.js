@@ -57,6 +57,8 @@ module.exports = app => {
     // --------------------------- 资产管理 --------------------------------
     // get list
     apiV1Router.get('assets/list', assets.list);
+    // get all
+    apiV1Router.get('assets/all', assets.all);
     // 新增 | 编辑
     apiV1Router.post('assets/handle', assets.handle);
     // 设置状态

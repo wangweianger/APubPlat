@@ -39,6 +39,21 @@ class AssetsService extends Service {
         };
     }
 
+    async all() {
+        return this.ctx.model.Assets.aggregate([
+            { $match: { status: 1 } },
+            {
+                $lookup: {
+                    from: 'teams',
+                    localField: 'team_code',
+                    foreignField: 'code',
+                    as: 'teamlist',
+                },
+            },
+            { $sort: { count: -1 } },
+        ]).exec();
+    }
+
     // add | update
     async handle(json) {
         const { type, name, code, status, _id, team_code, outer_ip, lan_ip, user, port, password } = json;

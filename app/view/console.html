@@ -1,6 +1,6 @@
 <style scoped>
-    body{background:#131313;}
-    .footer{display:none;}
+    body{background:#000;}
+    .header,.footer{display:none;}
     #body_content{overflow:hidden;}
     .content{
         padding:0px;
@@ -9,16 +9,19 @@
         flex-direction: row;
         color:#fff;
         height:calc(100% + 50px);
-        background:#2f2a2a;
+        background:#000;
         top:-50px;
         z-index:100;
     }
     .el-menu {border-right: none;}
     .console-side{
-        width:180px;
+        width:300px;
         height:calc(100%);
-        padding-right:20px;
         overflow-y:auto;
+    }
+    .console-ul{
+        width:calc(100%);
+        height:calc(100%);
     }
     .comsole-consten{
         width:100%;
@@ -32,12 +35,14 @@
         font-size:12px;
         color:#aaa;
         background:#3a3333;
+        width:calc(100%);
     }
     .comsole-consten .navs .item{
         display: flex;
         flex-direction: row;
         align-items: center;
         padding:0 10px;
+        height:100%;
         cursor:pointer;
     }
     .comsole-consten .navs .item span{
@@ -50,50 +55,85 @@
     }
     .comsole-consten .navs .active{
         color:#fff;
+        border-bottom:solid 2px #409eff;
     }
     .comsole-consten .navs .item i{
         cursor:pointer;
         font-size:16px;
     }
+    .xterm-list{
+        width:calc(100%);
+        height:calc(100%);
+        position: relative;
+    }
+    .xterm-list .xterm-item{
+        left:10px;
+        top:10px;
+        position: absolute;
+        width:calc(100% - 10px);
+        height:calc(100% - 10px);
+    }
+    .console-side .el-menu-item-group__title{
+        padding:0;
+    }
+    .console-side .el-submenu__title{
+        font-size:12px;
+        height:35px;
+        line-height:35px;
+    }
+    .console-side .el-submenu .el-menu-item{
+        font-size:12px;
+        height: 30px;
+        line-height: 30px;
+        padding-right:10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
 </style>
 <div class="content" id="team" v-cloak>
     <div class="console-side">
         <el-menu 
-            class="console-side"
-            default-active="1" 
+            class="console-ul"
+            :default-active="defaultActive" 
             class="el-menu-vertical-demo" 
             @open="handleOpen" 
             @close="handleClose"
-            background-color="#2f2a2a" 
+            background-color="#3a3333" 
             text-color="#fff" 
+            :default-openeds="defaultOpends"
             active-text-color="#ffd04b">
-            <el-submenu index="1">
-                <template slot="title">
-                    <i class="el-icon-folder"></i>
-                    <span>导航一</span>
-                </template>
-                <el-menu-item-group>
-                    <template slot="title">分组一</template>
-                    <el-menu-item index="1-1">选项1</el-menu-item>
-                    <el-menu-item index="1-2">选项2</el-menu-item>
-                </el-menu-item-group>
-            </el-submenu>
-            <el-menu-item index="2">
-                <i class="el-icon-monitor"></i>
-                <span slot="title">导航二</span>
-            </el-menu-item>
+            <div v-for="(val, name, index) in assets" :key="index">
+                <el-submenu :index="'console_'+index">
+                    <template slot="title">
+                        <i class="el-icon-folder"></i>
+                        <span>{{name}}</span>
+                    </template>
+                    <el-menu-item-group>
+                        <el-menu-item 
+                            v-for="(item,index1) in val" 
+                            :index="item._id"
+                            @click="selectAssets(item)"
+                            :key="index1">{{item.name+'-'+item.outer_ip}}</el-menu-item>
+                    </el-menu-item-group>
+                </el-submenu>
+            </div>
         </el-menu>
     </div>
     <div class="comsole-consten">
         <div class="navs">
-            <div class="item active">
-                <span>官网服务器-192.168.1.1</span>
+            <div 
+                v-for="(item,index) in xtermList" 
+                :key="index" 
+                class="item"
+                :class="{active:index==navIndex?true:false}">
+                <span>{{item.name+'-'+item.outer_ip}}</span>
                 <i class="el-icon-close"></i>
             </div>
-            <div class="item">
-                <span>官网服务器-192.168.1.1</span>
-                <i class="el-icon-close"></i>
-            </div>
+        </div>
+        <div class="xterm-list">
+            <div class="xterm-item" id="terminal"></div>
         </div>
     </div>
 </div>
@@ -102,13 +142,55 @@
         el: '#team',
         data: function () {
             return {
-               
+               assets:{},
+               defaultOpends:[],
+               defaultActive:'',
+               xtermList:[],
+               navIndex:0,
             }
         },
         mounted() {
             $('#body_content').css('height',$(window).height() +'px');
+            this.xtrem();
+            this.assetsList();
         },
         methods: {
+            assetsList(){
+                util.ajax({
+                    type:'get',
+                    url:`${config.baseApi}api/v1/assets/all`,
+                    success:data=>{
+                        const datas = data.data || [];
+                        const assets = {};
+                        const xtermList = [];
+                        let ids = util.getQueryString('ids');
+                        ids = ids ? ids.split(',') : [];
+                        datas.forEach(item => {
+                            if(ids.includes(item._id)){
+                                xtermList.push(item);
+                                if(!this.defaultActive) this.defaultActive = item._id;
+                            }
+                            if(!assets[item.teamlist[0].name]){
+                                assets[item.teamlist[0].name] = [ item ];
+                            } else {
+                                assets[item.teamlist[0].name].push(item);
+                            }
+                        })
+                        this.xtermList = xtermList;
+                        this.assets = assets;
+                    }
+                })
+            },
+            selectAssets(item){
+                this.xtermList.push(item);
+                this.navIndex = this.navIndex+1;
+                console.log(item)
+            },
+            xtrem(){
+                var term = new Terminal();
+                term.open(document.getElementById('terminal'));
+                term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+            },
             handleOpen(key, keyPath) {
                 console.log(key, keyPath);
             },
