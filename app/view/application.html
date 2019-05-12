@@ -121,7 +121,7 @@
                         <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="250" fixed="right">
+                <el-table-column label="操作" width="280" fixed="right">
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
@@ -133,11 +133,12 @@
                         </div>
                         <div class="mb10">
                             <el-button @click="distAsstes(scope.row)" type="success" size="small" plain>分配资产</el-button>
+                            <el-button @click="distEmails(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                         <div>
-                            <el-button @click="distEmails(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
                             <el-button @click="buildApplication(scope.row)" type="primary" size="small">快速部署</el-button>
+                            <el-button @click="applicationConsole(scope.row)" type="danger" size="small">控制台</el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -572,6 +573,14 @@
                 let url = '/buildprocess?id=' + item._id;
                 if(assetsItem) url = url + '&assetsId=' + assetsItem._id;
                 location.href = url;
+            },
+            applicationConsole(item){
+                let ids = '';
+                item.assets_list && item.assets_list.forEach(item=>{
+                    ids = ids + item._id + ','
+                })
+                ids = ids ? ids.slice(0,-1) : '';
+                location.href="/console?ids=" + ids
             },
         }
     })
