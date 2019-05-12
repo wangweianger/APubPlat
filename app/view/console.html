@@ -15,7 +15,7 @@
     }
     .el-menu {border-right: none;}
     .console-side{
-        width:300px;
+        width:250px;
         height:calc(100%);
         overflow-y:auto;
         background:#3a3333;
@@ -101,7 +101,7 @@
     
 </style>
 <div class="content" id="team" v-cloak>
-    <div class="console-side" :style="{width:isCollapse?'55px':'300px'}">
+    <div class="console-side" :style="{width:isCollapse?'55px':'250px'}">
         <div class="hide-side" @click="isCollapse=!isCollapse">
             <i class="el-icon-menu"></i> <span v-if="!isCollapse">隐藏左边栏</span> 
         </div>
@@ -126,7 +126,7 @@
                         <el-menu-item 
                             v-for="(item,index1) in val" 
                             :index="item._id"
-                            @click="selectAssets(item)"
+                            @click="addXtermForAssets(item)"
                             :key="index1">{{item.name+'-'+item.outer_ip}}</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
@@ -140,34 +140,36 @@
                 :key="index" 
                 class="item"
                 :style="{'max-width':(1/xtermList.length)*100+'%'}"
-                @click="navIndex=index"
-                :class="{active:index==navIndex?true:false}">
+                @click="selectTab(item)"
+                :data-i="navIndex+'--'+item.xtermId"
+                :class="{active:navIndex==item.xtermId?true:false}">
                 <span>{{item.name+'-'+item.outer_ip}}</span>
-                <i @click.stop="closeXterm(index)" class="el-icon-close"></i>
+                <i @click.stop="closeXtermForAssets(index,item)" class="el-icon-close"></i>
             </div>
         </div>
         <div class="xterm-list">
             <div 
                 class="xterm-item"
-                :style="{'z-index':index==navIndex?20:1}"
+                :style="{'z-index':navIndex==item.xtermId?20:1}"
                 v-for="(item,index) in xtermList" 
-                :key="index" 
-                :id="'console_terminal_'+index"></div>
+                :key="item.xtermId" 
+                :id="'console_terminal_'+item.xtermId"></div>
         </div>
     </div>
 </div>
 <script>
     const xtermRunList = [];
+    let xtermId = -1;
     new Vue({
         el: '#team',
         data: function () {
             return {
-               assets:{},
-               defaultOpends:[],
-               defaultActive:'',
-               xtermList:[],
-               navIndex:0,
-               isCollapse: false,
+                assets:{},
+                defaultOpends:[],
+                defaultActive:'',
+                xtermList:[],
+                navIndex:0,
+                isCollapse: false,
             }
         },
         watch:{
@@ -191,8 +193,9 @@
                         const xtermList = [];
                         let ids = util.getQueryString('ids');
                         ids = ids ? ids.split(',') : [];
-                        datas.forEach(item => {
+                        datas.forEach((item,index) => {
                             if(ids.includes(item._id)){
+                                item.xtermId = index;
                                 xtermList.push(item);
                                 if(!this.defaultActive) this.defaultActive = item._id;
                             }
@@ -204,6 +207,7 @@
                         })
                         this.xtermList = xtermList;
                         this.assets = assets;
+                        xtermId = this.xtermList.length-1;
                         setTimeout(()=>{
                             this.xtermList.forEach((item,index)=>{
                                 this.showConsole(index, item)
@@ -212,19 +216,31 @@
                     }
                 })
             },
-            selectAssets(item){
-                this.navIndex = this.xtermList.length ? this.navIndex + 1 : 0;
-                this.xtermList.push(item);
-                setTimeout(()=>{ this.showConsole(this.navIndex, item); }, 200);
+            selectTab(item){
+                this.navIndex = item.xtermId;
             },
-            closeXterm(index){
+            addXtermForAssets(item){
+                item = JSON.parse(JSON.stringify(item))
+                xtermId++
+                this.navIndex = xtermId;
+                item.xtermId = xtermId;
+                this.xtermList.push(item);
+                setTimeout(()=>{ this.showConsole(xtermId, item); }, 200);
+            },
+            closeXtermForAssets(index,item){
                 const xterm = xtermRunList[index];
                 xterm.destroy();
-                // this.socket.emit('console_close_'+index)
+                // this.socket.emit('console_close_'+ item.xtermId)
                 this.xtermList.splice(index,1);
                 xtermRunList.splice(index, 1);
-                if(!this.xtermList[this.navIndex]){
-                    this.navIndex = this.navIndex - 1;
+                if(item.xtermId !== this.navIndex) return;
+
+                if(this.xtermList[index]){
+                    this.navIndex = this.xtermList[index].xtermId;
+                }else if(this.xtermList[index-1]){
+                    this.navIndex = this.xtermList[index-1].xtermId;
+                }else{
+                    this.navIndex = -1
                 }
             },
             xtrem(){
@@ -238,23 +254,7 @@
                     socket: this.socket,
                     assetsItem,
                 })
-
                 xtermRunList.push(xteam);
-
-                // setTimeout(() => {
-                //     let assetsList = this.multipleSelection.length ? this.multipleSelection : this.assetslist
-                //     if (type === 3) assetsList = [assetsItem];
-
-                //     // 开始
-                //     const result = util.startSocketXteam({
-                //         taskItem,
-                //         buildType: 'buildprocess',
-                //         assetsList,
-                //         startType,
-                //     });
-                //     socket = result.socket;
-                //     xteamlist = result.xteamList;
-                // })
             },
             handleOpen(key, keyPath) {
                 console.log(key, keyPath);

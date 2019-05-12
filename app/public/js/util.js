@@ -396,8 +396,6 @@ class utilfn {
         const startType = json.startType || 'new';
         if (!Array.isArray(assetsList) && !assetsList.length) return;
 
-        console.log(startType)
-
         const result = [];
         if (startType === 'switch') {
             for (let i = 0; i < XTEAMLIST.length; i++) { XTEAMLIST[i] && XTEAMLIST[i].destroy() }
@@ -568,7 +566,6 @@ class utilfn {
         xteam.fit()
 
         xteam.on('data', function (res) {
-            console.log(res)
             socket.emit(data, res)
         })
 
