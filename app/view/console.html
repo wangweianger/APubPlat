@@ -193,9 +193,11 @@
                         const xtermList = [];
                         let ids = util.getQueryString('ids');
                         ids = ids ? ids.split(',') : [];
+                        let i = 0;
                         datas.forEach((item,index) => {
                             if(ids.includes(item._id)){
-                                item.xtermId = index;
+                                item.xtermId = i;
+                                i++;
                                 xtermList.push(item);
                                 if(!this.defaultActive) this.defaultActive = item._id;
                             }
