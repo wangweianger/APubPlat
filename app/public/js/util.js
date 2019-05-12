@@ -435,7 +435,6 @@ class utilfn {
             
             // socket
             socket.on(data, function (res) {
-                res = res.replace('\r', '\r\n')
                 xteam.write(res);
             });
             XTEAMLIST.push(xteam);
@@ -533,34 +532,67 @@ class utilfn {
     */
     socket(json = {}) {
         const socket = io.connect('/');
-        socket.on('data', function (data) {
-            json.callback && json.callback(data);
-        });
-        socket.on('connect', function () {
-            if (json.xterm) socket.emit('geometry', json.xterm.cols, json.xterm.rows)
-        })
-        socket.on('close', msg => { json.close && json.close() });
-        socket.on('disconnect', msg => { json.close && json.close() });
-        socket.on('disconnecting', () => { json.close && json.close() });
-        socket.on('error', (err) => { json.close && json.close() });
-        socket.emit('socket', json.query || 'begin');
+        // socket.on('data', function (data) {
+        //     json.callback && json.callback(data);
+        // });
+        // socket.on('connect', function () {
+        //     if (json.xterm) socket.emit('geometry', json.xterm.cols, json.xterm.rows)
+        // })
+        // socket.on('close', msg => { json.close && json.close() });
+        // socket.on('disconnect', msg => { json.close && json.close() });
+        // socket.on('disconnecting', () => { json.close && json.close() });
+        // socket.on('error', (err) => { json.close && json.close() });
+        // socket.emit('socket', json.query || 'begin');
         return socket;
     }
 
     /* xteam 实现
     * id
     */
-    xteam(json={}){
+    xteam(json = {}){
+        const { socket, index, assetsItem} = json;
+        const result = [];
+
+        const data = 'console_data_' + index;
+        const resize = 'console_resize_' + index;
+        const close = 'console_close_' + index;
+
         Terminal.applyAddon(fit);
-        let xteam = new Terminal();
-        xteam.open(document.getElementById(json.id));
+        let xteam = new Terminal({
+            cursorBlink: true,
+            fontSize: 14,
+            fontFamily: '"Monaco", "Consolas", "monospace"',
+        });
+        xteam.open(document.getElementById('console_terminal_' + index));
         xteam.focus()
         xteam.fit()
-        xteam.setOption('cursorBlink', json.cursorBlink+'' || true)
 
-        xteam.on('data', function (data) {
-            socket.emit('data', data)
+        xteam.on('data', function (res) {
+            console.log(res)
+            socket.emit(data, res)
         })
+
+        xteam.write(`开始连接到 ${assetsItem.user}@${assetsItem.name}-${assetsItem.outer_ip}-${assetsItem.lan_ip}\r\n`)
+        // socket
+        socket.on(data, function (res) {
+            xteam.write(res);
+        });
+
+        result.push({
+            assitsItem: {
+                host: assetsItem.outer_ip,
+                port: assetsItem.port,
+                username: assetsItem.user,
+                password: assetsItem.password,
+            },
+            taskItem: {}, 
+            data, resize, close
+        })
+
+        socket.emit('socket', { data: result, buildType: 'buildprocess' } || 'begin');
+
+        window.addEventListener('resize', this.resizeScreen.bind(this, [xteam], socket), false)
+        this.resizeScreen([xteam], socket)
 
         return xteam;
     }

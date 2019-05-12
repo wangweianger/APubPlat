@@ -26,9 +26,12 @@ class NspController extends Controller {
         if (!data.length) return;
         const { ctx } = this;
         for (let i = 0; i < data.length; i++) {
-            const shell = data[i].taskItem.task_type !== 'command' ?
-                `sh ${data[i].taskItem.shell_path} ${data[i].taskItem.shell_opction || ''} \r\n` :
-                data[i].taskItem.shell_body + '\r\n';
+            let shell = '';
+            if (data[i].taskItem && data[i].taskItem.task_type) {
+                shell = data[i].taskItem.task_type !== 'command' ?
+                    `sh ${data[i].taskItem.shell_path} ${data[i].taskItem.shell_opction || ''} \r\n` :
+                    data[i].taskItem.shell_body + '\r\n';
+            }
 
             socket({
                 host: data[i].assitsItem.host,

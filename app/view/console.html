@@ -18,14 +18,21 @@
         width:300px;
         height:calc(100%);
         overflow-y:auto;
+        background:#3a3333;
+    }
+    .console-side .hide-side{
+        padding:20px 0 10px 20px;
+        font-size:16px;
+        cursor:pointer;
     }
     .console-ul{
         width:calc(100%);
-        height:calc(100%);
+        height:calc(100% - 60px);
     }
     .comsole-consten{
         width:100%;
         position: relative;
+        overflow:hidden;
     }
     .comsole-consten .navs{
         display: flex;
@@ -34,7 +41,7 @@
         height:30px;
         font-size:12px;
         color:#aaa;
-        background:#3a3333;
+        
         width:calc(100%);
     }
     .comsole-consten .navs .item{
@@ -71,7 +78,7 @@
         top:10px;
         position: absolute;
         width:calc(100% - 10px);
-        height:calc(100% - 10px);
+        height:calc(100% - 50px);
     }
     .console-side .el-menu-item-group__title{
         padding:0;
@@ -93,8 +100,12 @@
     
 </style>
 <div class="content" id="team" v-cloak>
-    <div class="console-side">
+    <div class="console-side" :style="{width:isCollapse?'55px':'300px'}">
+        <div class="hide-side" @click="isCollapse=!isCollapse">
+            <i class="el-icon-menu"></i> <span v-if="!isCollapse">隐藏左边栏</span> 
+        </div>
         <el-menu 
+            :collapse="isCollapse"
             class="console-ul"
             :default-active="defaultActive" 
             class="el-menu-vertical-demo" 
@@ -127,17 +138,25 @@
                 v-for="(item,index) in xtermList" 
                 :key="index" 
                 class="item"
+                :style="{'max-width':(1/xtermList.length)*100+'%'}"
+                @click="navIndex=index"
                 :class="{active:index==navIndex?true:false}">
                 <span>{{item.name+'-'+item.outer_ip}}</span>
-                <i class="el-icon-close"></i>
+                <i @click.stop="closeXterm(index)" class="el-icon-close"></i>
             </div>
         </div>
         <div class="xterm-list">
-            <div class="xterm-item" id="terminal"></div>
+            <div 
+                class="xterm-item"
+                :style="{'z-index':index==navIndex?20:1}"
+                v-for="(item,index) in xtermList" 
+                :key="index" 
+                :id="'console_terminal_'+index"></div>
         </div>
     </div>
 </div>
 <script>
+    const xtermRunList = [];
     new Vue({
         el: '#team',
         data: function () {
@@ -147,12 +166,18 @@
                defaultActive:'',
                xtermList:[],
                navIndex:0,
+               isCollapse: false,
+            }
+        },
+        watch:{
+            'isCollapse'(){
+                setTimeout(()=>{ util.resizeScreen(xtermRunList, this.socket); },500)
             }
         },
         mounted() {
             $('#body_content').css('height',$(window).height() +'px');
-            this.xtrem();
             this.assetsList();
+            this.socket = util.socket();
         },
         methods: {
             assetsList(){
@@ -178,18 +203,57 @@
                         })
                         this.xtermList = xtermList;
                         this.assets = assets;
+                        setTimeout(()=>{
+                            this.xtermList.forEach((item,index)=>{
+                                this.showConsole(index, item)
+                            })
+                        },200)
                     }
                 })
             },
             selectAssets(item){
+                this.navIndex = this.xtermList.length ? this.navIndex + 1 : 0;
                 this.xtermList.push(item);
-                this.navIndex = this.navIndex+1;
-                console.log(item)
+                setTimeout(()=>{ this.showConsole(this.navIndex, item); }, 200);
+            },
+            closeXterm(index){
+                const xterm = xtermRunList[index];
+                xterm.destroy();
+                // this.socket.emit('console_close_'+index)
+                this.xtermList.splice(index,1);
+                xtermRunList.splice(index, 1);
+                if(!this.xtermList[this.navIndex]){
+                    this.navIndex = this.navIndex - 1;
+                }
             },
             xtrem(){
                 var term = new Terminal();
-                term.open(document.getElementById('terminal'));
+                term.open(document.getElementById('console_terminal_0'));
                 term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
+            },
+            showConsole(index,assetsItem){
+                const xteam = util.xteam({
+                    index,
+                    socket: this.socket,
+                    assetsItem,
+                })
+
+                xtermRunList.push(xteam);
+
+                // setTimeout(() => {
+                //     let assetsList = this.multipleSelection.length ? this.multipleSelection : this.assetslist
+                //     if (type === 3) assetsList = [assetsItem];
+
+                //     // 开始
+                //     const result = util.startSocketXteam({
+                //         taskItem,
+                //         buildType: 'buildprocess',
+                //         assetsList,
+                //         startType,
+                //     });
+                //     socket = result.socket;
+                //     xteamlist = result.xteamList;
+                // })
             },
             handleOpen(key, keyPath) {
                 console.log(key, keyPath);

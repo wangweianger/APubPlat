@@ -32,6 +32,10 @@ module.exports = function socket(json) {
                 stream.write(data);
             });
 
+            socket.on(json.socket.close || 'close', function() {
+                conn.end();
+            });
+
             socket.on('resize', function socketOnResize(data) {
                 stream.setWindow(data.rows, data.cols);
             });
