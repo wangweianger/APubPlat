@@ -230,7 +230,7 @@
             closeXtermForAssets(index,item){
                 const xterm = xtermRunList[index];
                 xterm.destroy();
-                // this.socket.emit('console_close_'+ item.xtermId)
+                this.socket.emit('console_close_'+ item.xtermId)
                 this.xtermList.splice(index,1);
                 xtermRunList.splice(index, 1);
                 if(item.xtermId !== this.navIndex) return;
