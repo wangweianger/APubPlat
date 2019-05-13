@@ -83,7 +83,7 @@
             </el-option>
         </el-select>
         <el-input v-model="app_name" class="inp ml20" placeholder="按应用名称查询"></el-input>
-        <el-button @click="getList" type="primary" size="medium">搜索</el-button>
+        <el-button @click="getList" type="primary">搜索</el-button>
     </div>
     <el-tabs class="el-tabs-content" v-model="activeName" @tab-click="handleClick">
         <el-tab-pane v-for="(item,index) in environlist" :key="index" :label="item.label" :name="item._id">
