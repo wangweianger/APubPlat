@@ -125,12 +125,12 @@
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button @click="buildApplication(scope.row)" type="primary" size="small">快速部署</el-button>
-                            <el-button @click="setAppConfig(scope.row)" type="primary" size="small" plain>构建配置</el-button>
+                            <el-button @click="setAppConfig(scope.row)" type="success" size="small" plain>构建配置</el-button>
                             <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
                         </div>
                         <div class="mb10">
-                            <el-button @click="distAsstes(scope.row)" type="success" size="small">分配资产</el-button>
-                            <el-button @click="distEmails(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
+                            <el-button @click="distAsstes(scope.row)" type="success" size="small" plain>分配资产</el-button>
+                            <el-button @click="distEmails(scope.row)" type="warning" size="small" plain>分配邮件</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                         <div>
@@ -586,7 +586,7 @@
                     ids = ids + item._id + ','
                 })
                 ids = ids ? ids.slice(0,-1) : '';
-                location.href="/console?ids=" + ids
+                window.open("/console?ids=" + ids);
             },
             serverConfigs(item) {
                 if(!item.assets_list || !item.assets_list.length) {

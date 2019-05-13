@@ -68,6 +68,7 @@
     .el-tabs-content{
         background:#fff;
         padding:15px;
+        box-shadow: 5px 5px 10px #eee;
     }
 </style>
 <div class="content" id="team" v-cloak>
@@ -247,7 +248,7 @@
                     ids = ids + item._id + ','
                 })
                 ids = ids ? ids.slice(0, -1) : '';
-                location.href = "/console?ids=" + ids
+                window.open("/console?ids=" + ids);
             },
             setAppConfig(item) {
                 location.href = "/appconfig?id=" + item._id;

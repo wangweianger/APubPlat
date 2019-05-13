@@ -24,7 +24,7 @@
             <div class="l">资产管理</div>
             <div class="r">
                 <el-button type="primary" size="small" class="ml20" icon="el-icon-plus" @click="handleAssets(1)">新增资产</el-button>
-                <el-button type="danger" size="small" icon="el-icon-s-tools" @click="serverConfigs()">资产配置</el-button>
+                <el-button type="danger" size="small" icon="el-icon-s-tools" @click="serverConfigs()">资产任务</el-button>
             </div>
         </div>
         <div class="table_body">
@@ -57,13 +57,13 @@
                     <template slot-scope="scope">
                         <div class="mb10">
                             <el-button type="primary" size="small" @click="goToConsole(scope.row)">控制台</el-button>
-                            <el-button type="success" size="small" @click="serverConfigs(scope.row)">资产配置</el-button>
+                            <el-button type="success" size="small" @click="serverConfigs(scope.row)">资产任务</el-button>
                             <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger"
                                 size="small" plain>禁用</el-button>
                             <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success"
                                 size="small">启用</el-button>
                         </div>
-                        <div class="mb10">
+                        <div>
                             <el-button @click="handleAssets(2,scope.row)" type="primary" size="small" plain>编辑</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
@@ -353,7 +353,7 @@
                 location.href = "/assetsconfig";
             },
             goToConsole(assetsItem){
-                location.href="/console?ids=" + assetsItem._id
+                window.open("/console?ids=" + assetsItem._id)
             },
         },
     })

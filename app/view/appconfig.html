@@ -58,7 +58,8 @@
             <div class="bottom">
                 <div class="top mb20">资产列表</div>
                 <div class="mb10">
-                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-s-tools" size="small">资产配置</el-button>
+                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-tickets" size="small">资产任务</el-button>
+                    <el-button @click="applicationConsole()" type="danger" icon="el-icon-s-tools" size="small">控制台</el-button>
                     <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
                     </span>
                 </div>
@@ -80,7 +81,7 @@
                     <el-table-column label="操作">
                         <template slot-scope="scope">
                             <div>
-                                <el-button @click="serverConfigs(scope.row)" type="primary" size="mini" plain>资产配置</el-button>
+                                <el-button @click="serverConfigs(scope.row)" type="primary" size="mini" plain>资产任务</el-button>
                             </div>
                         </template>
                     </el-table-column>
@@ -422,6 +423,18 @@
             },
             goToBuild(){
                 location.href = "/buildprocess?id="+this.id;
+            },
+            applicationConsole() {
+                if (!this.multipleSelection.length) {
+                    popup.alert({ title: '请选择进入控制台的资产列表!' })
+                    return;
+                }
+                let ids = '';
+                this.multipleSelection && this.multipleSelection.forEach(item => {
+                    ids = ids + item._id + ','
+                })
+                ids = ids ? ids.slice(0, -1) : '';
+                window.open("/console?ids=" + ids);
             },
         }
     })
