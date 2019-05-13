@@ -65,6 +65,10 @@
         color:#999;
         font-weight:300;
     }
+    .el-tabs-content{
+        background:#fff;
+        padding:15px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -73,10 +77,6 @@
         </el-col>
     </el-row>
     <div class="com_top">
-        <el-select v-model="environ_code" class="inp" @change="getList" placeholder="请选择部署环境">
-            <el-option v-for="item in environlist" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-        </el-select>
         <el-select v-model="team_code" class="inp" @change="getList" placeholder="请选择所属团队">
             <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
@@ -84,51 +84,60 @@
         <el-input v-model="app_name" class="inp ml20" placeholder="按应用名称查询"></el-input>
         <el-button @click="getList" type="primary" size="medium">搜索</el-button>
     </div>
-    <!-- table -->
-    <div class="com_table_block mt20" v-if="datalist.length">
-        <div class="table_header">
-            <div class="l">应用构建</div>
-        </div>
-        <div class="table_body">
-            <el-table :data="datalist" style="width: 100%">
-                <el-table-column prop="name" label="应用名称" width="250">
-                </el-table-column>
-                <el-table-column label="所属团队" width="250">
-                    <template slot-scope="scope">
-                        <div>{{scope.row.teamlist[0].name}}</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="所属环境" width="250">
-                    <template slot-scope="scope">
-                        <div class="success">{{scope.row.environlist[0].name}}</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="部署网络方式" width="250">
-                    <template slot-scope="scope">
-                        <div>{{scope.row.net_type == 1?'外网IP':'内网IP'}}</div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作">
-                    <template slot-scope="scope">
-                        <div class="mb10">
-                            <el-button @click="buildProcess(scope.row)" type="primary" size="small">开始部署</el-button>
-                        </div>
-                        <div>
-                            <el-button @click="buildProcess(scope.row)" type="danger" size="small" disabled>应用还原</el-button>
-                        </div>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </div>
-        <div class="common_pages">
-            <el-pagination background @current-change="handleCurrentChange" :current-page.sync="currentPage"
-                :page-size="pageSize" layout="prev, pager, next, jumper" :total="totalCount">
-            </el-pagination>
-        </div>
-    </div>
-    <!-- empty -->
-    <div class="select_app" v-if="!datalist.length"><div>请先选择需要部署的应用!</div></div>
-    
+    <el-tabs class="el-tabs-content" v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane v-for="(item,index) in environlist" :key="index" :label="item.label" :name="item._id">
+            <!-- table -->
+            <div class="com_table_block mt20" v-if="datalist.length">
+                <div class="table_header">
+                    <div class="l">应用构建</div>
+                </div>
+                <div class="table_body">
+                    <el-table :data="datalist" style="width: 100%">
+                        <el-table-column prop="name" label="应用名称" width="250">
+                        </el-table-column>
+                        <el-table-column prop="code" label="应用编码" width="200">
+                        </el-table-column>
+                        <el-table-column label="所属团队" width="250">
+                            <template slot-scope="scope">
+                                <div>{{scope.row.teamlist[0]?scope.row.teamlist[0].name:''}}</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="所属环境" width="150">
+                            <template slot-scope="scope">
+                                <div class="success">{{scope.row.environlist[0]?scope.row.environlist[0].name:''}}</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="部署网络方式" width="150">
+                            <template slot-scope="scope">
+                                <div>{{scope.row.net_type == 1?'外网IP':'内网IP'}}</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <div class="mb10">
+                                    <el-button @click="buildProcess(scope.row)" type="primary" size="small">应用部署</el-button>
+                                    <el-button @click="buildProcess(scope.row)" type="danger" size="small" disabled>应用还原</el-button>
+                                </div>
+                                <div>
+                                    <el-button @click="applicationConsole(scope.row)" type="danger" size="small">控制台</el-button>
+                                    <el-button @click="setAppConfig(scope.row)" type="primary" size="small" plain>构建配置</el-button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <div class="common_pages">
+                    <el-pagination background @current-change="handleCurrentChange" :current-page.sync="currentPage"
+                        :page-size="pageSize" layout="prev, pager, next, jumper" :total="totalCount">
+                    </el-pagination>
+                </div>
+            </div>
+            <!-- empty -->
+            <div class="select_app" v-if="!datalist.length">
+                <div>请先选择需要部署的应用!</div>
+            </div>
+        </el-tab-pane>
+    </el-tabs>
 </div>
 <script>
     new Vue({
@@ -145,15 +154,18 @@
                 pageSize: 30,
                 totalCount: 0,
                 currentPage: 1,
+                activeName: '',
             }
         },
-        filters: {
-        },
         mounted() {
-            this.getTeamList();
             this.getEnvironList();
+            this.getTeamList();
         },
         methods: {
+            handleClick(tab, event) {
+                this.environ_code = this.environlist[tab.index].code;
+                this.getList();
+            },
             getList() {
                 util.ajax({
                     type: 'get',
@@ -204,15 +216,21 @@
                         pageSize: 100,
                     },
                     success: data => {
+                        if(!data.data.datalist || !data.data.datalist.length) return;
                         const datas = data.data.datalist || [];
                         const options = [];
                         datas.forEach(item => {
                             options.push({
+                                _id: item._id,
+                                code: item.code,
                                 value: item.code,
                                 label: item.name
                             })
                         })
                         this.environlist = options;
+                        this.activeName = datas[0]['_id'];
+                        this.environ_code = datas[0]['code'];
+                        this.getList();
                     }
                 })
             },
@@ -222,6 +240,17 @@
             },
             buildProcess(item){
                 location.href = "/buildprocess?id=" + item._id;
+            },
+            applicationConsole(item) {
+                let ids = '';
+                item.assets_list && item.assets_list.forEach(item => {
+                    ids = ids + item._id + ','
+                })
+                ids = ids ? ids.slice(0, -1) : '';
+                location.href = "/console?ids=" + ids
+            },
+            setAppConfig(item) {
+                location.href = "/appconfig?id=" + item._id;
             },
         }
     })

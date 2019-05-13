@@ -37,7 +37,7 @@
                 </el-table-column>
                 <el-table-column label="所属团队">
                     <template slot-scope="scope">
-                        <div>{{scope.row.teamlist[0].name}}</div>
+                        <div>{{scope.row.teamlist[0]?scope.row.teamlist[0].name:''}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column prop="outer_ip" label="外网IP" width="150">
@@ -88,7 +88,7 @@
             <el-row>
                 <el-col :span="12">
                     <div class="com_model_block">
-                        <div class="left">所属团队</div>
+                        <div class="left">所属团队<span class="red">*</span></div>
                         <el-select class="inp" v-model="team.team_code" placeholder="请选择">
                             <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
                         </el-option>
@@ -96,7 +96,7 @@
                 </el-col>
                 <el-col :span="12">
                     <div class="com_model_block ml20">
-                        <div class="left">资产名称</div>
+                        <div class="left">资产名称<span class="red">*</span></div>
                         <el-input class="inp" v-model="team.name" placeholder="请输资产名称"></el-input>
                     </div>
                 </el-col>
@@ -104,13 +104,13 @@
             <el-row>
                 <el-col :span="12">
                     <div class="com_model_block">
-                        <div class="left">资产编码</div>
-                        <el-input class="inp" v-model="team.code" placeholder="以ass_开头、例如ass_zxhy"></el-input>
+                        <div class="left">资产编码<span class="red">*</span></div>
+                        <el-input class="inp" v-model="team.code" placeholder="以ass_开头、例如ass_zxhy" :disabled="team.type==2?true:false"></el-input>
                     </div>
                 </el-col>
                 <el-col :span="12">
                     <div class="com_model_block ml20">
-                        <div class="left">外网IP</div>
+                        <div class="left">外网IP<span class="red">*</span></div>
                         <el-input class="inp" v-model="team.outer_ip" placeholder="请输入外网IP"></el-input>
                     </div>
                 </el-col>
@@ -118,13 +118,13 @@
             <el-row>
                 <el-col :span="12">
                     <div class="com_model_block">
-                        <div class="left">内网IP</div>
+                        <div class="left">内网IP<span class="red">*</span></div>
                         <el-input class="inp" v-model="team.lan_ip" placeholder="请输入内容IP"></el-input>
                     </div>
                 </el-col>
                 <el-col :span="12">
                     <div class="com_model_block ml20">
-                        <div class="left">登录用户名</div>
+                        <div class="left">登录用户名<span class="red">*</span></div>
                         <el-input class="inp" v-model="team.user" placeholder="请输入登录用户名"></el-input>
                     </div>
                 </el-col>
@@ -132,13 +132,13 @@
             <el-row>
                 <el-col :span="12">
                     <div class="com_model_block">
-                        <div class="left">登录端口号</div>
+                        <div class="left">登录端口号<span class="red">*</span></div>
                         <el-input class="inp" v-model="team.port" placeholder="请输入登录端口号"></el-input>
                     </div>
                 </el-col>
                 <el-col :span="12">
                     <div class="com_model_block ml20">
-                        <div class="left">登录密码</div>
+                        <div class="left">登录密码<span class="red">*</span></div>
                         <el-input class="inp" v-model="team.password" placeholder="请输入登录密码"></el-input>
                     </div>
                 </el-col>
@@ -243,6 +243,22 @@
                     popup.alert({ title: '请填写资产编码!' });
                     return;
                 }
+                if (!this.team.outer_ip) {
+                    popup.alert({ title: '请填写外网IP地址!' });
+                    return;
+                }
+                if (!this.team.lan_ip) {
+                    popup.alert({ title: '请填写内网IP地址!' });
+                    return;
+                }
+                if (!this.team.user) {
+                    popup.alert({ title: '请填写登录用户名!' });
+                    return;
+                }
+                if (!this.team.password) {
+                    popup.alert({ title: '请填写登录用密码!' });
+                    return;
+                }
                 this.team.status = this.team.status ? 1 : 0;
                 util.ajax({
                     url: `${config.baseApi}api/v1/assets/handle`,
@@ -265,7 +281,7 @@
                         type: 1,
                         _id: '',
                         name: '',
-                        code: '',
+                        code: 'ass_' + util.randomString(12),
                         outer_ip: '',
                         lan_ip: '',
                         user: '',

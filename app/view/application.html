@@ -88,12 +88,12 @@
                 </el-table-column>
                 <el-table-column label="所属团队" width="120">
                     <template slot-scope="scope">
-                        <div>{{scope.row.teamlist[0].name}}</div>
+                        <div>{{scope.row.teamlist[0]?scope.row.teamlist[0].name:''}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column label="所属环境" width="100">
                     <template slot-scope="scope">
-                        <div class="success">{{scope.row.environlist[0].name}}</div>
+                        <div class="success">{{scope.row.environlist[0]?scope.row.environlist[0].name:''}}</div>
                     </template>
                 </el-table-column>
                 <el-table-column label="拥有资产" width="500">
@@ -172,7 +172,7 @@
             </div>
             <div class="com_model_block">
                 <div class="left">应用编码</div>
-                <el-input class="inp" v-model="team.code" placeholder="以app_开头、例如app_zxhy"></el-input>
+                <el-input class="inp" v-model="team.code" placeholder="以app_开头、例如app_zxhy" :disabled="team.type==2?true:false"></el-input>
             </div>
             <div class="com_model_block">
                 <div class="left">启用状态</div>
@@ -390,9 +390,8 @@
                             }
                         })
                     })
-                } else {
-                    this.$refs.multipleTable.clearSelection();
                 }
+                this.$refs.multipleTable && this.$refs.multipleTable.clearSelection();
             },
             handleSelectionChange(val) {
                 this.assets.multipleSelection = val;
@@ -463,7 +462,7 @@
                         type: 1,
                         _id: '',
                         name: '',
-                        code: '',
+                        code: 'app_' + util.randomString(12),
                         status: true,
                     }
                 }

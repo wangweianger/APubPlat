@@ -64,7 +64,7 @@
             </div>
             <div class="com_model_block">
                 <div class="left">团队编码</div>
-                <el-input class="inp" v-model="team.code" placeholder="以team_开头、例如team_zxhy"></el-input>
+                <el-input class="inp" v-model="team.code" placeholder="以team_开头、例如team_zxhy" :disabled="team.type==2?true:false"></el-input>
             </div>
             <div class="com_model_block">
                 <div class="left">启用状态</div>
@@ -143,7 +143,7 @@
                         type: 1,
                         _id: '',
                         name: '',
-                        code: '',
+                        code: 'team_'+util.randomString(12),
                         status: true,
                     }
                 }

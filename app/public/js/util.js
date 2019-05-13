@@ -25,6 +25,7 @@ if (!new Date().format) {
 let XTEAMLIST = [];
 let MODELTYPE = '';
 let SOCKET = null;
+let CONSOLEXTEAM = [];
 
 // util 公共对象函数
 class utilfn {
@@ -289,7 +290,19 @@ class utilfn {
 	//hideLoading
 	hideLoading() {
 		$('#loading').stop().hide();
-	}
+    }
+    
+    /*生成随机字符串*/
+    randomString(len) {
+        len = len || 15;
+        var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+        var maxPos = $chars.length;
+        var pwd = '';
+        for (let i = 0; i < len; i++) {
+            pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+        }
+        return pwd;
+    }
 	
 	/*获取url hash*/
 	getQueryString(name, hash) {
@@ -389,6 +402,7 @@ class utilfn {
         return json
     }
 
+    // 应用构建socket、xtram
     startSocketXteam(json = {}) {
         const assetsList = json.assetsList || [];
         const taskItem = json.taskItem || {};
@@ -445,10 +459,6 @@ class utilfn {
                 },
                 taskItem, data, resize
             })
-            // socket.on('connect', function () {
-            //     if (xterm) socket.emit(geometry, xterm.cols, xterm.rows)
-            // })
-            
         })
         socket.emit('socket', { data: result, buildType} || 'begin');
 
@@ -530,17 +540,17 @@ class utilfn {
     */
     socket(json = {}) {
         const socket = io.connect('/');
-        // socket.on('data', function (data) {
-        //     json.callback && json.callback(data);
-        // });
-        // socket.on('connect', function () {
-        //     if (json.xterm) socket.emit('geometry', json.xterm.cols, json.xterm.rows)
-        // })
-        // socket.on('close', msg => { json.close && json.close() });
-        // socket.on('disconnect', msg => { json.close && json.close() });
-        // socket.on('disconnecting', () => { json.close && json.close() });
-        // socket.on('error', (err) => { json.close && json.close() });
-        // socket.emit('socket', json.query || 'begin');
+        socket.on('close', msg => { close() });
+        socket.on('disconnect', msg => { close() });
+        socket.on('disconnecting', () => { close() });
+        socket.on('error', (err) => { close() });
+
+        function close(){
+            CONSOLEXTEAM.forEach(item => {
+                item.write(err || '服务器close.');
+            })
+        }
+
         return socket;
     }
 
@@ -570,6 +580,7 @@ class utilfn {
         })
 
         xteam.write(`开始连接到 ${assetsItem.user}@${assetsItem.name}-${assetsItem.outer_ip}-${assetsItem.lan_ip}\r\n`)
+
         // socket
         socket.on(data, function (res) {
             xteam.write(res);
@@ -590,6 +601,8 @@ class utilfn {
 
         window.addEventListener('resize', this.resizeScreen.bind(this, [xteam], socket), false)
         this.resizeScreen([xteam], socket)
+
+        CONSOLEXTEAM.push(xteam)
 
         return xteam;
     }

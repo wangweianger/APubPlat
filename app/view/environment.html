@@ -48,7 +48,7 @@
             </div>
             <div class="com_model_block">
                 <div class="left">环境编码</div>
-                <el-input class="inp" v-model="environment.code" placeholder="以env_开头、例如env_zxhy"></el-input>
+                <el-input class="inp" v-model="environment.code" placeholder="以env_开头、例如env_zxhy" :disabled="environment.type==2?true:false"></el-input>
             </div>
             <div class="btns">
                 <el-button type="primary" @click="submitEnvironment"> 提交 </el-button>
@@ -124,7 +124,7 @@
                         type: 1,
                         id: '',
                         name: '',
-                        code: '',
+                        code: 'env_' + util.randomString(8),
                     }
                 }
                 this.environment.type = type;
