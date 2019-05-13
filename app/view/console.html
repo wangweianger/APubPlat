@@ -142,6 +142,7 @@
                 :style="{'max-width':(1/xtermList.length)*100+'%'}"
                 @click="selectTab(item)"
                 :data-i="navIndex+'--'+item.xtermId"
+                :title="item.name+'-'+item.outer_ip+'-'+item.lan_ip"
                 :class="{active:navIndex==item.xtermId?true:false}">
                 <span>{{item.name+'-'+item.outer_ip}}</span>
                 <i @click.stop="closeXtermForAssets(index,item)" class="el-icon-close"></i>
@@ -227,7 +228,7 @@
                 this.navIndex = xtermId;
                 item.xtermId = xtermId;
                 this.xtermList.push(item);
-                setTimeout(()=>{ this.showConsole(xtermId, item); }, 200);
+                setTimeout((xtermId)=>{ this.showConsole(xtermId, item); }, 200, xtermId);
             },
             closeXtermForAssets(index,item){
                 const xterm = xtermRunList[index];
