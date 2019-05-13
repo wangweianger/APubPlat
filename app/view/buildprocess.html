@@ -197,6 +197,10 @@
                     <div :id="'editor_'+index" class="comm_build_textarea"></div>
                 </div>
             </div>
+            <div class="ml10 mt30 light tc" v-if="item.task_type!='command'?true:false">
+                <i class="el-icon-warning fs-16 mr5 primary"></i>
+                请确保已生成构建配置，若未生成构建配置，则先执行生成构建配置按钮，再执行部署任务。
+            </div>
             <div class="btns mb20">
                 <el-button type="primary" @click="deployApplications(item,1)">全量{{item.task_type!='command'?'部署':'运行'}}</el-button>
                 <el-button type="success" @click="deployApplications(item,2)" plain>部分{{item.task_type!='command'?'部署':'运行'}}</el-button>

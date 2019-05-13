@@ -25,7 +25,7 @@
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <div class="mb10">
-                            <el-button @click="handleEnvironment(2,scope.row)" icon="el-icon-edit" type="primary" size="small">编辑</el-button>
+                            <el-button @click="handleEnvironment(2,scope.row)" type="primary" size="small">编辑</el-button>
                             <el-button @click="hanleDelete(scope.row)" icon="el-icon-delete" type="danger" size="small">删除</el-button>
                         </div>
                     </template>
@@ -43,11 +43,11 @@
     <el-dialog width="500px" title="环境编辑" :visible.sync="dialogTableVisible">
         <div class="com_model_main">
             <div class="com_model_block">
-                <div class="left">环境名称</div>
+                <div class="left">环境名称<span class="red">*</span></div>
                 <el-input class="inp" v-model="environment.name" placeholder="请输环境名称"></el-input>
             </div>
             <div class="com_model_block">
-                <div class="left">环境编码</div>
+                <div class="left">环境编码<span class="red">*</span></div>
                 <el-input class="inp" v-model="environment.code" placeholder="以env_开头、例如env_zxhy" :disabled="environment.type==2?true:false"></el-input>
             </div>
             <div class="btns">

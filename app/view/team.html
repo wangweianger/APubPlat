@@ -59,11 +59,11 @@
         :visible.sync="dialogTableVisible">
         <div class="com_model_main">
             <div class="com_model_block">
-                <div class="left">团队名称</div>
+                <div class="left">团队名称<span class="red">*</span></div>
                 <el-input class="inp" v-model="team.name" placeholder="请输团队名称"></el-input>
             </div>
             <div class="com_model_block">
-                <div class="left">团队编码</div>
+                <div class="left">团队编码<span class="red">*</span></div>
                 <el-input class="inp" v-model="team.code" placeholder="以team_开头、例如team_zxhy" :disabled="team.type==2?true:false"></el-input>
             </div>
             <div class="com_model_block">

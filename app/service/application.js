@@ -49,6 +49,7 @@ class ApplicationService extends Service {
                         team_code: 1,
                         environ_code: 1,
                         code: 1,
+                        task_list: 1,
                     },
                 },
                 { $skip: (pageNo - 1) * pageSize },

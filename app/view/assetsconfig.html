@@ -30,7 +30,7 @@
 <div class="content" id="team" v-cloak>
     <el-row>
         <el-col :span="12">
-            <div class="grid-content bg-purple com_title">应用构建配置</div>
+            <div class="grid-content bg-purple com_title">资产脚本任务</div>
         </el-col>
     </el-row>
     <div class="config_main mt30">
@@ -38,6 +38,12 @@
             <div class="top mb20">
                 <div>资产列表</div> 
                 <el-button @click="addNewCommTask" type="primary" icon="el-icon-plus" size="small">新建资产任务</el-button>
+            </div>
+            <div class="mb20">
+                <span class="ml10 light">
+                    <i class="el-icon-warning fs-16 mr5 primary"></i>
+                    资产脚本任务可进行各种应用的安装，各种应用的版本检测，支持各种脚本命令，支持单机和多机运行。
+                </span>
             </div>
             <el-table 
                 :data="assetslist" border 
@@ -151,6 +157,10 @@
                 <div class="com_model_block">
                     <div class="left">任务脚本内容：</div>
                     <div id="editor" class="comm_build_textarea"></div>
+                </div>
+                <div class="ml10 light tc" v-if="taskItem.type==2?true:false">
+                    <i class="el-icon-warning fs-16 mr5 primary"></i>
+                    请确保已生成构建配置，若未生成构建配置，则先执行生成配置按钮，再执行任务。
                 </div>
                 <div class="btns">
                     <el-button type="primary" @click="deployApplications">执行任务</el-button>

@@ -96,7 +96,7 @@
                         <div class="success">{{scope.row.environlist[0]?scope.row.environlist[0].name:''}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="拥有资产" width="500">
+                <el-table-column label="拥有资产" width="510">
                     <template slot-scope="scope">
                         <div class="assets_item_list" 
                             :class="{'first':scope.row.assets_list.length==1?true:false}"
@@ -121,24 +121,24 @@
                         <div>{{scope.row.status == 1?'已启用':'已禁用'}}</div>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="280" fixed="right">
+                <el-table-column label="操作" width="300" fixed="right">
                     <template slot-scope="scope">
                         <div class="mb10">
-                            <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
+                            <el-button @click="buildApplication(scope.row)" type="primary" size="small">快速部署</el-button>
                             <el-button @click="setAppConfig(scope.row)" type="primary" size="small" plain>构建配置</el-button>
-                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger"
-                                size="small" plain>禁用</el-button>
-                            <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success"
-                                size="small">启用</el-button>
+                            <el-button @click="handleApplication(2,scope.row)" type="primary" size="small">编辑</el-button>
                         </div>
                         <div class="mb10">
-                            <el-button @click="distAsstes(scope.row)" type="success" size="small" plain>分配资产</el-button>
+                            <el-button @click="distAsstes(scope.row)" type="success" size="small">分配资产</el-button>
                             <el-button @click="distEmails(scope.row)" type="primary" size="small" plain>分配邮件</el-button>
                             <el-button @click="hanleDelete(scope.row)" type="danger" size="small">删除</el-button>
                         </div>
                         <div>
-                            <el-button @click="buildApplication(scope.row)" type="primary" size="small">快速部署</el-button>
-                            <el-button @click="applicationConsole(scope.row)" type="danger" size="small">控制台</el-button>
+                            <el-button @click="applicationConsole(scope.row)" type="primary" size="small">控制台</el-button>
+                            <el-button @click="serverConfigs(scope.row)" type="primary" size="small" plain>资产任务</el-button>
+                            <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger" size="small" plain>禁用
+                            </el-button>
+                            <el-button v-if="scope.row.status==0?true:false" @click="hanleUse(scope.row)" type="success" size="small">启用</el-button>
                         </div>
                     </template>
                 </el-table-column>
@@ -155,23 +155,23 @@
     <el-dialog width="500px" title="应用编辑" :visible.sync="dialogTableVisible">
         <div class="com_model_main">
             <div class="com_model_block">
-                <div class="left">所属团队</div>
+                <div class="left">所属团队<span class="red">*</span></div>
                 <el-select class="inp" v-model="team.team_code" placeholder="请选择">
                     <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
             </div>
             <div class="com_model_block">
-                <div class="left">选择环境</div>
+                <div class="left">选择环境<span class="red">*</span></div>
                 <el-select class="inp" v-model="team.environ_code" placeholder="请选择">
                     <el-option v-for="item in environlist" :key="item.value" :label="item.label" :value="item.value">
                     </el-option>
             </div>
             <div class="com_model_block">
-                <div class="left">应用名称</div>
+                <div class="left">应用名称<span class="red">*</span></div>
                 <el-input class="inp" v-model="team.name" placeholder="请输应用名称"></el-input>
             </div>
             <div class="com_model_block">
-                <div class="left">应用编码</div>
+                <div class="left">应用编码<span class="red">*</span></div>
                 <el-input class="inp" v-model="team.code" placeholder="以app_开头、例如app_zxhy" :disabled="team.type==2?true:false"></el-input>
             </div>
             <div class="com_model_block">
@@ -568,17 +568,33 @@
                 })
             },
             buildApplication(item,assetsItem){
+                if(!item.task_list || !item.task_list.length){
+                    popup.alert({ title: '请先增加应用构建配置!' })
+                    return
+                }
                 let url = '/buildprocess?id=' + item._id;
                 if(assetsItem) url = url + '&assetsId=' + assetsItem._id;
                 location.href = url;
             },
             applicationConsole(item){
+                if (!item.assets_list || !item.assets_list.length) {
+                    popup.alert({ title: '请先给应用分配资产!' })
+                    return
+                }
                 let ids = '';
                 item.assets_list && item.assets_list.forEach(item=>{
                     ids = ids + item._id + ','
                 })
                 ids = ids ? ids.slice(0,-1) : '';
                 location.href="/console?ids=" + ids
+            },
+            serverConfigs(item) {
+                if(!item.assets_list || !item.assets_list.length) {
+                    popup.alert({title:'请先给应用分配资产!'})
+                    return
+                }
+                util.setStorage('session', 'assets_list_configs', JSON.stringify(item.assets_list));
+                location.href = "/assetsconfig";
             },
         }
     })
