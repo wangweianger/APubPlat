@@ -97,7 +97,10 @@ module.exports = app => {
     apiV1Router.post('util/handleShellTasks', util.handleShellTasks);
 
     // -------------------------- build 构建 ------------------------------
+    // 生成构建配置
     apiV1Router.post('build/generateBuildConfig', build.generateBuildConfig);
+    // 备份服务
+    apiV1Router.post('build/backupApplications', build.backupApplications);
 
     // -------------------------- socket.io ------------------------------
     // socket.io

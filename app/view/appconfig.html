@@ -273,11 +273,15 @@
             this.itemdetail();
         },
         methods: {
-            runMonaco(id,data) {
+            runMonaco(id,data,type) {
+                const moId = `editor_${id}`;
+                if(type) {
+                    monacos[moId].setValue(data);
+                    return;
+                }
                 //载入Monaco
                 let editor = null;
                 _this = this;
-                const moId = `editor_${id}`;
                 require(['vs/editor/editor.main'], function () {
                     //得到支持的语言
                     var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
@@ -315,7 +319,7 @@
                                 item.shell_write_type = item.shell_write_type ? parseInt(item.shell_write_type) : 1;
                                 item.is_backups = item.is_backups == 1 ? true : false;
                                 if(!item.shell_body) item.shell_body = '#!/bin/bash\r\n'
-                                if(!type) this.runMonaco(index, item.shell_body)
+                                this.runMonaco(index, item.shell_body, type)
                             })
                         }
                         this.tasklist = tasklist;
@@ -396,6 +400,9 @@
                 this.tasklist.forEach((item,index)=>{
                     item.is_backups = item.is_backups ? 1 : 0;
                     item.shell_body = monacos[`editor_${index}`].getValue() || '#!/bin/bash\r\n';
+                    if(item.shell_body.indexOf('successful command construction') == -1 && item.task_type != 'command') {
+                        item.shell_body = item.shell_body + '\r\n#以下内容由系统默认增加,放置于最后,不要做任何修改,用于判断shell是否执行成功\r\nif [ $? -eq 0 ]\r\nthen\r\n    echo "successful command construction."\r\nelse\r\n    echo "error command construction."\r\nfi'
+                    }
                 })
                 util.ajax({
                     url: `${config.baseApi}api/v1/application/updateConfigs`,

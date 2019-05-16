@@ -8,7 +8,7 @@ const path = require('path');
 class BuildService extends Service {
 
     // init 初始化
-    async generateBuildConfig(id, taskItem, assetslist = []) {
+    async generateBuildConfig(id, taskItem = {}, assetslist = []) {
         let file = '';
         let paths = '/';
         if (taskItem.shell_path && taskItem.shell_path.indexOf('/') > -1) {
@@ -27,12 +27,63 @@ class BuildService extends Service {
         // 发布到相应服务器
         const result = [];
         for (let i = 0; i < assetslist.length; i++) { result.push(this.genConfigsForSsh(paths, file, assetslist[i], taskItem)); }
-        await Promise.all(result);
+        const data = await Promise.all(result);
         // 删除本地文件
         if (taskItem.shell_write_type === 1) fs.unlinkSync(path.resolve(__dirname, '../tempFile/' + file));
-        return {};
+        return data;
     }
 
+    // 脚本备份
+    async backupApplications(taskItem = {}, assetslist = []) {
+        const bakList = [];
+        for (let i = 0; i < assetslist.length; i++) {
+            bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i])));
+        }
+        const result = await Promise.all(bakList);
+        return result;
+    }
+
+    // 文件备份
+    async backUpProject(taskItem, assets) {
+        const { outer_ip, port, user, password } = assets;
+        const { project_path, backups_path } = taskItem;
+        return new Promise((resolve, reject) => {
+            const Client = require('ssh2-sftp-client');
+            const sftp = new Client();
+            sftp.connect({
+                host: outer_ip,
+                username: user,
+                port,
+                password,
+            })
+                .then(() => {
+                    const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
+                    const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backups_path}/bak_${dateStr}`;
+                    let str = '';
+
+                    sftp.client.exec(sh, (err, stream) => {
+                        if (err) throw err;
+                        stream.on('close', code => {
+                            resolve({
+                                shell: sh,
+                                data: str,
+                                code,
+                            });
+                            sftp.client.end();
+                        }).on('data', data => {
+                            str = str + data;
+                        }).stderr.on('data', data => {
+                            str = str + data;
+                        });
+                    });
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
+    }
+
+    // 上传文件
     async genConfigsForSsh(paths, file, asstesItem, taskItem) {
         return new Promise((resolve, reject) => {
             const Client = require('ssh2-sftp-client');
@@ -58,8 +109,8 @@ class BuildService extends Service {
                         return this.exec(sftp, "echo '" + taskItem.shell_body + "' > " + taskItem.shell_path);
                     }
                 })
-                .then(() => {
-                    resolve(true);
+                .then(data => {
+                    resolve(data);
                     sftp.end();
                 })
                 .catch(err => {

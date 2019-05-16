@@ -8,6 +8,12 @@ const SSH = require('ssh2').Client;
 module.exports = function socket(json) {
     const socket = json.socket.socket;
     const conn = new SSH();
+    let isEnd = false;
+    let isSend = false;
+    let isSuccess = false;
+    let timer = null;
+    const timeout = 1000;
+    const regExp = new RegExp(`\\[${json.username || ''}@.+?\\]`);
 
     socket.on(json.socket.geometry || 'geometry', function socketOnGeometry(cols, rows) {
         json.cols = cols;
@@ -29,6 +35,8 @@ module.exports = function socket(json) {
             }
 
             socket.on(json.socket.data || 'data', function socketOnData(data) {
+                if (isEnd) isEnd = false;
+                if (isSuccess) isSuccess = false;
                 stream.write(data);
             });
 
@@ -40,33 +48,40 @@ module.exports = function socket(json) {
                 stream.setWindow(data.rows, data.cols);
             });
 
-            // socket.on('disconnecting', function socketOnDisconnecting(reason) {
-            //     socket.emit(json.socket.close || 'close', 1);
-            //     debug('SOCKET DISCONNECTING: ' + reason);
-            // });
-            // socket.on('disconnect', function socketOnDisconnect(reason) {
-            //     debug('SOCKET DISCONNECT: ' + reason);
-            //     err = { message: reason };
-            //     debug('CLIENT SOCKET DISCONNECT', err);
-            //     socket.emit(json.socket.close || 'close', 1);
-            //     conn.end();
-            // });
-
-            // socket.on('error', function socketOnError(err) {
-            //     debug('SOCKET ERROR', err);
-            //     socket.emit(json.socket.close || 'close', 1);
-            //     conn.end();
-            // });
-
-            stream.on('data', function streamOnData(data) {
-                socket.emit(json.socket.data || 'data', data.toString('utf-8'));
+            socket.on('disconnect', function socketOnDisconnect(reason) {
+                err = { message: reason };
+                debug('CLIENT SOCKET DISCONNECT', err);
+                socket.emit(json.socket.close || 'close', 1);
+                conn.end();
             });
+
+            socket.on('error', function socketOnError(err) {
+                debug('SOCKET ERROR', err);
+                socket.emit(json.socket.close || 'close', 1);
+                conn.end();
+            });
+
             stream.on('close', function streamOnClose(code, signal) {
                 err = { message: ((code || signal) ? (((code) ? 'CODE: ' + code : '') + ((code && signal) ? ' ' : '') + ((signal) ? 'SIGNAL: ' + signal : '')) : undefined) };
                 debug('STREAM CLOSE', err);
                 socket.emit(json.socket.close || 'close', 1);
                 conn.end();
             });
+
+            stream.on('data', function streamOnData(data) {
+                data = data.toString('utf-8');
+                if (data.indexOf('successful command construction.') > -1) isSuccess = true;
+                if (timer) clearTimeout(timer);
+                if (regExp.test(data)) {
+                    timer = setTimeout(() => {
+                        isEnd = true;
+                        if (!isSend) socket.emit(json.socket.end || 'data', { isSuccess, isEnd });
+                        isSend = true;
+                    }, timeout);
+                }
+                socket.emit(json.socket.data || 'data', data);
+            });
+
         });
     });
 

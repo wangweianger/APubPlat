@@ -440,6 +440,7 @@ class utilfn {
 
             const data = 'data_' + index;
             const resize = 'resize_' + index;
+            const end = 'end_' + index;
 
             xteam.on('data', function (res) {
                 socket.emit(data, res)
@@ -449,7 +450,15 @@ class utilfn {
             socket.on(data, function (res) {
                 xteam.write(res);
             });
+
+            // end
+            socket.on(end, function (res) {
+                console.log('----------')
+                console.log(res);
+            });
+
             XTEAMLIST.push(xteam);
+
             result.push({
                 assitsItem:{
                     host: item.outer_ip,
@@ -457,7 +466,7 @@ class utilfn {
                     username: item.user,
                     password: item.password,
                 },
-                taskItem, data, resize
+                taskItem, data, resize, end
             })
         })
         socket.emit('socket', { data: result, buildType} || 'begin');
@@ -502,9 +511,9 @@ class utilfn {
             comm_mocel.style.marginTop = '10px'
         }else if(type === 2){
             // 缩小
-            comm_mocel.style.width = 'calc(60%)'
+            comm_mocel.style.width = 'calc(70%)'
             comm_mocel.style.height = 'calc(80%)'
-            comm_mocel.style.marginLeft = 'calc(20%)'
+            comm_mocel.style.marginLeft = 'calc(15%)'
             comm_mocel.style.marginTop = 'calc(5%)'
         } else if (type === 3){
             for (let i = 0; i < terminal_item.length;i++) {
@@ -564,6 +573,7 @@ class utilfn {
         const data = 'console_data_' + index;
         const resize = 'console_resize_' + index;
         const close = 'console_close_' + index;
+        const end = 'console_end_' + index;
 
         Terminal.applyAddon(fit);
         let xteam = new Terminal({
@@ -594,7 +604,7 @@ class utilfn {
                 password: assetsItem.password,
             },
             taskItem: {}, 
-            data, resize, close
+            data, resize, close, end
         })
 
         socket.emit('socket', { data: result, buildType: 'buildprocess' } || 'begin');

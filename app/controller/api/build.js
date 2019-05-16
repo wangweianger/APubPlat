@@ -22,6 +22,23 @@ class BuildController extends Controller {
         });
     }
 
+    // 服务备份
+    async backupApplications() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const taskItem = query.taskItem || {};
+        const assetsList = query.assetsList || [];
+
+        if (!taskItem.project_path) throw new Error('应用所在位置不能为空!');
+        if (!taskItem.backups_path) throw new Error('应用备份的路径不能为空!');
+
+        const result = await this.ctx.service.build.backupApplications(taskItem, assetsList);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
 }
 
 module.exports = BuildController;

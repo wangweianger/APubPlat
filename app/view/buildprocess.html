@@ -203,8 +203,8 @@
                 请确保已生成构建配置，若未生成构建配置，则先执行生成构建配置按钮，再执行部署任务。
             </div>
             <div class="btns mb20">
-                <el-button type="primary" @click="deployApplications(item,1)">全量{{item.task_type!='command'?'部署':'运行'}}</el-button>
-                <el-button type="success" @click="deployApplications(item,2)" plain>部分{{item.task_type!='command'?'部署':'运行'}}</el-button>
+                <el-button type="primary" @click="deployApplications(item,1)">服务部署</el-button>
+                <el-button type="success" @click="backupApplications(item)" plain>服务备份</el-button>
                 <el-button type="primary" @click="updageAppConfigs(index)" plain>修改构建配置</el-button>
                 <el-button v-if="item.task_type!='command'?true:false" type="danger" @click="generateBuildConfig(item)" plain>生成构建配置</el-button>
                 <el-button type="default" @click="goBack">返回</el-button>
@@ -320,7 +320,7 @@
                 location.href = "/build"
             },
             deployApplications(taskItem, type, assetsItem) {
-                if(type === 2 && !this.multipleSelection.length){
+                if(!this.multipleSelection.length){
                     popup.alert({title:'请先勾选需要部署的服务器!'});
                     return;
                 }
@@ -344,7 +344,7 @@
                 this.dialogTableVisible = true;
 
                 setTimeout(()=>{
-                    let assetsList = this.multipleSelection.length ? this.multipleSelection : this.assetslist
+                    let assetsList = this.multipleSelection;
                     if(type === 3) assetsList = [assetsItem];
 
                     // 开始
@@ -356,6 +356,18 @@
                     });
                     socket = result.socket;
                     xteamlist = result.xteamList;
+                })
+            },
+            backupApplications(item){
+                util.ajax({
+                    url: `${config.baseApi}api/v1/build/backupApplications`,
+                    data: {
+                        taskItem: item,
+                        assetsList: this.assetslist,
+                    },
+                    success: data => {
+                        popup.miss({ title: '操作成功!' })
+                    }
                 })
             },
             handleShellModel(type){
