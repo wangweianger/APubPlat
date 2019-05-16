@@ -205,8 +205,9 @@
             <div class="btns mb20">
                 <el-button type="primary" @click="deployApplications(item,1)">服务部署</el-button>
                 <el-button type="success" @click="backupApplications(item)" plain>服务备份</el-button>
+                <el-button v-if="item.task_type!='command'?true:false" type="danger" @click="generateBuildConfig(item)" plain>生成构建配置
+                </el-button>
                 <el-button type="primary" @click="updageAppConfigs(index)" plain>修改构建配置</el-button>
-                <el-button v-if="item.task_type!='command'?true:false" type="danger" @click="generateBuildConfig(item)" plain>生成构建配置</el-button>
                 <el-button type="default" @click="goBack">返回</el-button>
             </div>
         </div>
@@ -236,6 +237,24 @@
         </div>
     </div>
 
+    <!-- 备份|构建日志 -->
+    <el-dialog width="80%" :title="logsData.name" :visible.sync="dialogModelVisible">
+        <el-table :data="logsData.content">
+            <el-table-column property="outer_ip" label="外网IP" width="150"></el-table-column>
+            <el-table-column property="lan_ip" label="内网IP" width="100"></el-table-column>
+            <el-table-column label="执行状态" width="100">
+                <template slot-scope="scope">
+                    <div 
+                        :class="scope.row.code==0?'success':'red'">
+                        {{scope.row.code==0?'执行成功':'执行失败'}}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column v-if="logsData.type===2" property="shell" label="执行shell内容"></el-table-column>
+            <el-table-column property="data" label="执行日志"></el-table-column>
+        </el-table>
+    </el-dialog>
+
 </div>
 <script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
 <script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
@@ -255,6 +274,8 @@
                 shell_model_item: 0,
                 model_icon:1,
                 taskName:'',
+                dialogModelVisible:false,
+                logsData: { content:[] },
             }
         },
         mounted() {
@@ -366,6 +387,8 @@
                         assetsList: this.assetslist,
                     },
                     success: data => {
+                        this.dialogModelVisible = true;
+                        this.logsData = data.data || {};
                         popup.miss({ title: '操作成功!' })
                     }
                 })
@@ -391,6 +414,8 @@
                         assetsList:this.assetslist,
                     },
                     success: data => {
+                        this.dialogModelVisible = true;
+                        this.logsData = data.data || {};
                         popup.miss({ title: '操作成功!' })
                     }
                 })

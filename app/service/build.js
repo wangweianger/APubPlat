@@ -28,9 +28,16 @@ class BuildService extends Service {
         const result = [];
         for (let i = 0; i < assetslist.length; i++) { result.push(this.genConfigsForSsh(paths, file, assetslist[i], taskItem)); }
         const data = await Promise.all(result);
+        // add logs
+        const json = {
+            name: `${taskItem.task_name}任务-生成构建配置`,
+            type: 3,
+            content: data || [],
+        };
+        this.ctx.service.logs.addLogs(json);
         // 删除本地文件
         if (taskItem.shell_write_type === 1) fs.unlinkSync(path.resolve(__dirname, '../tempFile/' + file));
-        return data;
+        return json;
     }
 
     // 脚本备份
@@ -40,7 +47,13 @@ class BuildService extends Service {
             bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i])));
         }
         const result = await Promise.all(bakList);
-        return result;
+        const json = {
+            name: `${taskItem.task_name}任务-服务备份`,
+            type: 2,
+            content: result || [],
+        };
+        this.ctx.service.logs.addLogs(json);
+        return json;
     }
 
     // 文件备份
@@ -59,23 +72,14 @@ class BuildService extends Service {
                 .then(() => {
                     const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
                     const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backups_path}/bak_${dateStr}`;
-                    let str = '';
-
-                    sftp.client.exec(sh, (err, stream) => {
-                        if (err) throw err;
-                        stream.on('close', code => {
-                            resolve({
-                                shell: sh,
-                                data: str,
-                                code,
-                            });
-                            sftp.client.end();
-                        }).on('data', data => {
-                            str = str + data;
-                        }).stderr.on('data', data => {
-                            str = str + data;
-                        });
-                    });
+                    return this.exec(sftp, sh);
+                }).then(data => {
+                    resolve(Object.assign({}, data, {
+                        name: assets.name || '',
+                        lan_ip: assets.lan_ip || '',
+                        outer_ip: assets.outer_ip || '',
+                    }));
+                    sftp.end();
                 })
                 .catch(err => {
                     reject(err);
@@ -110,7 +114,17 @@ class BuildService extends Service {
                     }
                 })
                 .then(data => {
-                    resolve(data);
+                    if (typeof (data) === 'string') {
+                        data = {
+                            data,
+                            code: 0,
+                        };
+                    }
+                    resolve(Object.assign({}, data, {
+                        name: asstesItem.name || '',
+                        lan_ip: asstesItem.lan_ip || '',
+                        outer_ip: asstesItem.outer_ip || '',
+                    }));
                     sftp.end();
                 })
                 .catch(err => {
@@ -119,6 +133,7 @@ class BuildService extends Service {
         });
     }
 
+    // 执行shell任务
     exec(sftp, shell) {
         return new Promise((resolve, reject) => {
             let str = '';
@@ -128,7 +143,11 @@ class BuildService extends Service {
                     return;
                 }
                 stream.on('close', code => {
-                    return resolve(str || true);
+                    return resolve({
+                        data: str,
+                        shell,
+                        code,
+                    });
                 }).on('data', data => {
                     str += data;
                 }).stderr.on('data', data => {
