@@ -1,0 +1,201 @@
+<style scoped>
+    .com_top .inp {
+        width: 180px;
+    }
+
+    .el-table .disabled-row {
+        background: oldlace;
+    }
+
+    .model_assets_list .btns {
+        border-top: solid 1px #eee;
+        padding: 35px 0 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .model_assets_list .ml {
+        margin-left: 20px;
+    }
+
+    .model_assets_list .common_pages {
+        justify-content: flex-start;
+    }
+
+    .assets_item_list:nth-child(odd) {
+        border-bottom: solid 1px #eee;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+    }
+
+    .assets_item_list.first {
+        border-bottom: none;
+        padding-bottom: 0px;
+        margin-bottom: 0px;
+    }
+
+    .assets_item_item {
+        font-size: 12px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .assets_item_item .as_1 {
+        display: inline-block;
+        width: 250px;
+    }
+
+    .assets_item_item .as_2 {
+        display: inline-block;
+        width: 150px;
+    }
+
+    .model_assets_list .b_t {
+        padding-top: 15px;
+        border-top: solid 1px #eee;
+    }
+
+    .select_app {
+        font-size: 22px;
+        text-align: center;
+        margin: 50px auto;
+        text-align: center;
+        color: #999;
+        font-weight: 300;
+    }
+
+    .el-tabs-content {
+        background: #fff;
+        padding: 15px;
+        box-shadow: 5px 5px 10px #eee;
+    }
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">构建日志</div>
+        </el-col>
+    </el-row>
+    <div class="com_top">
+        <el-select v-model="application_id" class="inp" @change="getList" placeholder="请选择所属团队">
+            <el-option v-for="item in applist" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
+        <el-input v-model="name" class="inp ml20" placeholder="按应用名称查询"></el-input>
+        <el-button @click="getList" type="primary">搜索</el-button>
+    </div>
+    <el-tabs class="el-tabs-content" v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane v-for="(item,index) in environlist" :key="index" :label="item.label" :name="item.value">
+            <!-- table -->
+            <div class="com_table_block mt20" v-if="datalist.length">
+                <div class="table_body">
+                    <el-table :data="datalist" style="width: 100%">
+                        <el-table-column prop="name" label="任务名称" width="300">
+                        </el-table-column>
+                        <el-table-column label="构建时间" width="180">
+                            <template slot-scope="scope">
+                                <div>{{scope.row.create_time | date('-',true)}}</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <div>
+                                    <el-button @click="buildProcess(scope.row)" type="primary" size="small">重新部署
+                                    </el-button>
+                                    <el-button @click="buildProcess(scope.row)" type="danger" size="small" disabled>应用还原
+                                    </el-button>
+                                </div>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <div class="common_pages">
+                    <el-pagination background @current-change="handleCurrentChange" :current-page.sync="currentPage"
+                        :page-size="pageSize" layout="prev, pager, next, jumper" :total="totalCount">
+                    </el-pagination>
+                </div>
+            </div>
+            <!-- empty -->
+            <div class="select_app" v-if="!datalist.length">
+                <div>暂无需要部署的应用,请新建环境和应用!</div>
+            </div>
+        </el-tab-pane>
+    </el-tabs>
+</div>
+<script>
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                application_id:'',
+                name:'',
+                activeName: '1',
+                datalist: [],
+                pageSize: 30,
+                totalCount: 0,
+                currentPage: 1,
+                environlist: [{
+                    value: '1',
+                    label: '应用构建日志',
+                }, {
+                    value: '2',
+                    label: '应用备份日志',
+                }, {
+                    value: '3',
+                    label: '生成应用配置日志',
+                }],
+                applist:[],
+
+            }
+        },
+        mounted() {
+            this.getList();
+        },
+        filters: {
+            date:Filter.date,
+        },
+        methods: {
+            handleClick(tab, event) {
+                this.getList();
+            },
+            getList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/logs/list`,
+                    data: {
+                        application_id: this.application_id,
+                        name: this.name,
+                        type: this.activeName,
+                        pageNo: this.currentPage,
+                        pageSize: this.pageSize,
+                    },
+                    success: data => {
+                        this.totalCount = data.data.totalNum;
+                        this.datalist = data.data.datalist;
+                    }
+                })
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.getList();
+            },
+            buildProcess(item) {
+                location.href = "/buildprocess?id=" + item._id;
+            },
+            applicationConsole(item) {
+                let ids = '';
+                item.assets_list && item.assets_list.forEach(item => {
+                    ids = ids + item._id + ','
+                })
+                ids = ids ? ids.slice(0, -1) : '';
+                window.open("/console?ids=" + ids);
+            },
+            setAppConfig(item) {
+                location.href = "/appconfig?id=" + item._id;
+            },
+        }
+    })
+</script>

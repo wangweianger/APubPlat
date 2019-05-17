@@ -18,6 +18,32 @@ class LogsService extends Service {
         return await logs.save();
     }
 
+    // get list
+    async list(pageNo, pageSize, type, name, application_id) {
+        pageSize = pageSize * 1;
+        pageNo = pageNo * 1;
+        type = type * 1;
+
+        const query = { type };
+        if (name) query.name = { $regex: new RegExp(name) };
+        if (application_id) query.application_id = application_id;
+
+        const count = Promise.resolve(this.ctx.model.Logs.count(query).exec());
+        const datas = Promise.resolve(
+            this.ctx.model.Logs.find(query)
+                .skip((pageNo - 1) * pageSize)
+                .limit(pageSize)
+                .exec()
+        );
+        const all = await Promise.all([ count, datas ]);
+        const [ totalNum, datalist ] = all;
+        return {
+            datalist,
+            totalNum,
+            pageNo,
+        };
+    }
+
 }
 
 module.exports = LogsService;

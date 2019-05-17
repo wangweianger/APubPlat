@@ -222,7 +222,7 @@ iframe { display: none; }
     width:100%;
     height:100%;
     background: rgba(0,0,0,.1);
-    z-index:1000;
+    z-index:3000;
 }
 .comm_shell_model .comm_shell_model_content{
     position: fixed;
@@ -235,7 +235,7 @@ iframe { display: none; }
     background:#000;
     border-radius:3px;
     overflow:hidden;
-    z-index:1002;
+    z-index:3002;
 }
 .comm_shell_model .close{
     position: absolute;
@@ -244,7 +244,7 @@ iframe { display: none; }
     font-size:20px;
     cursor:pointer;
     color:#c7c7c7;
-    z-index:1001;
+    z-index:3001;
 }
 .comm_shell_model .menu{
     right:150px;
@@ -260,7 +260,7 @@ iframe { display: none; }
     left:0;
     top:0;
     width:100%;
-    background:#797979;
+    background:#383838;
     display: flex;
     flex-direction: row;
     align-items: center;

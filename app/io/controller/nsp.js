@@ -75,11 +75,12 @@ class NspController extends Controller {
         const { taskItem, data, id } = query;
 
         let shell = '';
-        if (taskItem && taskItem.task_type) {
-            shell = taskItem.task_type !== 'command' ?
+        if (taskItem && taskItem.shell_path) {
+            shell = taskItem.shell_path ?
                 `sh ${taskItem.shell_path} ${taskItem.shell_opction || ''} \r\n` :
                 taskItem.shell_body + '\r\n';
         }
+
         const result = await this.ssh2Client(data, taskItem, shell, id);
         // 保存备份日志
         taskItem.is_backups && this.ctx.service.logs.addLogs({

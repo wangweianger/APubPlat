@@ -604,7 +604,7 @@ class utilfn {
 
         result.push({
             assitsItem: {
-                name: item.name,
+                name: assetsItem.name,
                 lan_ip: assetsItem.lan_ip,
                 outer_ip: assetsItem.outer_ip,
                 port: assetsItem.port,

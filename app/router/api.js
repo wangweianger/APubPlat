@@ -13,6 +13,7 @@ module.exports = app => {
         email,
         build,
         commtask,
+        logs,
     } = controller.api;
 
     // 校验用户是否登录中间件
@@ -103,6 +104,9 @@ module.exports = app => {
     apiV1Router.post('build/backupApplications', build.backupApplications);
     // 构建应用
     apiV1Router.post('build/buildApplicationed', build.buildApplicationed);
+
+    // -------------------------- logs 构建 ------------------------------
+    apiV1Router.get('logs/list', logs.list);
 
     // -------------------------- socket.io ------------------------------
     // socket.io

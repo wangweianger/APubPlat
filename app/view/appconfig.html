@@ -400,8 +400,8 @@
                 this.tasklist.forEach((item,index)=>{
                     item.is_backups = item.is_backups ? 1 : 0;
                     item.shell_body = monacos[`editor_${index}`].getValue() || '#!/bin/bash\r\n';
-                    if(item.shell_body.indexOf('successful command construction') == -1 && item.task_type != 'command') {
-                        item.shell_body = item.shell_body + '\r\n#以下内容由系统默认增加,放置于最后,不要做任何修改,用于判断shell是否执行成功\r\nif [ $? -eq 0 ]\r\nthen\r\n    echo "successful command construction."\r\nelse\r\n    echo "error command construction."\r\nfi'
+                    if(item.shell_body.indexOf('SUCCESSFUL_COMMAND_CONSTRUCTION') == -1 && item.task_type != 'command') {
+                        item.shell_body = item.shell_body + '\r\n#以下内容由系统默认增加,放置于最后,不要做任何修改,用于判断shell是否执行成功\r\nif [ $? -eq 0 ]\r\nthen\r\n    echo "SUCCESSFUL_COMMAND_CONSTRUCTION"\r\nelse\r\n    echo "ERROR_COMMAND_CONSTRUCTION"\r\nfi'
                     }
                 })
                 util.ajax({

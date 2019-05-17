@@ -14,6 +14,7 @@ module.exports = function socket(json) {
     let timer = null;
     const timeout = 1000;
     const regExp = new RegExp(`\\[${json.username || ''}@.+?\\]`);
+    const socketIndex = json.socket.data.split('_').splice(-1).join();
 
     socket.on(json.socket.geometry || 'geometry', function socketOnGeometry(cols, rows) {
         json.cols = cols;
@@ -70,26 +71,24 @@ module.exports = function socket(json) {
 
             stream.on('data', function streamOnData(data) {
                 data = data.toString('utf-8');
-                if (data.indexOf('successful command construction.') > -1) isSuccess = true;
+                socket.emit(json.socket.data || 'data', data);
+                // 执行成功
+                if (data.indexOf('SUCCESSFUL_COMMAND_CONSTRUCTION') > -1) isSuccess = true;
                 if (timer) clearTimeout(timer);
                 if (regExp.test(data)) {
                     timer = setTimeout(() => {
                         isEnd = true;
                         if (!isSend) {
-                            const result = {
+                            socket.emit(json.socket.end || 'data', {
                                 isSuccess, isEnd,
                                 date: json.date || new Date(),
-                                index: json.socket.end.split('_').splice(-1).join(),
-                            };
-                            json.callback && json.callback(result);
-                            socket.emit(json.socket.end || 'data', result);
+                                index: socketIndex,
+                            });
                         }
                         isSend = true;
                     }, timeout);
                 }
-                socket.emit(json.socket.data || 'data', data);
             });
-
         });
     });
 

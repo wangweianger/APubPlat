@@ -38,4 +38,8 @@ module.exports = app => {
 
     // 控制台
     router.get('/console', web.console);
+
+    // 构建日志
+    router.get('/logs', web.logs);
+
 };

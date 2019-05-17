@@ -271,7 +271,7 @@
             </div>
             <div class="bottom mt30">
                 <div class="navs">
-                    <el-tabs v-model="activeName" @tab-click="handleClick">
+                    <el-tabs v-model="activeName">
                         <el-tab-pane v-for="(item,index) in assetslist" :label="item.name+'-'+item.outer_ip" :name="index+''"></el-tab-pane>
                     </el-tabs>
                 </div>
@@ -330,16 +330,13 @@
                 backupLogs:{},
                 buildLogs:{},
                 activeName: '0',
-                buildListEnd:[],
             }
         },
         mounted() {
+            this.buildListEnd = [];
             this.itemdetail();
         },
         methods: {
-            handleClick(tab, event) {
-                console.log(tab, event);
-            },
             runMonaco(id, data){
                 //载入Monaco
                 let editor = null;

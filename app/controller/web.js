@@ -107,6 +107,14 @@ class WebController extends Controller {
         });
     }
 
+    // 构建日志
+    async logs() {
+        const { ctx } = this;
+        await ctx.render('logs', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;
