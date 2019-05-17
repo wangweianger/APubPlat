@@ -26,10 +26,10 @@ module.exports = function socket(json) {
             cols: json.cols,
             rows: json.rows,
         }, function connShell(err, stream) {
-            setTimeout(() => { json.initial_task && stream.write(json.initial_task); }, 1000);
+            setTimeout(() => { json.initialTask && stream.write(json.initialTask); }, 1000);
 
             if (err) {
-                socket.emit(json.socket.close || 'close', 1);
+                socket.emit(json.socket.close || 'close', 'SSH2 CONN ERROR');
                 conn.end();
                 return;
             }
@@ -51,20 +51,20 @@ module.exports = function socket(json) {
             socket.on('disconnect', function socketOnDisconnect(reason) {
                 err = { message: reason };
                 debug('CLIENT SOCKET DISCONNECT', err);
-                socket.emit(json.socket.close || 'close', 1);
+                socket.emit(json.socket.close || 'close', 'CLIENT SOCKET DISCONNECT');
                 conn.end();
             });
 
             socket.on('error', function socketOnError(err) {
                 debug('SOCKET ERROR', err);
-                socket.emit(json.socket.close || 'close', 1);
+                socket.emit(json.socket.close || 'close', 'SOCKET ERROR');
                 conn.end();
             });
 
             stream.on('close', function streamOnClose(code, signal) {
                 err = { message: ((code || signal) ? (((code) ? 'CODE: ' + code : '') + ((code && signal) ? ' ' : '') + ((signal) ? 'SIGNAL: ' + signal : '')) : undefined) };
                 debug('STREAM CLOSE', err);
-                socket.emit(json.socket.close || 'close', 1);
+                socket.emit(json.socket.close || 'close', 'STREAM CLOSE');
                 conn.end();
             });
 
@@ -75,7 +75,15 @@ module.exports = function socket(json) {
                 if (regExp.test(data)) {
                     timer = setTimeout(() => {
                         isEnd = true;
-                        if (!isSend) socket.emit(json.socket.end || 'data', { isSuccess, isEnd });
+                        if (!isSend) {
+                            const result = {
+                                isSuccess, isEnd,
+                                date: json.date || new Date(),
+                                index: json.socket.end.split('_').splice(-1).join(),
+                            };
+                            json.callback && json.callback(result);
+                            socket.emit(json.socket.end || 'data', result);
+                        }
                         isSend = true;
                     }, timeout);
                 }
@@ -85,9 +93,9 @@ module.exports = function socket(json) {
         });
     });
 
-    conn.on('end', function connOnEnd(err) { socket.emit(json.socket.close || 'close', 1); debug('CONN END BY HOST', err); });
-    conn.on('close', function connOnClose(err) { socket.emit(json.socket.close || 'close', 1); debug('CONN CLOSE', err); });
-    conn.on('error', function connOnError(err) { socket.emit(json.socket.close || 'close', 1); debug('CONN ERROR', err); });
+    conn.on('end', function connOnEnd(err) { socket.emit(json.socket.close || 'close', 'CONN END BY HOST'); debug('CONN END BY HOST', err); });
+    conn.on('close', function connOnClose(err) { socket.emit(json.socket.close || 'close', 'CONN CLOSE'); debug('CONN CLOSE', err); });
+    conn.on('error', function connOnError(err) { socket.emit(json.socket.close || 'close', 'CONN ERROR'); debug('CONN ERROR', err); });
 
     if (json.username && json.password) {
         conn.connect({

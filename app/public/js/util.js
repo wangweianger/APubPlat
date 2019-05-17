@@ -65,7 +65,9 @@ class utilfn {
         let noError = true;
         let url = null;
         let asyncVal = typeof(json.async) == 'boolean' ? json.async : true;
-        This.showLoading();
+        if (!json.nohideloading) {
+            This.showLoading();
+        };
 
         //是否有请求超时
         if (!json.notimeout) {
@@ -410,6 +412,8 @@ class utilfn {
         const startType = json.startType || 'new';
         if (!Array.isArray(assetsList) && !assetsList.length) return;
 
+        const buildLogs = {}
+
         const result = [];
         if (startType === 'switch') {
             for (let i = 0; i < XTEAMLIST.length; i++) { XTEAMLIST[i] && XTEAMLIST[i].destroy() }
@@ -438,9 +442,10 @@ class utilfn {
             xteam.focus()
             xteam.fit()
 
-            const data = 'data_' + index;
-            const resize = 'resize_' + index;
-            const end = 'end_' + index;
+            const data = 'process_data_' + index;
+            const resize = 'process_resize_' + index;
+            const end = 'process_end_' + index;
+            const close = 'process_close_' + index;
 
             xteam.on('data', function (res) {
                 socket.emit(data, res)
@@ -453,23 +458,24 @@ class utilfn {
 
             // end
             socket.on(end, function (res) {
-                console.log('----------')
-                console.log(res);
+                json.callback && json.callback(res)
             });
 
             XTEAMLIST.push(xteam);
 
             result.push({
                 assitsItem:{
-                    host: item.outer_ip,
+                    name: item.name,
+                    lan_ip: item.lan_ip,
+                    outer_ip: item.outer_ip,
                     port: item.port,
-                    username: item.user,
+                    user: item.user,
                     password: item.password,
                 },
-                taskItem, data, resize, end
+                data, resize, close, end
             })
         })
-        socket.emit('socket', { data: result, buildType} || 'begin');
+        socket.emit('socket', { taskItem, data: result, buildType, id: json.id || ''} || 'begin');
 
         window.addEventListener('resize', this.resizeScreen.bind(this, XTEAMLIST, socket), false)
 
@@ -480,7 +486,7 @@ class utilfn {
 
         function close(msg){
             XTEAMLIST.forEach(item => {
-                item.write(err || '服务器close.');
+                item.write(msg || '服务器close,请刷新重试。');
             })
         }
 
@@ -554,9 +560,9 @@ class utilfn {
         socket.on('disconnecting', () => { close() });
         socket.on('error', (err) => { close() });
 
-        function close(){
+        function close(msg){
             CONSOLEXTEAM.forEach(item => {
-                item.write(err || '服务器close.');
+                item.write(msg || '服务器close.');
             })
         }
 
@@ -598,16 +604,17 @@ class utilfn {
 
         result.push({
             assitsItem: {
-                host: assetsItem.outer_ip,
+                name: item.name,
+                lan_ip: assetsItem.lan_ip,
+                outer_ip: assetsItem.outer_ip,
                 port: assetsItem.port,
-                username: assetsItem.user,
+                user: assetsItem.user,
                 password: assetsItem.password,
             },
-            taskItem: {}, 
             data, resize, close, end
         })
 
-        socket.emit('socket', { data: result, buildType: 'buildprocess' } || 'begin');
+        socket.emit('socket', { data: result, buildType: 'sshonline' } || 'begin');
 
         window.addEventListener('resize', this.resizeScreen.bind(this, [xteam], socket), false)
         this.resizeScreen([xteam], socket)

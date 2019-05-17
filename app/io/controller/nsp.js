@@ -11,95 +11,91 @@ class NspController extends Controller {
 
         const buildType = query.buildType;
         switch (buildType) {
-        case 'buildprocess':
-            this.buildProcess(query.data);
+        case 'buildprocess': case 'buildtasks':
+            this.buildProcess(query);
             break;
-        case 'buildtasks':
-            this.buildProcess(query.data);
+        case 'sshonline':
+            this.sshOnline(query);
             break;
         default:
         }
     }
 
-    // 应用构建
-    async buildProcess(data = []) {
-        if (!data.length) return;
+    // common ssh2 servers
+    ssh2Client(data = [], taskItem = {}, shell = '', id = '') {
         const { ctx } = this;
-        const result = [];
+        const tasklist = [];
+        const date = new Date();
         for (let i = 0; i < data.length; i++) {
-            let shell = '';
-            if (data[i].taskItem && data[i].taskItem.task_type) {
-                shell = data[i].taskItem.task_type !== 'command' ?
-                    `sh ${data[i].taskItem.shell_path} ${data[i].taskItem.shell_opction || ''} \r\n` :
-                    data[i].taskItem.shell_body + '\r\n';
-            }
+            const datas = data[i] || {};
+            const assitsItem = datas.assitsItem || {};
             const item = Promise.resolve(
-                this.backUpProject(data[i]).then(() => {
+                this.backUpProject(taskItem, assitsItem).then(data => {
                     socket({
-                        host: data[i].assitsItem.host,
-                        port: data[i].assitsItem.port,
-                        username: data[i].assitsItem.username,
-                        password: data[i].assitsItem.password,
+                        id,
+                        date,
+                        taskName: taskItem.task_name ? `${taskItem.task_name}任务-构建应用服务` : '',
+                        assetsName: assitsItem.name,
+                        lanip: assitsItem.lan_ip,
+                        host: assitsItem.outer_ip,
+                        port: assitsItem.port,
+                        username: assitsItem.user,
+                        password: assitsItem.password,
                         cols: 138,
                         rows: 46,
                         term: 'xterm-color',
                         socket: {
                             socket: ctx.socket,
-                            geometry: data[i].geometry,
-                            close: data[i].close,
-                            data: data[i].data,
-                            end: data[i].end,
-                            resize: data[i].resize,
+                            geometry: datas.geometry,
+                            close: datas.close,
+                            data: datas.data,
+                            end: datas.end,
+                            resize: datas.resize,
                         },
-                        initial_task: shell,
+                        initialTask: shell,
                     });
+                    return data;
                 })
             );
-            result.push(item);
+            tasklist.push(item);
         }
-        await Promise.all(result);
+        return Promise.all(tasklist);
+    }
+
+    // 构建task
+    async sshOnline(query = {}) {
+        if (!query.data) return;
+        const { data } = query;
+        this.ssh2Client(data);
+    }
+
+    // 应用构建
+    async buildProcess(query = {}) {
+        if (!query.data) return;
+        const { taskItem, data, id } = query;
+
+        let shell = '';
+        if (taskItem && taskItem.task_type) {
+            shell = taskItem.task_type !== 'command' ?
+                `sh ${taskItem.shell_path} ${taskItem.shell_opction || ''} \r\n` :
+                taskItem.shell_body + '\r\n';
+        }
+        const result = await this.ssh2Client(data, taskItem, shell, id);
+        // 保存备份日志
+        taskItem.is_backups && this.ctx.service.logs.addLogs({
+            name: `${taskItem.task_name}任务-服务备份`,
+            type: 2,
+            application_id: id,
+            content: result || [],
+        });
     }
 
     // 备份
-    async backUpProject(data) {
-        const { host, port, username, password } = data.assitsItem;
-        const { is_backups, project_path, backups_path } = data.taskItem;
+    backUpProject(taskItem = {}, assitsItem = {}) {
+        const { is_backups, project_path, backups_path } = taskItem;
         let promise = null;
-        if (data.taskItem && is_backups && project_path && backups_path) {
-            promise = new Promise((resolve, reject) => {
-                const Client = require('ssh2-sftp-client');
-                const sftp = new Client();
-                sftp.connect({
-                    host,
-                    port,
-                    username,
-                    password,
-                })
-                    .then(() => {
-                        const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
-                        const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backups_path}/bak_${dateStr}`;
-                        let str = '';
-
-                        sftp.client.exec(sh, (err, stream) => {
-                            if (err) throw err;
-                            stream.on('close', code => {
-                                resolve({
-                                    shell: sh,
-                                    data: str,
-                                    code,
-                                });
-                                sftp.client.end();
-                            }).on('data', data => {
-                                str = str + data;
-                            }).stderr.on('data', data => {
-                                str = str + data;
-                            });
-                        });
-                    })
-                    .catch(err => {
-                        reject(err);
-                    });
-            });
+        if (taskItem && is_backups && project_path && backups_path) {
+            promise = this.ctx.service.build.backUpProject(taskItem, assitsItem || {});
         } else {
             promise = new Promise(resolve => { resolve(1); });
         }

@@ -7,7 +7,7 @@ const path = require('path');
 
 class BuildService extends Service {
 
-    // init 初始化
+    // 生成构建配置
     async generateBuildConfig(id, taskItem = {}, assetslist = []) {
         let file = '';
         let paths = '/';
@@ -30,8 +30,10 @@ class BuildService extends Service {
         const data = await Promise.all(result);
         // add logs
         const json = {
-            name: `${taskItem.task_name}任务-生成构建配置`,
+            application_id: id,
+            task_name: `${taskItem.task_name}任务-生成构建配置`,
             type: 3,
+            isLoad: true,
             content: data || [],
         };
         this.ctx.service.logs.addLogs(json);
@@ -41,15 +43,17 @@ class BuildService extends Service {
     }
 
     // 脚本备份
-    async backupApplications(taskItem = {}, assetslist = []) {
+    async backupApplications(id, taskItem = {}, assetslist = []) {
         const bakList = [];
         for (let i = 0; i < assetslist.length; i++) {
             bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i])));
         }
         const result = await Promise.all(bakList);
         const json = {
-            name: `${taskItem.task_name}任务-服务备份`,
+            application_id: id,
+            task_name: `${taskItem.task_name}任务-服务备份`,
             type: 2,
+            isLoad: true,
             content: result || [],
         };
         this.ctx.service.logs.addLogs(json);
@@ -71,11 +75,12 @@ class BuildService extends Service {
             })
                 .then(() => {
                     const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
-                    const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backups_path}/bak_${dateStr}`;
+                    const projectName = project_path ? project_path.split('/').splice(-1).join() : '';
+                    const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backups_path}/${projectName}_${dateStr}`;
                     return this.exec(sftp, sh);
                 }).then(data => {
                     resolve(Object.assign({}, data, {
-                        name: assets.name || '',
+                        assets_name: assets.name || '',
                         lan_ip: assets.lan_ip || '',
                         outer_ip: assets.outer_ip || '',
                     }));
@@ -121,7 +126,7 @@ class BuildService extends Service {
                         };
                     }
                     resolve(Object.assign({}, data, {
-                        name: asstesItem.name || '',
+                        assets_name: asstesItem.name || '',
                         lan_ip: asstesItem.lan_ip || '',
                         outer_ip: asstesItem.outer_ip || '',
                     }));

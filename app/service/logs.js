@@ -7,14 +7,14 @@ class LogsService extends Service {
 
     // add logs
     async addLogs(json = {}) {
-        const { name, application_code, commtask_code, type, content } = json;
+        const { task_name, application_id, commtask_id, type, content, date } = json;
         const logs = this.ctx.model.Logs();
-        logs.name = name || '';
+        logs.name = task_name || '';
         logs.type = type || '';
         logs.content = content || '';
-        logs.application_code = application_code || '';
-        logs.commtask_code = commtask_code || '';
-        logs.create_time = new Date();
+        logs.application_id = application_id || '';
+        logs.commtask_id = commtask_id || '';
+        logs.create_time = date ? new Date(date) : new Date();
         return await logs.save();
     }
 

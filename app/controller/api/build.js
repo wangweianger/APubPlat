@@ -8,7 +8,7 @@ class BuildController extends Controller {
     async generateBuildConfig() {
         const { ctx } = this;
         const query = ctx.request.body;
-        const id = query.id;
+        const id = query.id || '';
         const taskItem = query.taskItem || {};
         const assetsList = query.assetsList || [];
 
@@ -28,11 +28,23 @@ class BuildController extends Controller {
         const query = ctx.request.body;
         const taskItem = query.taskItem || {};
         const assetsList = query.assetsList || [];
+        const id = query.id || '';
 
         if (!taskItem.project_path) throw new Error('应用所在位置不能为空!');
         if (!taskItem.backups_path) throw new Error('应用备份的路径不能为空!');
 
-        const result = await this.ctx.service.build.backupApplications(taskItem, assetsList);
+        const result = await this.ctx.service.build.backupApplications(id, taskItem, assetsList);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
+    // 构建应用
+    async buildApplicationed() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const result = await this.ctx.service.logs.addLogs(query);
 
         ctx.body = this.app.result({
             data: result,

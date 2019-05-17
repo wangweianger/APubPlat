@@ -101,6 +101,8 @@ module.exports = app => {
     apiV1Router.post('build/generateBuildConfig', build.generateBuildConfig);
     // 备份服务
     apiV1Router.post('build/backupApplications', build.backupApplications);
+    // 构建应用
+    apiV1Router.post('build/buildApplicationed', build.buildApplicationed);
 
     // -------------------------- socket.io ------------------------------
     // socket.io
