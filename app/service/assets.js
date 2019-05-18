@@ -25,7 +25,7 @@ class AssetsService extends Service {
                     },
                 },
                 { $skip: (pageNo - 1) * pageSize },
-                { $sort: { count: -1 } },
+                { $sort: { create_time: -1 } },
                 { $limit: pageSize },
             ]).exec()
         );

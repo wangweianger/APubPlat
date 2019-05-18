@@ -72,6 +72,32 @@
         padding: 15px;
         box-shadow: 5px 5px 10px #eee;
     }
+    .assets-item{
+        margin-bottom:0px;
+    }
+    .assets-item .t0{
+        display: inline-block;
+        font-size:12px;
+        margin-right:10px;
+    }
+    .assets-item .t1{
+        width:180px;
+    }
+    .assets-item .t2{
+        width:130px;
+    }
+    .assets-item .t3{
+        width:130px;
+    }
+    .assets-item .t4{
+        width:100px;
+    }
+    .el-table__expanded-cell[class*=cell] {
+        padding: 10px 50px;
+    }
+    .el-form-item__content{
+        line-height:25px;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -80,7 +106,7 @@
         </el-col>
     </el-row>
     <div class="com_top">
-        <el-select v-model="application_id" class="inp" @change="getList" placeholder="请选择所属团队">
+        <el-select v-model="application_id" class="inp" @change="getList" placeholder="请选择所属应用">
             <el-option v-for="item in applist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
         </el-select>
@@ -93,9 +119,32 @@
             <div class="com_table_block mt20" v-if="datalist.length">
                 <div class="table_body">
                     <el-table :data="datalist" style="width: 100%">
-                        <el-table-column prop="name" label="任务名称" width="300">
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-form label-position="left" inline class="demo-table-expand">
+                                    <div v-for="item in scope.row.content" :key="index">
+                                        <el-form-item class="assets-item">
+                                            <span class='t0 t1'>资产名称:{{item.assets_name}}</span>
+                                            <span class='t0 t2'>外网IP:{{item.outer_ip}}</span>
+                                            <span class='t0 t3'>内网IP:{{item.lan_ip}}</span>
+                                            <span v-if="item.code==0?true:false" class='t0 t4 success'>{{typetext}}成功</span>
+                                            <span v-if="item.code!=0?true:false" class='t0 t4 red'>{{typetext}}失败</span>
+                                        </el-form-item>
+                                    </div>
+                                    
+                                </el-form>
+                            </template>
                         </el-table-column>
-                        <el-table-column label="构建时间" width="180">
+                        <el-table-column prop="name" label="任务名称" width="320">
+                        </el-table-column>
+                        <el-table-column :label="typetext+'状态'" width="150">
+                            <template slot-scope="scope">
+                                <div class="success" v-if="scope.row.status==0">{{typetext}}成功</div>
+                                <div class="warning" v-if="scope.row.status==1">部分{{typetext}}成功</div>
+                                <div class="red" v-if="scope.row.status==2">{{typetext}}失败</div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column :label="typetext+'时间'" width="200">
                             <template slot-scope="scope">
                                 <div>{{scope.row.create_time | date('-',true)}}</div>
                             </template>
@@ -103,9 +152,9 @@
                         <el-table-column label="操作">
                             <template slot-scope="scope">
                                 <div>
-                                    <el-button @click="buildProcess(scope.row)" type="primary" size="small">重新部署
+                                    <el-button @click="buildProcess(scope.row)" type="text" size="mini">重新部署
                                     </el-button>
-                                    <el-button @click="buildProcess(scope.row)" type="danger" size="small" disabled>应用还原
+                                    <el-button @click="buildProcess(scope.row)" type="text" size="mini">应用还原
                                     </el-button>
                                 </div>
                             </template>
@@ -133,6 +182,7 @@
                 application_id:'',
                 name:'',
                 activeName: '1',
+                typetext:'构建',
                 datalist: [],
                 pageSize: 30,
                 totalCount: 0,
@@ -148,8 +198,14 @@
                     label: '生成应用配置日志',
                 }],
                 applist:[],
-
             }
+        },
+        watch:{
+            "activeName"(val){
+                if (val == 1) this.typetext = '构建';
+                if (val == 2) this.typetext = '备份';
+                if (val == 3) this.typetext = '配置';
+            },
         },
         mounted() {
             this.getList();
@@ -173,8 +229,25 @@
                         pageSize: this.pageSize,
                     },
                     success: data => {
+                        const datas = data.data.datalist || [];
+                        datas.forEach(item=>{
+                            if(item.content && item.content.length) {
+                                let begin = 0;
+                                len = item.content.length;
+                                item.content.forEach(item1=>{
+                                    if(item1.code ==0) begin++
+                                })
+                                if(item.content.length == begin){
+                                    item.status = 0;
+                                }else if(begin == 0){
+                                    item.status = 2;
+                                }else {
+                                    item.status = 1;
+                                }
+                            }
+                        });
                         this.totalCount = data.data.totalNum;
-                        this.datalist = data.data.datalist;
+                        this.datalist = datas;
                     }
                 })
             },

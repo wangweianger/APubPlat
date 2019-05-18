@@ -16,6 +16,7 @@ class TeamService extends Service {
             this.ctx.model.Team.find(query)
                 .skip((pageNo - 1) * pageSize)
                 .limit(pageSize)
+                .sort({ create_time: -1 })
                 .exec()
         );
         const all = await Promise.all([ count, datas ]);

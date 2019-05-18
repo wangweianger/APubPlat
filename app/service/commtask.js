@@ -9,7 +9,10 @@ class CommtaskService extends Service {
 
     // init 初始化
     async list() {
-        return await this.ctx.model.Commtask.find().exec() || [];
+        return await this.ctx.model.Commtask
+            .find()
+            .sort({ create_time: -1 })
+            .exec() || [];
     }
 
     // add | update

@@ -33,6 +33,7 @@ class LogsService extends Service {
             this.ctx.model.Logs.find(query)
                 .skip((pageNo - 1) * pageSize)
                 .limit(pageSize)
+                .sort({ create_time: -1 })
                 .exec()
         );
         const all = await Promise.all([ count, datas ]);
