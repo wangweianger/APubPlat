@@ -106,6 +106,14 @@
         </el-col>
     </el-row>
     <div class="com_top">
+        <el-select v-model="environ_code" class="inp" @change="environChange" placeholder="部署环境筛选">
+            <el-option v-for="item in environlist" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
+        <el-select v-model="team_code" class="inp" @change="teamChange" placeholder="所属团队筛选">
+            <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
+            </el-option>
+        </el-select>
         <el-select v-model="application_id" class="inp" @change="getList" placeholder="请选择所属应用">
             <el-option v-for="item in applist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
@@ -114,7 +122,7 @@
         <el-button @click="getList" type="primary">搜索</el-button>
     </div>
     <el-tabs class="el-tabs-content" v-model="activeName" @tab-click="handleClick">
-        <el-tab-pane v-for="(item,index) in environlist" :key="index" :label="item.label" :name="item.value">
+        <el-tab-pane v-for="(item,index) in logtypelist" :key="index" :label="item.label" :name="item.value">
             <!-- table -->
             <div class="com_table_block mt20" v-if="datalist.length">
                 <div class="table_body">
@@ -179,15 +187,20 @@
         el: '#team',
         data: function () {
             return {
+                team_code:'',
+                environ_code:'',
                 application_id:'',
                 name:'',
                 activeName: '1',
                 typetext:'构建',
+                teamlist: [],
                 datalist: [],
+                environlist:[],
+                applist:[],
                 pageSize: 30,
                 totalCount: 0,
                 currentPage: 1,
-                environlist: [{
+                logtypelist: [{
                     value: '1',
                     label: '应用构建日志',
                 }, {
@@ -197,7 +210,6 @@
                     value: '3',
                     label: '生成应用配置日志',
                 }],
-                applist:[],
             }
         },
         watch:{
@@ -209,6 +221,9 @@
         },
         mounted() {
             this.getList();
+            this.getTeamList();
+            this.getEnvironList();
+            this.getAppList();
         },
         filters: {
             date:Filter.date,
@@ -250,6 +265,81 @@
                         this.datalist = datas;
                     }
                 })
+            },
+            getAppList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/application/list`,
+                    data: {
+                        team_code: this.team_code,
+                        environ_code: this.environ_code,
+                        status: 1,
+                        pageNo: 1,
+                        pageSize: 100,
+                    },
+                    success: data => {
+                        const datas = data.data.datalist || [];
+                        const options = [];
+                        datas.forEach(item => {
+                            options.push({
+                                value: item._id,
+                                label: item.name
+                            })
+                        })
+                        this.applist = options;
+                    }
+                })
+            },
+            getTeamList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/team/list`,
+                    data: {
+                        pageNo: 1,
+                        pageSize: 100,
+                        status: 1,
+                    },
+                    success: data => {
+                        const datas = data.data.datalist || [];
+                        const options = [];
+                        datas.forEach(item => {
+                            options.push({
+                                value: item.code,
+                                label: item.name
+                            })
+                        })
+                        this.teamlist = options;
+                    }
+                })
+            },
+            getEnvironList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/environment/list`,
+                    data: {
+                        pageNo: 1,
+                        pageSize: 100,
+                    },
+                    success: data => {
+                        const datas = data.data.datalist || [];
+                        const options = [];
+                        datas.forEach(item => {
+                            options.push({
+                                value: item.code,
+                                label: item.name
+                            })
+                        })
+                        this.environlist = options;
+                    }
+                })
+            },
+            environChange(){
+                this.application_id = '';
+                this.getAppList();
+            },
+            teamChange(){
+                this.application_id = '';
+                this.getAppList();
             },
             handleCurrentChange(val) {
                 this.currentPage = val;
