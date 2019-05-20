@@ -42,4 +42,7 @@ module.exports = app => {
     // 构建日志
     router.get('/logs', web.logs);
 
+    // 应用还原
+    router.get('/reduction', web.reduction);
+
 };

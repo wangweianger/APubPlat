@@ -117,7 +117,7 @@
                             <template slot-scope="scope">
                                 <div class="mb10">
                                     <el-button @click="buildProcess(scope.row)" type="primary" size="small">应用部署</el-button>
-                                    <el-button @click="buildProcess(scope.row)" type="danger" size="small" disabled>应用还原</el-button>
+                                    <el-button @click="goToReduction(scope.row)" type="danger" size="small">应用还原</el-button>
                                 </div>
                                 <div>
                                     <el-button @click="applicationConsole(scope.row)" type="danger" size="small">控制台</el-button>
@@ -252,6 +252,9 @@
             },
             setAppConfig(item) {
                 location.href = "/appconfig?id=" + item._id;
+            },
+            goToReduction(item){
+                location.href = "/reduction?id=" + item._id;
             },
         }
     })

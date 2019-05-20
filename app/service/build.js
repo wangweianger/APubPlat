@@ -45,8 +45,12 @@ class BuildService extends Service {
     // 脚本备份
     async backupApplications(id, taskItem = {}, assetslist = []) {
         const bakList = [];
+        const { project_path, backups_path } = taskItem;
+        const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
+        const projectName = project_path ? project_path.split('/').splice(-1).join() : '';
+        const backupPath = `${backups_path}/${projectName}_${dateStr}`;
         for (let i = 0; i < assetslist.length; i++) {
-            bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i])));
+            bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i], backupPath)));
         }
         const result = await Promise.all(bakList);
         const json = {
@@ -60,8 +64,59 @@ class BuildService extends Service {
         return json;
     }
 
+    // 备份还原
+    async reductionApplications(id, taskItem, assetslist = []) {
+        const reductionList = [];
+        const { projectPath, backupPath, appName } = taskItem;
+        const shell = '';
+
+        // `cp -rp /data/bak/$2  /data`
+
+        for (let i = 0; i < assetslist.length; i++) {
+            reductionList.push(Promise.resolve(this.reductionProject(assetslist[i], shell)));
+        }
+        const result = await Promise.all(reductionList);
+        const json = {
+            application_id: id,
+            task_name: `${appName}任务-服务还原`,
+            type: 4,
+            isLoad: true,
+            content: result || [],
+        };
+        this.ctx.service.logs.addLogs(json);
+        return json;
+    }
+
+    // 应用还原
+    reductionProject(assets, shell) {
+        const { outer_ip, port, user, password } = assets;
+        return new Promise((resolve, reject) => {
+            const Client = require('ssh2-sftp-client');
+            const sftp = new Client();
+            sftp.connect({
+                host: outer_ip,
+                username: user,
+                port,
+                password,
+            })
+                .then(() => {
+                    return this.exec(sftp, shell) || {};
+                }).then(data => {
+                    resolve(Object.assign({}, data, {
+                        assets_name: assets.name || '',
+                        lan_ip: assets.lan_ip || '',
+                        outer_ip: assets.outer_ip || '',
+                    }));
+                    sftp.end();
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
+    }
+
     // 文件备份
-    async backUpProject(taskItem, assets) {
+    async backUpProject(taskItem, assets, backupPath) {
         const { outer_ip, port, user, password } = assets;
         const { project_path, backups_path } = taskItem;
         return new Promise((resolve, reject) => {
@@ -74,15 +129,15 @@ class BuildService extends Service {
                 password,
             })
                 .then(() => {
-                    const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
-                    const projectName = project_path ? project_path.split('/').splice(-1).join() : '';
-                    const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backups_path}/${projectName}_${dateStr}`;
-                    return this.exec(sftp, sh);
+                    const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backupPath}`;
+                    return this.exec(sftp, sh) || {};
                 }).then(data => {
                     resolve(Object.assign({}, data, {
                         assets_name: assets.name || '',
                         lan_ip: assets.lan_ip || '',
                         outer_ip: assets.outer_ip || '',
+                        backup_path: backupPath,
+                        project_path,
                     }));
                     sftp.end();
                 })

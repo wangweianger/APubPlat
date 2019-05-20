@@ -26,11 +26,19 @@ class NspController extends Controller {
         const { ctx } = this;
         const tasklist = [];
         const date = new Date();
+        const { project_path, backups_path, is_backups } = taskItem;
+        let backupPath = '';
+        if (taskItem && is_backups && project_path && backups_path) {
+            const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
+            const projectName = project_path ? project_path.split('/').splice(-1).join() : '';
+            backupPath = `${backups_path}/${projectName}_${dateStr}`;
+        }
+
         for (let i = 0; i < data.length; i++) {
             const datas = data[i] || {};
             const assitsItem = datas.assitsItem || {};
             const item = Promise.resolve(
-                this.backUpProject(taskItem, assitsItem).then(data => {
+                this.backUpProject(taskItem, assitsItem, backupPath).then(data => {
                     socket({
                         id,
                         date,
@@ -92,11 +100,11 @@ class NspController extends Controller {
     }
 
     // 备份
-    backUpProject(taskItem = {}, assitsItem = {}) {
+    backUpProject(taskItem = {}, assitsItem = {}, backupPath) {
         const { is_backups, project_path, backups_path } = taskItem;
         let promise = null;
         if (taskItem && is_backups && project_path && backups_path) {
-            promise = this.ctx.service.build.backUpProject(taskItem, assitsItem || {});
+            promise = this.ctx.service.build.backUpProject(taskItem, assitsItem || {}, backupPath);
         } else {
             promise = new Promise(resolve => { resolve(1); });
         }

@@ -130,7 +130,7 @@
                         <el-table-column type="expand">
                             <template slot-scope="scope">
                                 <el-form label-position="left" inline class="demo-table-expand">
-                                    <div v-for="item in scope.row.content" :key="index">
+                                    <div v-for="(item,index) in scope.row.content" :key="index">
                                         <el-form-item class="assets-item">
                                             <span class='t0 t1'>资产名称:{{item.assets_name}}</span>
                                             <span class='t0 t2'>外网IP:{{item.outer_ip}}</span>
@@ -139,7 +139,6 @@
                                             <span v-if="item.code!=0?true:false" class='t0 t4 red'>{{typetext}}失败</span>
                                         </el-form-item>
                                     </div>
-                                    
                                 </el-form>
                             </template>
                         </el-table-column>
@@ -160,10 +159,8 @@
                         <el-table-column label="操作">
                             <template slot-scope="scope">
                                 <div>
-                                    <el-button @click="buildProcess(scope.row)" type="text" size="mini">重新部署
-                                    </el-button>
-                                    <el-button @click="buildProcess(scope.row)" type="text" size="mini">应用还原
-                                    </el-button>
+                                    <el-button @click="buildProcess(scope.row)" type="text" size="mini">重新{{typetext}}</el-button>
+                                    <el-button @click="goToReduction(scope.row)" type="text" size="mini">应用还原</el-button>
                                 </div>
                             </template>
                         </el-table-column>
@@ -358,6 +355,9 @@
             },
             setAppConfig(item) {
                 location.href = "/appconfig?id=" + item._id;
+            },
+            goToReduction(item) {
+                location.href = "/reduction?id=" + item.application_id;
             },
         }
     })

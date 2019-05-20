@@ -115,6 +115,14 @@ class WebController extends Controller {
         });
     }
 
+    // 构建还原
+    async reduction() {
+        const { ctx } = this;
+        await ctx.render('reduction', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

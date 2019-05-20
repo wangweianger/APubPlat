@@ -1,0 +1,366 @@
+<style scoped>
+    .config_main {
+        padding: 20px;
+        background: #fff;
+        box-shadow: 5px 5px 10px #eee;
+    }
+
+    .config_main .row-col {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .config_main .block {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 14px;
+    }
+
+    .config_main .block .left {
+        width: 150px;
+        color: #999;
+        font-size: 12px;
+    }
+
+    .config_main .block .right {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+
+    .btns {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding-top: 30px;
+    }
+
+    .item_task {
+        width: 1200px;
+    }
+
+    .item_task .title {
+        font-size: 25px;
+        font-weight: 300;
+    }
+
+    .tab-btns {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .tab-btns .btn-item {
+        margin-right: 10px;
+    }
+    .assets-item{
+        margin-bottom:0px;
+    }
+    .assets-item .t0{
+        display: inline-block;
+        font-size:12px;
+        margin-right:10px;
+    }
+    .assets-item .t1{
+        width:180px;
+    }
+    .assets-item .t2{
+        width:130px;
+    }
+    .assets-item .t3{
+        width:130px;
+    }
+    .assets-item .t4{
+        width:100px;
+    }
+    .el-table__expanded-cell[class*=cell] {
+        padding: 10px 50px;
+    }
+    .el-form-item__content{
+        line-height:25px;
+    }
+</style>
+<div class="content" id="team" v-cloak>
+    <el-row>
+        <el-col :span="12">
+            <div class="grid-content bg-purple com_title">应用还原</div>
+        </el-col>
+    </el-row>
+    <div class="config_main mt30 fs-18">
+        应用名称: {{datas.name}}
+    </div>
+    <div class="config_main mt30">
+        <div class="block">
+            <div class="bottom" style="width:100%;">
+                <div class="top mb20 fs-16">资产列表</div>
+                <div class="mb10">
+                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-tickets" size="small">资产任务
+                    </el-button>
+                    <el-button @click="applicationConsole()" type="danger" icon="el-icon-s-tools" size="small">控制台
+                    </el-button>
+                    <span class="ml10 light"><i
+                            class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
+                    </span>
+                </div>
+                <el-table :data="assetslist" ref="assetsTable" @selection-change="handleSelectionChange"
+                    style="width:auto;font-size:13px;">
+                    <el-table-column type="selection" width="55"></el-table-column>
+                    <el-table-column prop="name" label="资产名称" width="200"></el-table-column>
+                    <el-table-column prop="code" label="资产编码" width="200"></el-table-column>
+                    <el-table-column prop="outer_ip" label="外网IP" width="150"></el-table-column>
+                    <el-table-column prop="lan_ip" label="内网IP" width="150"></el-table-column>
+                    <el-table-column prop="user" label="用户名" width="80"></el-table-column>
+                    <el-table-column label="操作">
+                        <template slot-scope="scope">
+                            <div class="tab-btns">
+                                <el-button class="btn-item" @click="serverConfigs(scope.row)" type="default"
+                                    size="mini">资产任务</el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+    </div>
+    <div class="config_main mt30">
+        <div class="block">
+            <div class="bottom" style="width:100%;">
+                <div class="top mb20 fs-16">应用备份列表</div>
+                <el-table :data="datalist" style="width:auto;font-size:13px;">
+                    <el-table-column type="expand">
+                        <template slot-scope="scope">
+                            <el-form label-position="left" inline class="demo-table-expand">
+                                <div v-for="(item,index) in scope.row.content" :key="index">
+                                    <el-form-item class="assets-item">
+                                        <span class='t0 t1'>资产名称:{{item.assets_name}}</span>
+                                        <span class='t0 t2'>外网IP:{{item.outer_ip}}</span>
+                                        <span class='t0 t3'>内网IP:{{item.lan_ip}}</span>
+                                        <span v-if="item.code==0?true:false" class='t0 t4 success'>备份成功</span>
+                                        <span v-if="item.code!=0?true:false" class='t0 t4 red'>备份失败</span>
+                                    </el-form-item>
+                                </div>
+                            </el-form>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="name" label="备份名称" width="300"></el-table-column>
+                    <el-table-column label="备份状态" width="150">
+                        <template slot-scope="scope">
+                            <div class="success" v-if="scope.row.status==0">备份成功</div>
+                            <div class="warning" v-if="scope.row.status==1">部分备份成功</div>
+                            <div class="red" v-if="scope.row.status==2">备份失败</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="备份路径" width="350">
+                        <template slot-scope="scope">
+                            <div>{{scope.row.content[0].backup_path}}</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template slot-scope="scope">
+                            <div class="tab-btns">
+                                <el-button 
+                                    class="btn-item" 
+                                    v-if="scope.row.status==0 || scope.row.status==1"
+                                    @click="appReduction(scope.row)" 
+                                    type="primary" 
+                                    size="mini">还原为此版本</el-button>
+                            </div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <div class="common_pages">
+                    <el-pagination background @current-change="handleCurrentChange" :current-page.sync="currentPage"
+                        :page-size="pageSize" layout="prev, pager, next, jumper" :total="totalCount">
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 备份|构建日志 -->
+    <el-dialog width="80%" title="应用还原" :visible.sync="dialogModelVisible">
+        <!-- <div></div> -->
+        <el-table :data="logsData">
+            <el-table-column property="assets_name" label="资产名称" width="200"></el-table-column>
+            <el-table-column property="outer_ip" label="外网IP" width="150"></el-table-column>
+            <el-table-column property="lan_ip" label="内网IP" width="100"></el-table-column>
+            <el-table-column label="执行状态" width="150">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.code==-100"><i class="el-icon-loading"></i> 应用还原中...</div>
+                    <div v-if="scope.row.code!=-100" :class="scope.row.code==0?'success':'red'">
+                        {{scope.row.code==0?'执行成功':'执行失败'}}
+                    </div>
+                </template>
+            </el-table-column>
+            <!-- <el-table-column v-if="logsData.type===2 || logsData.type===1" property="shell" label="执行shell内容">
+            </el-table-column>
+            <el-table-column v-if="logsData.type!==1" property="data" label="执行日志"></el-table-column> -->
+        </el-table>
+    </el-dialog>
+    
+</div>
+<script>
+    let xteamlist = null;
+    let socket = null;
+    new Vue({
+        el: '#team',
+        data: function () {
+            return {
+                id: util.getQueryString('id'),
+                assetslist: [],
+                multipleSelection: [],
+                datas:{},
+                pageSize: 30,
+                totalCount: 0,
+                currentPage: 1,
+                datalist:[],
+                logsData: [],
+                dialogModelVisible: false,
+            }
+        },
+        mounted() {
+            this.itemdetail();
+            this.getList();
+        },
+        filters: {
+            date: Filter.date,
+        },
+        methods: {
+            getList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/logs/list`,
+                    data: {
+                        application_id: this.id,
+                        type: 2,
+                        pageNo: this.currentPage,
+                        pageSize: this.pageSize,
+                    },
+                    success: data => {
+                        const datas = data.data.datalist || [];
+                        datas.forEach(item => {
+                            if (item.content && item.content.length) {
+                                let begin = 0;
+                                len = item.content.length;
+                                item.content.forEach(item1 => {
+                                    if (item1.code == 0) begin++
+                                })
+                                if (item.content.length == begin) {
+                                    item.status = 0;
+                                } else if (begin == 0) {
+                                    item.status = 2;
+                                } else {
+                                    item.status = 1;
+                                }
+                            }
+                        });
+                        this.totalCount = data.data.totalNum;
+                        this.datalist = datas;
+                    }
+                })
+            },
+            itemdetail() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/application/itemdetail`,
+                    data: {
+                        id: this.id,
+                    },
+                    success: data => {
+                        this.datas = data.data;
+                        this.assetslist = data.data.assets_list || [];
+                        const assetsId = util.getQueryString('assetsId');
+                        setTimeout(() => {
+                            if (assetsId) {
+                                this.assetslist.forEach(item => { if (assetsId == item._id) this.$refs.assetsTable.toggleRowSelection(item, true) })
+                            } else {
+                                this.assetslist.forEach(item => { this.$refs.assetsTable.toggleRowSelection(item, true); })
+                            }
+                        })
+                    }
+                })
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.getList();
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+            serverConfigs(item) {
+                if (!item && !this.multipleSelection.length) {
+                    popup.alert({ title: '请选择需要配置的资产!' })
+                    return;
+                }
+                const assestsList = item ? [item] : this.multipleSelection;
+                util.setStorage('session', 'assets_list_configs', JSON.stringify(assestsList));
+                location.href = "/assetsconfig";
+            },
+            applicationConsole() {
+                if (!this.multipleSelection.length) {
+                    popup.alert({ title: '请选择进入控制台的资产列表!' })
+                    return;
+                }
+                let ids = '';
+                this.multipleSelection && this.multipleSelection.forEach(item => {
+                    ids = ids + item._id + ','
+                })
+                ids = ids ? ids.slice(0, -1) : '';
+                window.open("/console?ids=" + ids);
+            },
+            appReduction(item){
+                const backupPath = item.content[0].backup_path;
+                const projectPath = item.content[0].project_path;
+                if(!this.multipleSelection.length){
+                    popup.alert({ title: '请选择需要还原的资产!' })
+                    return 
+                }
+                if(!backupPath){
+                    popup.alert({ title: '无备份记录!' })
+                    return 
+                }
+
+                popup.confirm({
+                    title: `确定还原为此版本吗？`, yes: () => {
+                        this.dialogModelVisible = true;
+                        const assetslist = [];
+                        this.multipleSelection.forEach(item => {
+                            assetslist.push({
+                                assets_name: item.name,
+                                code: -100,
+                                data: '',
+                                lan_ip: item.lan_ip,
+                                outer_ip: item.outer_ip,
+                                password: item.password,
+                                port: item.port,
+                                user: item.user
+                            })
+                        })
+                        this.logsData = assetslist
+                        util.ajax({
+                            nohideloading: true,
+                            url: `${config.baseApi}api/v1/build/reductionApplications`,
+                            data: {
+                                id: this.id,
+                                taskItem:{
+                                    backupPath,
+                                    projectPath,
+                                    appName: this.datas.name
+                                },
+                                assetsList: assetslist,
+                            },
+                            success: data => {
+                                this.logsData = data.data || [];
+                            }
+                        })
+                    }
+                })
+            },
+        }
+    })
+</script>

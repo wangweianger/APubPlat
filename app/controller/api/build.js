@@ -51,6 +51,24 @@ class BuildController extends Controller {
         });
     }
 
+    // 应用还原
+    async reductionApplications() {
+        const { ctx } = this;
+        const query = ctx.request.body;
+        const taskItem = query.taskItem || {};
+        const assetsList = query.assetsList || [];
+        const id = query.id || '';
+
+        if (!taskItem.backupPath) throw new Error('应用备份路径不能为空!');
+        if (!taskItem.projectPath) throw new Error('应用所在路径不能为空!');
+
+        const result = await this.ctx.service.build.reductionApplications(id, taskItem, assetsList);
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
 }
 
 module.exports = BuildController;
