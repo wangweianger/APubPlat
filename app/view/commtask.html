@@ -74,7 +74,7 @@
                 <el-col :span="12">
                     <div class="com_model_block" v-if="team.type==2?true:false">
                         <div class="left">shell脚本路径</div>
-                        <el-input class="inp" v-model="team.shell_path" placeholder="例如：/usr/src/build.sh"></el-input>
+                        <el-input class="inp" v-model="team.shell_path" placeholder="例如：/usr/src/sh/build.sh"></el-input>
                     </div>
                 </el-col>
                 <el-col :span="12">
@@ -271,7 +271,7 @@
                         theme: 'vs-dark',
                         //代码略缩图
                         minimap: {
-                            enabled: true
+                            enabled: false
                         }
                     });
                 });

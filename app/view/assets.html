@@ -17,6 +17,8 @@
             <el-option v-for="item in teamlist" :key="item.value" :label="item.label" :value="item.value">
             </el-option>
         </el-select>
+        <el-input v-model="assets_name" class="inp ml20" placeholder="按资产名称查询"></el-input>
+        <el-button @click="getList" type="primary">搜索</el-button>
     </div>
     <!-- table -->
     <div class="com_table_block mt20">
@@ -164,6 +166,7 @@
         data: function () {
             return {
                 team_code:'',
+                assets_name:'',
                 teamlist:[],
                 datalist: [],
                 pageSize: 30,
@@ -200,6 +203,7 @@
                     url: `${config.baseApi}api/v1/assets/list`,
                     data: {
                         team_code: this.team_code,
+                        assets_name: this.assets_name,
                         pageNo: this.currentPage,
                         pageSize: this.pageSize,
                     },

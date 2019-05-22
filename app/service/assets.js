@@ -6,11 +6,12 @@ const Service = require('egg').Service;
 class AssetsService extends Service {
 
     // init 初始化
-    async list(pageNo, pageSize, team_code, status) {
+    async list(pageNo, pageSize, team_code, assets_name, status) {
         pageSize = pageSize * 1;
         pageNo = pageNo * 1;
         const query = { $match: {} };
         if (team_code) query.$match.team_code = team_code;
+        if (assets_name) query.$match.name = { $regex: new RegExp(assets_name) };
         if (status + '') query.$match.status = status * 1;
         const count = Promise.resolve(this.ctx.model.Assets.count(query.$match).exec());
         const datas = Promise.resolve(

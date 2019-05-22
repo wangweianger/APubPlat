@@ -205,17 +205,17 @@
                             </div>
                         </div>
                     </el-col>
-                    <el-col :span="12">
-                        <div class="block">
-                            <div class="left">应用所在位置</div>
-                            <div class="right">{{item.project_path}}</div>
-                        </div>
-                    </el-col>
                 </el-row>
                 <el-row class="mt20">
                     <el-col :span="12">
                         <div class="block">
-                            <div class="left">应用备份的路径</div>
+                            <div class="left">需要备份的资源</div>
+                            <div class="right">{{item.project_path}}</div>
+                        </div>
+                    </el-col>
+                    <el-col :span="12">
+                        <div class="block">
+                            <div class="left">备份文件的存放位置</div>
                             <div class="right">{{item.backups_path}}</div>
                         </div>
                     </el-col>

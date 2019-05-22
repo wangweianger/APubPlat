@@ -46,11 +46,12 @@ class BuildService extends Service {
     async backupApplications(id, taskItem = {}, assetslist = []) {
         const bakList = [];
         const { project_path, backups_path } = taskItem;
-        const dateStr = this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
+        const backupDir = 'bak_' + this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
         const projectName = project_path ? project_path.split('/').splice(-1).join() : '';
-        const backupPath = `${backups_path}/${projectName}_${dateStr}`;
+        const backupPath = `${backups_path}/${backupDir}/${projectName}`;
+
         for (let i = 0; i < assetslist.length; i++) {
-            bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i], backupPath)));
+            bakList.push(Promise.resolve(this.backUpProject(taskItem, assetslist[i], backupPath, backupDir)));
         }
         const result = await Promise.all(bakList);
         const json = {
@@ -65,47 +66,93 @@ class BuildService extends Service {
     }
 
     // 备份还原
-    async reductionApplications(id, taskItem, assetslist = []) {
-        const reductionList = [];
-        const { projectPath, backupPath, appName } = taskItem;
-        const shell = '';
-
-        // `cp -rp /data/bak/$2  /data`
-
-        for (let i = 0; i < assetslist.length; i++) {
-            reductionList.push(Promise.resolve(this.reductionProject(assetslist[i], shell)));
+    async reductionApplications(id, taskItem = {}, assetslist = []) {
+        let file = '';
+        let paths = '/';
+        if (taskItem.reduction_shell_path && taskItem.reduction_shell_path.indexOf('/') > -1) {
+            file = path.basename(taskItem.reduction_shell_path);
+            paths = path.dirname(taskItem.reduction_shell_path);
+        } else {
+            throw new Error('shell脚本地址必须以/开头!');
         }
-        const result = await Promise.all(reductionList);
+
+        taskItem.reduction_shell_write_type = taskItem.reduction_shell_write_type ? parseInt(taskItem.reduction_shell_write_type) : 1;
+        taskItem.reduction_shell_body = taskItem.reduction_shell_body.replace(/\r\n/g, '\n');
+
+        // 本地创建文件
+        if (taskItem.reduction_shell_write_type === 1) fs.writeFileSync(path.resolve(__dirname, '../tempFile/' + file), taskItem.reduction_shell_body);
+
+        // 发布到相应服务器
+        const result = [];
+        for (let i = 0; i < assetslist.length; i++) { result.push(this.reductionProject(paths, file, assetslist[i], taskItem)); }
+        const data = await Promise.all(result);
+        // add logs
         const json = {
             application_id: id,
-            task_name: `${appName}任务-服务还原`,
-            type: 4,
+            task_name: `${taskItem.name}任务-备份还原`,
+            type: 5,
             isLoad: true,
-            content: result || [],
+            content: data || [],
         };
         this.ctx.service.logs.addLogs(json);
+        // 删除本地文件
+        if (taskItem.reduction_shell_write_type === 1) fs.unlinkSync(path.resolve(__dirname, '../tempFile/' + file));
         return json;
     }
 
     // 应用还原
-    reductionProject(assets, shell) {
-        const { outer_ip, port, user, password } = assets;
+    reductionProject(paths, file, asstesItem, taskItem) {
         return new Promise((resolve, reject) => {
             const Client = require('ssh2-sftp-client');
             const sftp = new Client();
             sftp.connect({
-                host: outer_ip,
-                username: user,
-                port,
-                password,
+                host: asstesItem.outer_ip,
+                port: asstesItem.port,
+                username: asstesItem.user,
+                password: asstesItem.password,
             })
                 .then(() => {
-                    return this.exec(sftp, shell) || {};
-                }).then(data => {
+                    return sftp.exists(paths);
+                })
+                .then(data => {
+                    if (!data) return sftp.mkdir(paths, true);
+                    return 1;
+                })
+                .then(() => {
+                    if (taskItem.reduction_shell_write_type === 1) {
+                        return sftp.fastPut(path.resolve(__dirname, '../tempFile/' + file), taskItem.reduction_shell_path);
+                    } else if (taskItem.reduction_shell_write_type === 2) {
+                        taskItem.reduction_shell_body = taskItem.reduction_shell_body.replace(/'/g, '"');
+                        return this.exec(sftp, "echo '" + taskItem.reduction_shell_body + "' > " + taskItem.reduction_shell_path);
+                    }
+                })
+                .then(data => {
+                    if (typeof (data) === 'string') {
+                        data = {
+                            data,
+                            code: 0,
+                        };
+                    }
+                    if (data.code === 0) {
+                        const shell = taskItem.reduction_shell_opction ?
+                            `sh ${taskItem.reduction_shell_path} ${taskItem.reduction_shell_opction}` :
+                            `sh ${taskItem.reduction_shell_path}`;
+                        return this.exec(sftp, shell);
+                    } else if (data.code !== 0) {
+                        return data;
+                    }
+                })
+                .then(data => {
+                    if (typeof (data) === 'string') {
+                        data = {
+                            data,
+                            code: 0,
+                        };
+                    }
                     resolve(Object.assign({}, data, {
-                        assets_name: assets.name || '',
-                        lan_ip: assets.lan_ip || '',
-                        outer_ip: assets.outer_ip || '',
+                        assets_name: asstesItem.assets_name || '',
+                        lan_ip: asstesItem.lan_ip || '',
+                        outer_ip: asstesItem.outer_ip || '',
                     }));
                     sftp.end();
                 })
@@ -116,7 +163,7 @@ class BuildService extends Service {
     }
 
     // 文件备份
-    async backUpProject(taskItem, assets, backupPath) {
+    async backUpProject(taskItem, assets, backupPath, backupDir) {
         const { outer_ip, port, user, password } = assets;
         const { project_path, backups_path } = taskItem;
         return new Promise((resolve, reject) => {
@@ -129,7 +176,7 @@ class BuildService extends Service {
                 password,
             })
                 .then(() => {
-                    const sh = `mkdir -p ${backups_path} && cp -r ${project_path} ${backupPath}`;
+                    const sh = `mkdir -p ${backups_path}/${backupDir} && cp -r ${project_path} ${backupPath}`;
                     return this.exec(sftp, sh) || {};
                 }).then(data => {
                     resolve(Object.assign({}, data, {

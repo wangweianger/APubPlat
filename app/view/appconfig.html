@@ -27,7 +27,7 @@
         width:380px;
     }
     .config_main .block .inp2{
-        width:190px;
+        width:300px;
     }
     .config_main .block .textarea{
         width:800px;
@@ -148,8 +148,8 @@
                     <div class="block mt30">
                         <div class="left">部署shell脚本路径<span class="red">*</span></div>
                         <div class="right">
-                            <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/data/src/build.sh"></el-input>
-                            <span class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</span>
+                            <el-input v-model="item.shell_path" class="inp1" placeholder="例如：/usr/src/sh/build.sh"></el-input>
+                            <span class="ml20 light">备注：若目录或文件不存在则自动创建。</span>
                         </div>
                     </div>
                     <div class="block mt30">
@@ -175,15 +175,15 @@
                     </div>
                     <div class="row-col mt30">
                         <div class="block">
-                            <div class="left">应用所在位置<span class="red">*</span></div>
+                            <div class="left">需要备份的资源<span class="red">*</span></div>
                             <div class="right">
-                                <el-input v-model="item.project_path" class="inp2" placeholder="应用所在路径"></el-input>
+                                <el-input v-model="item.project_path" class="inp2" placeholder="备份目标可以是文件夹也可以是一个文件"></el-input>
                             </div>
                         </div>
                         <div class="block ml20">
-                            <div class="left">应用备份的路径</div>
+                            <div class="left">备份文件存放位置<span class="red">*</span></div>
                             <div class="right">
-                                <el-input v-model="item.backups_path" class="inp2" placeholder="应用备份的路径"></el-input>
+                                <el-input v-model="item.backups_path" class="inp2" placeholder="备份文件存储的位置"></el-input>
                             </div>
                         </div>
                     </div>
@@ -295,7 +295,7 @@
                         //主题，三款：vs、vs-dark、hc-black
                         theme: 'vs-dark',
                         minimap: {
-                            enabled: true
+                            enabled: false
                         }
                     });
                     editor.onDidChangeModelContent(function (e) {

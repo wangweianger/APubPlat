@@ -84,6 +84,22 @@
     .el-form-item__content{
         line-height:25px;
     }
+    .com_model_block{
+        margin-bottom:12px;
+    }
+    .com_model_block .left{
+        width:130px;
+    }
+    .com_model_block .inp1{
+        width:300px;
+    }
+    .comm_build_textarea {
+        width: 1000px;
+        height: 220px;
+    }
+    .com_model_main .btns{
+        margin-top:0;
+    }
 </style>
 <div class="content" id="team" v-cloak>
     <el-row>
@@ -147,25 +163,35 @@
                             </el-form>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="name" label="备份名称" width="300"></el-table-column>
-                    <el-table-column label="备份状态" width="150">
+                    <el-table-column prop="name" label="备份名称" width="250"></el-table-column>
+                    <el-table-column label="备份状态" width="100">
                         <template slot-scope="scope">
                             <div class="success" v-if="scope.row.status==0">备份成功</div>
                             <div class="warning" v-if="scope.row.status==1">部分备份成功</div>
                             <div class="red" v-if="scope.row.status==2">备份失败</div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="备份路径" width="350">
+                    <el-table-column label="备份时间" width="150">
+                        <template slot-scope="scope">
+                            <div>{{scope.row.create_time | date('-',true)}}</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="应用资源位置">
+                        <template slot-scope="scope">
+                            <div>{{scope.row.content[0].project_path}}</div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="备份文件位置">
                         <template slot-scope="scope">
                             <div>{{scope.row.content[0].backup_path}}</div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="操作">
+                    <el-table-column label="操作" fixed="right" width="150">
                         <template slot-scope="scope">
                             <div class="tab-btns">
                                 <el-button 
                                     class="btn-item" 
-                                    v-if="scope.row.status==0 || scope.row.status==1"
+                                    v-if="(scope.row.status==0 || scope.row.status==1) && !scope.row.delete"
                                     @click="appReduction(scope.row)" 
                                     type="primary" 
                                     size="mini">还原为此版本</el-button>
@@ -182,10 +208,55 @@
         </div>
     </div>
 
+    <!-- model弹出框 -->
+    <el-dialog width="80%" :title="taskItem.name+'任务-应用还原'" :visible.sync="dialogTableVisible">
+        <div class="com_model_main">
+            <div class="com_model_block">
+                <div class="left">应用资源位置</div>
+                <div>{{taskItem.project_path}}</div>
+            </div>
+            <div class="com_model_block">
+                <div class="left">备份文件位置</div>
+                <div>{{taskItem.backup_path}}</div>
+            </div>
+            <div class="com_model_block">
+                <div class="left">shell脚本写入方式</div>
+                <el-select v-model="taskItem.reduction_shell_write_type" class="inp1" placeholder="请选择">
+                    <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value">
+                    </el-option>
+                </el-select>
+            </div>
+            <el-row>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">shell脚本路径<span class="red">*</span></div>
+                        <div>
+                            <el-input v-model="taskItem.reduction_shell_path" class="inp1" placeholder="例如：/usr/src/sh/build.sh"></el-input>
+                            <div class="ml20 light">备注：若服务器目录或文件不存在则自动创建。</div>
+                        </div>
+                    </div>
+                </el-col>
+                <el-col :span="12">
+                    <div class="com_model_block">
+                        <div class="left">shell脚本参数</div>
+                        <div><el-input v-model="taskItem.reduction_shell_opction" class="inp1" placeholder="shell脚本参数请以空格隔开"></el-input></div>
+                    </div>
+                </el-col>
+            </el-row>
+            <div class="com_model_block">
+                <div class="left">任务脚本内容<span class="red">*</span></div>
+                <div id="editor" class="comm_build_textarea"></div>
+            </div>
+            <div class="btns">
+                <el-button type="primary" @click="deployBackupApp">执行任务</el-button>
+            </div>
+        </div>
+    </el-dialog>
+
     <!-- 备份|构建日志 -->
-    <el-dialog width="80%" title="应用还原" :visible.sync="dialogModelVisible">
+    <el-dialog width="80%" :title="logsData.task_name" :visible.sync="dialogModelVisible">
         <!-- <div></div> -->
-        <el-table :data="logsData">
+        <el-table :data="logsData.content">
             <el-table-column property="assets_name" label="资产名称" width="200"></el-table-column>
             <el-table-column property="outer_ip" label="外网IP" width="150"></el-table-column>
             <el-table-column property="lan_ip" label="内网IP" width="100"></el-table-column>
@@ -197,16 +268,15 @@
                     </div>
                 </template>
             </el-table-column>
-            <!-- <el-table-column v-if="logsData.type===2 || logsData.type===1" property="shell" label="执行shell内容">
-            </el-table-column>
-            <el-table-column v-if="logsData.type!==1" property="data" label="执行日志"></el-table-column> -->
+            <el-table-column property="shell" label="执行shell内容"></el-table-column>
+            <!-- <el-table-column v-if="logsData.type!==1" property="data" label="执行日志"></el-table-column> -->
         </el-table>
     </el-dialog>
-    
+    <script>var require = { paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.16.2/min/vs' } };</script>
+    <script src="//cdn.bootcss.com/monaco-editor/0.16.2/min/vs/loader.js"></script>
 </div>
 <script>
-    let xteamlist = null;
-    let socket = null;
+    let editor = null;
     new Vue({
         el: '#team',
         data: function () {
@@ -219,8 +289,19 @@
                 totalCount: 0,
                 currentPage: 1,
                 datalist:[],
-                logsData: [],
+                logsData: { content: [] },
                 dialogModelVisible: false,
+                dialogTableVisible: false,
+                taskItem:{},
+                tasklist:[],
+                taskname:'',
+                options2: [{
+                    value: 1,
+                    label: '新建文件并上传方式'
+                }, {
+                    value: 2,
+                    label: 'shell窗口命令行创建方式'
+                }],
             }
         },
         mounted() {
@@ -274,6 +355,7 @@
                     success: data => {
                         this.datas = data.data;
                         this.assetslist = data.data.assets_list || [];
+                        this.tasklist = data.data.task_list || [];
                         const assetsId = util.getQueryString('assetsId');
                         setTimeout(() => {
                             if (assetsId) {
@@ -324,40 +406,110 @@
                     popup.alert({ title: '无备份记录!' })
                     return 
                 }
+                this.dialogTableVisible = true;
 
-                popup.confirm({
-                    title: `确定还原为此版本吗？`, yes: () => {
-                        this.dialogModelVisible = true;
-                        const assetslist = [];
-                        this.multipleSelection.forEach(item => {
-                            assetslist.push({
-                                assets_name: item.name,
-                                code: -100,
-                                data: '',
-                                lan_ip: item.lan_ip,
-                                outer_ip: item.outer_ip,
-                                password: item.password,
-                                port: item.port,
-                                user: item.user
-                            })
-                        })
-                        this.logsData = assetslist
-                        util.ajax({
-                            nohideloading: true,
-                            url: `${config.baseApi}api/v1/build/reductionApplications`,
-                            data: {
-                                id: this.id,
-                                taskItem:{
-                                    backupPath,
-                                    projectPath,
-                                    appName: this.datas.name
-                                },
-                                assetsList: assetslist,
-                            },
-                            success: data => {
-                                this.logsData = data.data || [];
-                            }
-                        })
+                const taskname = this.taskname = item.name.replace('任务-服务备份', '') || '';
+                this.taskItem = Object.assign({}, this.taskItem, {
+                    name: taskname,
+                    backup_path: backupPath,
+                    project_path: projectPath,
+                })
+                const projectpth = projectPath.split('/'); projectpth.splice(-1);
+                const backup_exec = `\cp -frp ${backupPath} ${projectpth.join('/')}`;
+                let backup_body = this.default_shell_body = `#!/bin/bash\r\n${backup_exec}\r\n#若后续还需运行其他命令请自行补充（例如：文件还原之后重启服务等操作）`;
+                let taskItem = null;
+                this.tasklist.forEach(item=>{
+                    if(item.task_name == taskname && item.reduction_shell_path) taskItem = item;
+                })
+                if(taskItem){
+                    this.taskItem.reduction_shell_path = taskItem.reduction_shell_path;
+                    this.taskItem.reduction_shell_opction = taskItem.reduction_shell_opction || '';
+                    this.taskItem.reduction_shell_write_type = taskItem.reduction_shell_write_type ? parseInt(taskItem.reduction_shell_write_type) : 1;
+                    backup_body = backup_body + taskItem.reduction_shell_body;
+                }else{
+                    backup_body = this.default_shell_body;
+                }
+                editor ? editor.setValue(backup_body) : setTimeout(() => { this.runMonaco('editor', backup_body); });
+            },
+            runMonaco(id, data) {
+                //载入Monaco
+                const _this = this;
+                require(['vs/editor/editor.main'], function () {
+                    //得到支持的语言
+                    var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
+                    //创建编辑器
+                    editor = monaco.editor.create(document.getElementById(id), {
+                        //内容
+                        value: data,
+                        //语言
+                        language: 'shell',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        //主题，三款：vs、vs-dark、hc-black
+                        theme: 'vs-dark',
+                        //代码略缩图
+                        minimap: {
+                            enabled: false
+                        }
+                    });
+                });
+            },
+            deployBackupApp(){
+                if (!this.taskItem.reduction_shell_path) {
+                    popup.alert({ title: '请填写shell脚本路径' });
+                    return;
+                }
+                const tasklist = this.tasklist;
+                tasklist.forEach(item => {
+                    if (item.task_name == this.taskname) {
+                        item.reduction_shell_path = this.taskItem.reduction_shell_path;
+                        item.reduction_shell_opction = this.taskItem.reduction_shell_opction;
+                        item.reduction_shell_write_type = this.taskItem.reduction_shell_write_type;
+                        item.reduction_shell_body = editor.getValue().replace(this.default_shell_body,'');
+                    }
+                })
+                util.ajax({
+                    url:`${config.baseApi}api/v1/application/updateConfigs`,
+                    data:{
+                        id:this.id,
+                        tasklist: tasklist,
+                    },
+                    success:data => {
+                        this.runBackupShell();
+                    }
+                })
+            },
+            runBackupShell(){
+                this.dialogModelVisible = true;
+                const assetslist = [];
+                this.multipleSelection.forEach(item => {
+                    assetslist.push({
+                        assets_name: item.name,
+                        code: -100,
+                        data: '',
+                        lan_ip: item.lan_ip,
+                        outer_ip: item.outer_ip,
+                        password: item.password,
+                        port: item.port,
+                        user: item.user
+                    })
+                })
+                this.logsData = {
+                    task_name: this.taskname + '任务-备份还原',
+                    type: 5,
+                    content: assetslist,
+                }
+                this.taskItem.reduction_shell_body = editor.getValue();
+                util.ajax({
+                    nohideloading: true,
+                    url: `${config.baseApi}api/v1/build/reductionApplications`,
+                    data: {
+                        id: this.id,
+                        taskItem: this.taskItem,
+                        assetsList: assetslist,
+                    },
+                    success: data => {
+                        this.logsData = data.data || {};
                     }
                 })
             },
