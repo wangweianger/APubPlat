@@ -347,18 +347,7 @@
                 this.getList();
             },
             buildProcess(item) {
-                location.href = "/buildprocess?id=" + item._id;
-            },
-            applicationConsole(item) {
-                let ids = '';
-                item.assets_list && item.assets_list.forEach(item => {
-                    ids = ids + item._id + ','
-                })
-                ids = ids ? ids.slice(0, -1) : '';
-                window.open("/console?ids=" + ids);
-            },
-            setAppConfig(item) {
-                location.href = "/appconfig?id=" + item._id;
+                location.href = "/buildprocess?id=" + item.application_id;
             },
             goToReduction(item) {
                 location.href = "/reduction?id=" + item.application_id;

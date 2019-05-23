@@ -22,8 +22,12 @@ class NspController extends Controller {
     }
 
     // common ssh2 servers
-    ssh2Client(data = [], taskItem = {}, shell = '', id = '') {
+    ssh2Client(json = {}) {
         const { ctx } = this;
+        let { data, taskItem, shell, id, cols, rows } = json;
+        data = data || [];
+        taskItem = taskItem || {};
+
         const tasklist = [];
         const date = new Date();
         const { project_path, backups_path, is_backups } = taskItem;
@@ -50,8 +54,8 @@ class NspController extends Controller {
                         port: assitsItem.port,
                         username: assitsItem.user,
                         password: assitsItem.password,
-                        cols: 138,
-                        rows: 46,
+                        cols: cols || 138,
+                        rows: rows || 46,
                         term: 'xterm-color',
                         socket: {
                             socket: ctx.socket,
@@ -74,8 +78,8 @@ class NspController extends Controller {
     // 构建task
     async sshOnline(query = {}) {
         if (!query.data) return;
-        const { data } = query;
-        this.ssh2Client(data);
+        const { data, cols, rows } = query;
+        this.ssh2Client({ data, cols, rows });
     }
 
     // 应用构建
@@ -86,11 +90,11 @@ class NspController extends Controller {
         let shell = '';
         if (taskItem && taskItem.shell_path) {
             shell = taskItem.shell_path ?
-                `sh ${taskItem.shell_path} ${taskItem.shell_opction || ''} \r\n` :
-                taskItem.shell_body + '\r\n';
+                `sh ${taskItem.shell_path} ${taskItem.shell_opction || ''} \n` :
+                taskItem.shell_body + '\n';
         }
 
-        const result = await this.ssh2Client(data, taskItem, shell, id);
+        const result = await this.ssh2Client({ data, taskItem, shell, id });
         // 保存备份日志
         taskItem.is_backups && this.ctx.service.logs.addLogs({
             name: `${taskItem.task_name}任务-服务备份`,

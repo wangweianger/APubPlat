@@ -1,52 +1,71 @@
 <style scoped>
     body{background:#000;}
     .header,.footer{display:none;}
-    #body_content{overflow:hidden;}
+    #body_content{overflow:hidden;margin-left: 0px!important;padding-top: 0px;}
+    .side{display: none;}
     .content{
         padding:0px;
-        position: relative;
-        display:flex;
-        flex-direction: row;
         color:#fff;
-        height:calc(100% + 50px);
-        background:#000;
-        top:-50px;
-        z-index:100;
-    }
-    .el-menu {border-right: none;}
-    .console-side{
-        width:250px;
-        height:calc(100%);
-        overflow-y:auto;
-        overflow-x:hidden;
-        background:#3a3333;
-    }
-    /*滚动条样式*/
-    .console-side::-webkit-scrollbar {
-        width: 4px;     
-        height: 4px;
-    }
-    .console-side::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        background: rgba(0,0,0,0.6);
-    }
-    .console-side::-webkit-scrollbar-track {
-        -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-        border-radius: 0;
-        background: rgba(0,0,0,.1);
-    }
-    .console-side .hide-side{
-        padding:20px 0 10px 20px;
-        font-size:16px;
-        cursor:pointer;
-    }
-    .console-ul{
         width:calc(100%);
-        height:calc(100% - 60px);
+        height:calc(100%);
+        background:#000;
+    }
+    .console-header{
+        width:100%;
+        height:40px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        background:#5a5454;
+    }
+    .console-header .home{
+        width:60px;
+        height:40px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        cursor:pointer;
+        margin-right:50px;
+    }
+    .console-header .item{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-left:30px;
+    }
+    .console-header .item .inp1{
+        width:250px;
+    }
+    .el-input__inner {
+        background-color: #5a5454;
+        color: #dedfe2;
+        height: 30px;
+        line-height: 30px;
+        border: none;
+    }
+    .el-input__icon {
+        line-height: 30px;
+    }
+    .console-header-list .empty{
+        padding:15px 10px;
+        font-size:14px;
+    }
+    .console-header-list .child{
+        line-height:30px;
+        cursor: pointer;
+        padding-left:10px;
+    }
+    .console-header-list .child:hover{
+        color:#000;
+        background-color: #F5F7FA;
+    }
+    .console-header-list .select-all{
+        margin:10px 0 0 10px;
     }
     .comsole-consten{
-        width:100%;
+        width:calc(100%);
+        height:calc(100% - 80px);
         position: relative;
         overflow:hidden;
     }
@@ -58,7 +77,7 @@
         font-size:12px;
         background:#3a3333;
         color:#aaa;
-        
+        padding:0 10px;
         width:calc(100%);
     }
     .comsole-consten .navs .item{
@@ -114,40 +133,46 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    
+    .console-footer{
+        height:40px;
+        background:#5a5454;
+        padding-left:100px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    .console-footer input{
+        width:800px;
+        height:30px;
+        padding-left:10px;
+        font-size:14px;
+        letter-spacing:1px;
+        border:none;
+    }
 </style>
 <div class="content" id="team" v-cloak>
-    <div class="console-side" :style="{width:isCollapse?'55px':'250px'}">
-        <div class="hide-side" @click="isCollapse=!isCollapse">
-            <i class="el-icon-menu"></i> <span v-if="!isCollapse">隐藏左边栏</span> 
+    <div class="console-header">
+        <div class="home" @click="goHome"><i class="el-icon-s-home fs-22"></i></div>
+        <div class="item">
+            <span>团队筛选：</span>
+            <el-select v-model="team_name" placeholder="请选择团队">
+                <el-option v-for="(val, name, index) in assets" :key="name" :label="name" :value="name" ></el-option>
+            </el-select>
         </div>
-        <el-menu 
-            :collapse="isCollapse"
-            class="console-ul"
-            :default-active="defaultActive" 
-            class="el-menu-vertical-demo" 
-            @open="handleOpen" 
-            @close="handleClose"
-            background-color="#3a3333" 
-            text-color="#fff" 
-            :default-openeds="defaultOpends"
-            active-text-color="#ffd04b">
-            <div v-for="(val, name, index) in assets" :key="index">
-                <el-submenu :index="'console_'+index">
-                    <template slot="title">
-                        <i class="el-icon-folder"></i>
-                        <span>{{name}}</span>
-                    </template>
-                    <el-menu-item-group>
-                        <el-menu-item 
-                            v-for="(item,index1) in val" 
-                            :index="item._id"
-                            @click="addXtermForAssets(item)"
-                            :key="index1">{{item.name+'-'+item.outer_ip}}</el-menu-item>
-                    </el-menu-item-group>
-                </el-submenu>
-            </div>
-        </el-menu>
+        <div class="item">
+            <el-popover placement="bottom-start" width="300" trigger="hover">
+                <div class="console-header-list">
+                    <div v-if="assetslist.length?true:false">
+                        <div class="child" v-for="item in assetslist" :key="item.code" @click="addXtermForAssets(item)">{{item.name}}</div>
+                        <el-button class="select-all" type="primary" size="small" @click="addAllToXterm">全部选择</el-button>
+                    </div>
+                    <div v-if="!assetslist.length?true:false" class="empty">请先选择团队信息。</div>
+                </div>
+                <div class="select-btn" slot="reference">请选择需要打开的资产</div>
+            </el-popover>
+        </div>
+        
     </div>
     <div class="comsole-consten">
         <div class="navs">
@@ -173,26 +198,36 @@
                 :id="'console_terminal_'+item.xtermId"></div>
         </div>
     </div>
+    <div class="console-footer">
+        <span>全局运行指令：</span>
+        <input type="text" v-model="instructions" @keyup="onKeyUp" @keyup.enter="onEnter" placeholder="请输入">
+    </div>
 </div>
 <script>
     const xtermRunList = [];
     let xtermId = -1;
+    const key_storage = util.getStorage('local', 'console_key_history');
+    const keyHistory = key_storage ? JSON.parse(key_storage).splice(-20) : [];
+    let hisBegin = keyHistory.length;
     new Vue({
         el: '#team',
         data: function () {
             return {
                 assets:{},
-                defaultOpends:[],
-                defaultActive:'',
                 xtermList:[],
                 navIndex:0,
-                isCollapse: false,
+                assetslist: [],
+                assets_name: '',
+                team_name:'',
+                instructions:'',
             }
         },
         watch:{
-            'isCollapse'(){
-                setTimeout(()=>{ util.resizeScreen(xtermRunList, this.socket); },500)
-            }
+            'team_name'(newVal,oldVal){
+                if(newVal !== oldVal){
+                    this.assetslist = this.assets[newVal];
+                }
+            },
         },
         mounted() {
             $('#body_content').css('height',$(window).height() +'px');
@@ -216,7 +251,6 @@
                                 item.xtermId = i;
                                 i++;
                                 xtermList.push(item);
-                                if(!this.defaultActive) this.defaultActive = item._id;
                             }
                             if(!assets[item.teamlist[0].name]){
                                 assets[item.teamlist[0].name] = [ item ];
@@ -237,6 +271,10 @@
             },
             selectTab(item){
                 this.navIndex = item.xtermId;
+            },
+            addAllToXterm(){
+                const assetslist = this.assetslist || [];
+                assetslist.forEach( item => this.addXtermForAssets(item) )
             },
             addXtermForAssets(item){
                 item = JSON.parse(JSON.stringify(item))
@@ -275,11 +313,36 @@
                 })
                 xtermRunList.push(xteam);
             },
-            handleOpen(key, keyPath) {
-                console.log(key, keyPath);
+            goHome(){
+                location.href="/"
             },
-            handleClose(key, keyPath) {
-                console.log(key, keyPath);
+            onEnter(){
+                const xtermList = this.xtermList;
+                if(!xtermList || !xtermList.length) {
+                    popup.alert({title:'请登录中的资产!'});
+                    return;
+                }
+                
+                xtermList.forEach(item => {
+                    this.socket.emit('console_data_'+ item.xtermId, this.instructions + '\n')
+                })
+                keyHistory.push(this.instructions);
+                hisBegin = keyHistory.length;
+                util.setStorage('local','console_key_history',JSON.stringify(keyHistory));
+                this.instructions = '';
+            },
+            onKeyUp(e){
+                if(e.code === 'ArrowUp'){
+                    if (hisBegin > 0) {
+                        hisBegin--
+                        this.instructions = keyHistory[hisBegin];
+                    }
+                }else if(e.code === 'ArrowDown'){
+                    if (hisBegin < keyHistory.length-1) {
+                        hisBegin++
+                        this.instructions = keyHistory[hisBegin];
+                    }
+                }
             },
         }
     })

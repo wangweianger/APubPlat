@@ -475,7 +475,7 @@ class utilfn {
                 data, resize, close, end
             })
         })
-        socket.emit('socket', { taskItem, data: result, buildType, id: json.id || ''} || 'begin');
+        socket.emit('socket', { taskItem, data: result, buildType, id: json.id || '', cols: XTEAMLIST[0].cols, rows: XTEAMLIST[0].rows} || 'begin');
 
         window.addEventListener('resize', this.resizeScreen.bind(this, XTEAMLIST, socket), false)
 
@@ -614,7 +614,7 @@ class utilfn {
             data, resize, close, end
         })
 
-        socket.emit('socket', { data: result, buildType: 'sshonline' } || 'begin');
+        socket.emit('socket', { data: result, buildType: 'sshonline', cols: xteam.cols, rows: xteam.rows } || 'begin');
 
         window.addEventListener('resize', this.resizeScreen.bind(this, [xteam], socket), false)
         this.resizeScreen([xteam], socket)
