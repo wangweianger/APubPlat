@@ -46,7 +46,7 @@ module.exports = appInfo => {
 
     exports.io = {
         namespace: {
-            '/': {
+            '/socket': {
                 connectionMiddleware: [],
                 packetMiddleware: [],
             },
