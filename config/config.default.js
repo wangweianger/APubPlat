@@ -45,6 +45,10 @@ module.exports = appInfo => {
     };
 
     exports.io = {
+        init: {
+            transports: [ 'polling', 'websocket' ],
+            allowUpgrades: true,
+        },
         namespace: {
             '/socket': {
                 connectionMiddleware: [],
