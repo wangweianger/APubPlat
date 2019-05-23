@@ -39,9 +39,9 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start --workers=2 --title=apubplat --sticky",
+    "start": "egg-scripts start --sticky",
     "stop": "egg-scripts stop",
-    "dev": "egg-bin dev",
+    "dev": "egg-bin dev --sticky",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
