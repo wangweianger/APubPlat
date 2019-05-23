@@ -38,7 +38,7 @@ module.exports = function socket(json) {
             socket.on(json.socket.data || 'data', function socketOnData(data) {
                 if (isEnd) isEnd = false;
                 if (isSuccess) isSuccess = false;
-                stream.write(data);
+                try { stream.write(data); } catch (err) { console.log(err); }
             });
 
             socket.on(json.socket.close || 'close', function() {

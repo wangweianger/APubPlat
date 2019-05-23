@@ -430,6 +430,7 @@ class utilfn {
         // socket
         const socket = SOCKET = io.connect('/');
         Terminal.applyAddon(fit);
+        Terminal.applyAddon(attach);
         // list
         assetsList.forEach((item, index) => {
             // 先执行 xteam
@@ -441,6 +442,7 @@ class utilfn {
             xteam.open(document.getElementById('terminal'+index));
             xteam.focus()
             xteam.fit()
+            xteam.attach(socket)
 
             const data = 'process_data_' + index;
             const resize = 'process_resize_' + index;
@@ -582,6 +584,9 @@ class utilfn {
         const end = 'console_end_' + index;
 
         Terminal.applyAddon(fit);
+        Terminal.applyAddon(fullscreen); 
+        Terminal.applyAddon(attach);
+
         let xteam = new Terminal({
             cursorBlink: true,
             fontSize: 14,
@@ -590,6 +595,7 @@ class utilfn {
         xteam.open(document.getElementById('console_terminal_' + index));
         xteam.focus()
         xteam.fit()
+        xteam.attach(socket)
 
         xteam.on('data', function (res) {
             socket.emit(data, res)

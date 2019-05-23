@@ -233,6 +233,7 @@
             $('#body_content').css('height',$(window).height() +'px');
             this.assetsList();
             this.socket = util.socket();
+            this.fullscreen();
         },
         methods: {
             assetsList(){
@@ -343,6 +344,16 @@
                         this.instructions = keyHistory[hisBegin];
                     }
                 }
+            },
+            fullscreen(){
+                const _this = this;
+                $(document).keyup(function (event) {
+                    if (event.keyCode === 112) {
+                        if(xtermRunList && xtermRunList[_this.navIndex]){
+                            xtermRunList[_this.navIndex].toggleFullScreen();
+                        }
+                    }
+                });
             },
         }
     })
