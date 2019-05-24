@@ -186,7 +186,7 @@
                             <div>{{scope.row.content[0].backup_path}}</div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="操作" fixed="right" width="150">
+                    <el-table-column label="操作" width="150">
                         <template slot-scope="scope">
                             <div class="tab-btns">
                                 <el-button 
@@ -502,6 +502,7 @@
                 this.taskItem.reduction_shell_body = editor.getValue();
                 util.ajax({
                     nohideloading: true,
+                    notimeout: true,
                     url: `${config.baseApi}api/v1/build/reductionApplications`,
                     data: {
                         id: this.id,

@@ -96,7 +96,7 @@
 <div class="content" id="team" v-cloak>
     <el-row>
         <el-col :span="12">
-            <div class="grid-content bg-purple com_title">开始构建00000</div>
+            <div class="grid-content bg-purple com_title">开始构建</div>
         </el-col>
     </el-row>
     <div class="config_main mt30">
@@ -500,6 +500,7 @@
                 }
                 util.ajax({
                     nohideloading: true,
+                    notimeout: true,
                     url: `${config.baseApi}api/v1/build/backupApplications`,
                     data: {
                         id: this.id,
@@ -547,6 +548,7 @@
                 }
                 util.ajax({
                     nohideloading:true,
+                    notimeout: true,
                     url: `${config.baseApi}api/v1/build/generateBuildConfig`,
                     data: {
                         id: this.id,
