@@ -232,7 +232,7 @@
             <div class="block mt30">
                 <div class="left">shell脚本内容</div>
                 <div class="right">
-                    <div :id="'editor_'+index" class="comm_build_textarea"></div>
+                    <div :id="'editor_'+index" class="comm_build_textarea" :style="{height:item.task_type=='command'?'80px':'300px'}"></div>
                 </div>
             </div>
             <div class="ml10 mt30 light tc" v-if="item.task_type!='command'?true:false">

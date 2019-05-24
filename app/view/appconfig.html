@@ -192,7 +192,7 @@
                     <div class="left">{{item.task_type=='command'?'命令行脚本内容':'部署shell脚本'}}<span class="red">*</span></div>
                     <div>
                         <div class="mt10 right">
-                            <div :id="'editor_'+index" style="width:1000px;height:350px;"></div>
+                            <div :id="'editor_'+index" :style="{width:'1000px',height:item.task_type=='command'?'80px':'350px'}"></div>
                         </div>
                         <div class="mt10 light" v-show="item.task_type!='command'?true:false">备注：服务器初始shell脚本。</div>
                     </div>
