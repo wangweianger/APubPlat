@@ -115,13 +115,11 @@
                         </el-table-column>
                         <el-table-column label="操作">
                             <template slot-scope="scope">
-                                <div class="mb10">
-                                    <el-button @click="buildProcess(scope.row)" type="primary" size="small">应用部署</el-button>
-                                    <el-button @click="goToReduction(scope.row)" type="danger" size="small">应用还原</el-button>
-                                </div>
                                 <div>
-                                    <el-button @click="applicationConsole(scope.row)" type="danger" size="small">控制台</el-button>
-                                    <el-button @click="setAppConfig(scope.row)" type="primary" size="small" plain>构建配置</el-button>
+                                    <el-button @click="buildProcess(scope.row)" type="text" size="small">应用部署</el-button>
+                                    <el-button @click="applicationConsole(scope.row)" type="text" size="small">控制台</el-button>
+                                    <el-button @click="goToReduction(scope.row)" type="text" size="small">应用还原</el-button>
+                                    <el-button @click="setAppConfig(scope.row)" type="text" size="small" plain>构建配置</el-button>
                                 </div>
                             </template>
                         </el-table-column>

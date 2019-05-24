@@ -430,6 +430,7 @@ class utilfn {
         // socket
         const socket = SOCKET = io.connect('/');
         Terminal.applyAddon(fit);
+        Terminal.applyAddon(fullscreen); 
         Terminal.applyAddon(attach);
         // list
         assetsList.forEach((item, index) => {

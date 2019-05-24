@@ -79,7 +79,7 @@
     }
     .build_content .bottom .shell-terminal{
         width:calc(100%);
-        height:500px;
+        height:650px;
         background:#000;
         position: relative;
     }
@@ -104,7 +104,7 @@
             <div class="bottom" style="width:100%;">
                 <div class="top mb20">资产列表</div>
                 <div class="mb10">
-                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-tickets" size="small">资产任务</el-button>
+                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-tickets" size="small">脚本任务</el-button>
                     <el-button @click="applicationConsole()" type="danger" icon="el-icon-s-tools" size="small">控制台</el-button>
                     <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
                     </span>
@@ -127,7 +127,7 @@
                                 <el-button 
                                     class="btn-item" 
                                     @click="serverConfigs(scope.row)"
-                                    type="primary" size="mini">资产任务</el-button>
+                                    type="primary" size="mini">脚本任务</el-button>
                                 <div v-for="(item,index) in tasklist" :key="index">
                                     <el-button 
                                         class="btn-item" 
@@ -253,7 +253,7 @@
     <!-- 开始构建 -->
     <el-dialog class="build_product" :title="buildLogs.task_name" :fullscreen="true" :close-on-click-modal="false" :visible.sync="dialogTableVisible">
         <div class="build_content">
-            <div class="top">
+            <div class="top" v-if="taskType!=='command'">
                 <el-table class="table" border max-height="250" :data="buildLogs.content">
                     <el-table-column property="assets_name" label="资产名称" width="200"></el-table-column>
                     <el-table-column property="outer_ip" label="外网IP" width="180"></el-table-column>
@@ -330,11 +330,13 @@
                 backupLogs:{},
                 buildLogs:{},
                 activeName: '0',
+                taskType:'git',
             }
         },
         mounted() {
             this.buildListEnd = [];
             this.itemdetail();
+            this.fullscreen();
         },
         methods: {
             runMonaco(id, data){
@@ -416,6 +418,7 @@
 
                 this.type = type;
                 this.taskName = taskItem.task_name;
+                this.taskType = taskItem.task_type;
                 // 弹出框
                 this.dialogTableVisible = true;
                 if(!this.buildLogs.task_name){
@@ -581,6 +584,17 @@
                 })
                 ids = ids ? ids.slice(0, -1) : '';
                 window.open("/console?ids=" + ids);
+            },
+            fullscreen() {
+                const _this = this;
+                $(document).keyup(function (event) {
+                    console.log(event.keyCode)
+                    if (event.keyCode === 112) {
+                        if (xteamlist && xteamlist[_this.activeName]) {
+                            xteamlist[_this.activeName].toggleFullScreen();
+                        }
+                    }
+                });
             },
         }
     })

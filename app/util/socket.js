@@ -15,6 +15,7 @@ module.exports = function socket(json) {
     const timeout = 1000;
     const regExp = new RegExp(`\\[${json.username || ''}@.+?\\]`);
     const socketIndex = json.socket.data.split('_').splice(-1).join();
+    const taskType = json.taskType || 'command';
 
     socket.on(json.socket.geometry || 'geometry', function socketOnGeometry(cols, rows) {
         json.cols = cols;
@@ -75,7 +76,7 @@ module.exports = function socket(json) {
                 // 执行成功
                 if (data.indexOf('SUCCESSFUL_COMMAND_CONSTRUCTION') > -1) isSuccess = true;
                 if (timer) clearTimeout(timer);
-                if (regExp.test(data)) {
+                if (regExp.test(data) && (taskType === 'shell' || taskType === 'git')) {
                     timer = setTimeout(() => {
                         isEnd = true;
                         if (!isSend) {

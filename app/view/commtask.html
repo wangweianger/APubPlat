@@ -16,9 +16,9 @@
     <!-- table -->
     <div class="com_table_block mt20">
         <div class="table_header">
-            <div class="l">资产任务管理</div>
+            <div class="l">脚本任务管理</div>
             <div class="r">
-                <el-button type="primary" size="small" class="ml20" icon="el-icon-plus" @click="handleCommTask(1)">新建资产任务</el-button>
+                <el-button type="primary" size="small" class="ml20" icon="el-icon-plus" @click="handleCommTask(1)">新建脚本任务</el-button>
             </div>
         </div>
         <div class="table_body">
@@ -51,7 +51,7 @@
         </div>
     </div>
     <!-- model弹出框 -->
-    <el-dialog width="1000px" title="资产任务编辑" :visible.sync="dialogTableVisible">
+    <el-dialog width="1000px" title="脚本任务编辑" :visible.sync="dialogTableVisible">
         <div class="com_model_main">
             <el-row>
                 <el-col :span="12">
@@ -210,6 +210,7 @@
                         is_plain: 2,
                         shell_opction:'',
                         shell_path:'',
+                        task_type:'taskshell',
                     }
                     editor ? editor.setValue('') : setTimeout(() => { this.runMonaco('editor', ''); });
                 }

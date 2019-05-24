@@ -77,7 +77,7 @@ module.exports = app => {
     // 删除
     apiV1Router.post('email/delete', email.delete);
 
-    // -------------------------- 资产任务管理 ------------------------------
+    // -------------------------- 脚本任务管理 ------------------------------
     // get list
     apiV1Router.get('commtask/list', commtask.list);
     // 新增 | 编辑

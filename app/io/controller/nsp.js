@@ -57,6 +57,7 @@ class NspController extends Controller {
                         cols: cols || 138,
                         rows: rows || 46,
                         term: 'xterm-color',
+                        taskType: taskItem.task_type || 'command',
                         socket: {
                             socket: ctx.socket,
                             geometry: datas.geometry,
@@ -92,6 +93,8 @@ class NspController extends Controller {
             shell = taskItem.shell_path ?
                 `sh ${taskItem.shell_path} ${taskItem.shell_opction || ''} \n` :
                 taskItem.shell_body + '\n';
+        } else if (taskItem && taskItem.shell_body) {
+            shell = taskItem.shell_body + '\n';
         }
 
         const result = await this.ssh2Client({ data, taskItem, shell, id });

@@ -23,8 +23,8 @@ class CommtaskController extends Controller {
         const shell_body = query.shell_body;
 
         if (parseInt(handletype) === 2 && !_id) throw new Error('id参数不能为空!');
-        if (!name) throw new Error('资产任务名称不能为空!');
-        if (!shell_body) throw new Error('资产任务脚本内容不能为空!');
+        if (!name) throw new Error('脚本任务名称不能为空!');
+        if (!shell_body) throw new Error('脚本任务脚本内容不能为空!');
 
         const result = await this.ctx.service.commtask.handle(query);
 

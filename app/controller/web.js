@@ -91,7 +91,7 @@ class WebController extends Controller {
         });
     }
 
-    // 资产任务
+    // 脚本任务
     async commtask() {
         const { ctx } = this;
         await ctx.render('commtask', {

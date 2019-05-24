@@ -37,7 +37,7 @@
         <div class="bottom">
             <div class="top mb20">
                 <div>资产列表</div> 
-                <el-button @click="addNewCommTask" type="primary" icon="el-icon-plus" size="small">新建资产任务</el-button>
+                <el-button @click="addNewCommTask" type="primary" icon="el-icon-plus" size="small">新建脚本任务</el-button>
             </div>
             <div class="mb20">
                 <span class="ml10 light">
@@ -67,14 +67,13 @@
                             <span v-for="(item,index) in tasklist" :key="index">
                                 <el-button 
                                     @click="showTaskOpctions(2,item,scope.row)"
-                                    v-if="item==1?true:false" 
+                                    v-if="item.type==1?true:false" 
                                     :type="item.btn_color" 
                                     :plain="item.is_plain==1?true:false"
                                     size="mini" 
                                     >{{item.name}}</el-button>
                                     <div v-if="index!==0 && index%3===0" class="mb10"></div>
                             </span>
-                            <div class="mt10"></div>
                             <el-button @click="showSshKey(scope.row)" type="danger" size="mini">获得SSH KEY</el-button>
                         </div>
                     </template>
@@ -116,7 +115,7 @@
         </el-dialog>
 
         <!-- model弹出框 -->
-        <el-dialog width="1000px" title="资产任务编辑" :visible.sync="dialogTableVisible">
+        <el-dialog width="1000px" title="脚本任务编辑" :visible.sync="dialogTableVisible">
             <div class="com_model_main">
                 <el-row>
                     <el-col :span="12">
@@ -164,8 +163,8 @@
                 </div>
                 <div class="btns">
                     <el-button type="primary" @click="deployApplications">执行任务</el-button>
-                    <el-button type="success" @click="updageAppConfigs" plain>修改配置</el-button>
                     <el-button type="danger" v-if="taskItem.type==2?true:false" @click="generateBuildConfig" plain>生成配置</el-button>
+                    <el-button type="success" @click="updageAppConfigs" plain>修改配置</el-button>
                 </div>
             </div>
         </el-dialog>
@@ -269,21 +268,21 @@
             },
             handleTask(assetsItem,commItem){
                 util.ajax({
-                url: `${config.baseApi}api/v1/util/handleShellTasks`,
-                data: {
-                    shell_type: commItem.type,
-                    shell_body: commItem.shell_body,
-                    shell_opction: commItem.shell_opction,
-                    shell_path: commItem.shell_path,
-                    host: assetsItem.outer_ip,
-                    port: assetsItem.port,
-                    username: assetsItem.user,
-                    password: assetsItem.password,
-                },
-                success: data => {
-                    popup.miss({ title: data.data.result })
-                }
-            })
+                    url: `${config.baseApi}api/v1/util/handleShellTasks`,
+                    data: {
+                        shell_type: commItem.type,
+                        shell_body: commItem.shell_body,
+                        shell_opction: commItem.shell_opction,
+                        shell_path: commItem.shell_path,
+                        host: assetsItem.outer_ip,
+                        port: assetsItem.port,
+                        username: assetsItem.user,
+                        password: assetsItem.password,
+                    },
+                    success: data => {
+                        popup.miss({ title: data.data.result })
+                    }
+                })
             },
             addNewCommTask(){
                 location.href="/commtask?model=1"

@@ -348,6 +348,7 @@
             fullscreen(){
                 const _this = this;
                 $(document).keyup(function (event) {
+                    console.log(event.keyCode)
                     if (event.keyCode === 112) {
                         if(xtermRunList && xtermRunList[_this.navIndex]){
                             xtermRunList[_this.navIndex].toggleFullScreen();
