@@ -112,5 +112,5 @@ module.exports = app => {
 
     // -------------------------- socket.io ------------------------------
     // socket.io
-    io.of('/socket').route('socket', io.controller.nsp.socket);
+    io.of('/').route('socket', io.controller.nsp.socket);
 };

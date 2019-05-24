@@ -428,7 +428,7 @@ class utilfn {
         }
 
         // socket
-        const socket = SOCKET = io.connect('/socket');
+        const socket = SOCKET = io.connect('/');
         Terminal.applyAddon(fit);
         Terminal.applyAddon(attach);
         // list
@@ -556,7 +556,7 @@ class utilfn {
     *  query socket 参数
     */
     socket(json = {}) {
-        const socket = io.connect('/socket');
+        const socket = io.connect('/');
         socket.on('close', msg => { close() });
         socket.on('disconnect', msg => { close() });
         socket.on('disconnecting', () => { close() });
