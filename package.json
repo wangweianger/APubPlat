@@ -1,5 +1,5 @@
 {
-  "name": "cluster-star-pc-web",
+  "name": "apubplat",
   "version": "1.0.0",
   "description": "",
   "private": true,
@@ -14,7 +14,6 @@
     "excel-export": "^0.5.1",
     "md5": "^2.2.1",
     "moment": "^2.24.0",
-    "mysqls": "^1.1.0",
     "nodemailer": "^5.1.1",
     "qiniu": "^7.2.1",
     "ssh2": "^0.8.2",
