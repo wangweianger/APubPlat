@@ -67,6 +67,20 @@ class ApplicationService extends Service {
         };
     }
 
+    async all() {
+        return this.ctx.model.Application.aggregate([
+            { $match: { status: 1 } },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    assets_list: 1,
+                },
+            },
+            { $sort: { count: -1 } },
+        ]).exec();
+    }
+
     // add | update
     async handle(json) {
         const { type, name, code, status, _id, team_code, environ_code } = json;

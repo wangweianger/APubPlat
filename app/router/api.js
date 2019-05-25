@@ -40,6 +40,8 @@ module.exports = app => {
     // --------------------------- 应用管理 --------------------------------
     // get list
     apiV1Router.get('application/list', application.list);
+    // get all
+    apiV1Router.get('application/all', application.all);
     // 新增 | 编辑
     apiV1Router.post('application/handle', application.handle);
     // 设置状态

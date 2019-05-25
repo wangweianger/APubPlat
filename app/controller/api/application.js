@@ -22,6 +22,15 @@ class ApplicationController extends Controller {
         });
     }
 
+    async all() {
+        const { ctx } = this;
+        const result = await this.ctx.service.application.all();
+
+        ctx.body = this.app.result({
+            data: result,
+        });
+    }
+
     // add | update
     async handle() {
         const { ctx } = this;

@@ -232,7 +232,7 @@
             <div class="block mt30">
                 <div class="left">shell脚本内容</div>
                 <div class="right">
-                    <div :id="'editor_'+index" class="comm_build_textarea" :style="{height:item.task_type=='command'?'80px':'300px'}"></div>
+                    <div :id="'editor_'+index" class="comm_build_textarea" :style="{height:item.task_type=='command'?'40px':'300px'}"></div>
                 </div>
             </div>
             <div class="ml10 mt30 light tc" v-if="item.task_type!='command'?true:false">
@@ -240,11 +240,27 @@
                 请确保已生成构建配置，若未生成构建配置，则先执行生成构建配置按钮，再执行部署任务。
             </div>
             <div class="btns mb20">
-                <el-button type="primary" @click="deployApplications(item,1)">服务部署</el-button>
-                <el-button type="success" @click="backupApplications(item)" plain>服务备份</el-button>
-                <el-button v-if="item.task_type!='command'?true:false" type="danger" @click="generateBuildConfig(item)" plain>生成构建配置
+                <el-button 
+                    type="primary" 
+                    @click="deployApplications(item,1)">
+                    {{item.task_type=='command'?'开始运行':'开始部署'}}
                 </el-button>
-                <el-button type="primary" @click="updageAppConfigs(index)" plain>修改构建配置</el-button>
+                <el-button 
+                    v-if="item.task_type!='command'?true:false" 
+                    type="success" 
+                    @click="backupApplications(item)" plain>
+                    服务备份
+                </el-button>
+                <el-button 
+                    v-if="item.task_type!='command'?true:false" 
+                    type="danger" @click="generateBuildConfig(item)" plain>
+                    生成构建配置
+                </el-button>
+                <el-button 
+                    type="primary" 
+                    @click="updageAppConfigs(index)" plain>
+                    修改构建配置
+                </el-button>
                 <el-button type="default" @click="goBack">返回</el-button>
             </div>
         </div>
@@ -398,6 +414,15 @@
                 location.href = "/build"
             },
             deployApplications(taskItem, type, assetsItem) {
+                if (!taskItem.shell_path && taskItem.task_type != 'command') {
+                    popup.alert({ title: 'shell脚本路径不能为空!' })
+                    return;
+                }
+                if (!taskItem.shell_body) {
+                    popup.alert({ title: 'shell脚本内容不能为空!' })
+                    return;
+                }
+
                 if(!this.multipleSelection.length){
                     popup.alert({title:'请先勾选需要部署的服务器!'});
                     return;
@@ -476,7 +501,16 @@
                     success: data => {}
                 })
             },
-            backupApplications(item){
+            backupApplications(item = {}){
+                if(!item.project_path){
+                    popup.alert({title:'需要备份的资源|目录不能为空!'})
+                    return;
+                }
+                if (!item.backups_path) {
+                    popup.alert({ title: '备份文件的存放位置不能为空!' })
+                    return;
+                }
+
                 this.dialogModelVisible = true;
                 if (this.backupLogs.isLoad) {
                     this.logsData = this.backupLogs;
@@ -494,7 +528,7 @@
                     })
                 })
                 this.backupLogs = this.logsData = {
-                    task_name: item.name + '任务-生成构建配置',
+                    task_name: item.task_name + '任务-服务备份',
                     type: 3,
                     content: assetslist,
                 }
@@ -525,6 +559,15 @@
                 util.setSocketXteam(type, xteamlist, socket);
             },
             generateBuildConfig(item){
+                if (!item.shell_path) {
+                    popup.alert({ title: 'shell脚本路径不能为空!' })
+                    return;
+                }
+                if (!item.shell_body) {
+                    popup.alert({ title: 'shell脚本内容不能为空!' })
+                    return;
+                }
+
                 this.dialogModelVisible = true;
                 if(this.configLogs.isLoad){
                     this.logsData = this.configLogs;
@@ -542,7 +585,7 @@
                     })
                 })
                 this.configLogs = this.logsData = {
-                    task_name: item.name + '任务-生成构建配置',
+                    task_name: item.task_name + '任务-生成构建配置',
                     type: 3,
                     content: assetslist,
                 }

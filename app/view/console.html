@@ -32,7 +32,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        margin-left:30px;
+        margin-right: 10px;
     }
     .console-header .item .inp1{
         width:250px;
@@ -62,6 +62,12 @@
     }
     .console-header-list .select-all{
         margin:10px 0 0 10px;
+    }
+    .console-header .line{
+        height:20px;
+        width:1px;
+        background:#ccc;
+        margin:0 25px;
     }
     .comsole-consten{
         width:calc(100%);
@@ -154,9 +160,10 @@
 <div class="content" id="team" v-cloak>
     <div class="console-header">
         <div class="home" @click="goHome"><i class="el-icon-s-home fs-22"></i></div>
+        <div class="line"></div>
         <div class="item">
-            <span>团队筛选：</span>
-            <el-select v-model="team_name" placeholder="请选择团队">
+            <!-- <span>通过团队筛选：</span> -->
+            <el-select v-model="team_name" class="w-200" placeholder="请选择团队">
                 <el-option v-for="(val, name, index) in assets" :key="name" :label="name" :value="name" ></el-option>
             </el-select>
         </div>
@@ -165,14 +172,34 @@
                 <div class="console-header-list">
                     <div v-if="assetslist.length?true:false">
                         <div class="child" v-for="item in assetslist" :key="item.code" @click="addXtermForAssets(item)">{{item.name}}</div>
-                        <el-button class="select-all" type="primary" size="small" @click="addAllToXterm">全部选择</el-button>
+                        <el-button class="select-all" type="primary" size="small" @click="addAllToXterm(1)">全部选择</el-button>
                     </div>
                     <div v-if="!assetslist.length?true:false" class="empty">请先选择团队信息。</div>
                 </div>
                 <div class="select-btn" slot="reference">请选择需要打开的资产</div>
             </el-popover>
         </div>
-        
+        <div class="line"></div>
+        <div class="item">
+            <!-- <span>通过应用筛选：</span> -->
+            <el-select v-model="app_name" class="w-200" placeholder="请选择应用">
+                <el-option v-for="(val, name, index) in application" :key="name" :label="name" :value="name"></el-option>
+            </el-select>
+        </div>
+        <div class="item">
+            <el-popover placement="bottom-start" width="300" trigger="hover">
+                <div class="console-header-list">
+                    <div v-if="applicationlist.length?true:false">
+                        <div class="child" v-for="item in applicationlist" :key="item.code" @click="addXtermForAssets(item)">
+                            {{item.name}}</div>
+                        <el-button class="select-all" type="primary" size="small" @click="addAllToXterm(2)">全部选择</el-button>
+                    </div>
+                    <div v-if="!applicationlist.length?true:false" class="empty">请先选择应用信息。</div>
+                </div>
+                <div class="select-btn" slot="reference">请选择需要打开的资产</div>
+            </el-popover>
+        </div>
+        <div class="line"></div>
     </div>
     <div class="comsole-consten">
         <div class="navs">
@@ -220,6 +247,9 @@
                 assets_name: '',
                 team_name:'',
                 instructions:'',
+                app_name: '',
+                application:{},
+                applicationlist:[],
             }
         },
         watch:{
@@ -228,10 +258,16 @@
                     this.assetslist = this.assets[newVal];
                 }
             },
+            'app_name'(newVal, oldVal) {
+                if (newVal !== oldVal) {
+                    this.applicationlist = this.application[newVal];
+                }
+            },
         },
         mounted() {
             $('#body_content').css('height',$(window).height() +'px');
             this.assetsList();
+            this.applicationList();
             this.socket = util.socket();
             this.fullscreen();
         },
@@ -270,11 +306,28 @@
                     }
                 })
             },
+            applicationList() {
+                util.ajax({
+                    type: 'get',
+                    url: `${config.baseApi}api/v1/application/all`,
+                    success: data => {
+                        const datas = data.data || [];
+                        const application = {};
+                        const xtermList = [];
+                        datas.forEach((item, index) => {
+                            if (!application[item.name]) {
+                                application[item.name] = item.assets_list;
+                            }
+                        })
+                        this.application = application;
+                    }
+                })
+            },
             selectTab(item){
                 this.navIndex = item.xtermId;
             },
-            addAllToXterm(){
-                const assetslist = this.assetslist || [];
+            addAllToXterm(type){
+                const assetslist = type === 1 ? this.assetslist : this.applicationlist;
                 assetslist.forEach( item => this.addXtermForAssets(item) )
             },
             addXtermForAssets(item){
