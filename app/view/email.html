@@ -32,7 +32,7 @@
                 </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <div class="mb10">
+                        <div>
                             <el-button @click="handleEmail(2,scope.row)" type="primary" size="small">编辑</el-button>
                             <el-button v-if="scope.row.status==1?true:false" @click="hanleUse(scope.row)" type="danger"
                                 size="small" plain>禁用</el-button>
