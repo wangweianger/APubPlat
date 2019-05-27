@@ -14,7 +14,7 @@
     z-index:11;
 }  
 .side .switch-nav{
-    width: 200px;
+    width: 280px;
     height:50px;
     display: flex;
     flex-direction: row;
@@ -72,7 +72,7 @@
             <i class="el-icon-menu"></i>
             <!-- <span class="iconfont">&#xe626;</span> -->
         </div>
-        <div class="text">自动化部署平台</div>
+        <div class="text">APubPlat自动化部署平台</div>
     </div>
     <div class="label" :style="{'height':nav_h+'px'}">
         <el-menu 
@@ -84,10 +84,10 @@
             @close="handleClose"
             @select="handleSelect" 
             :collapse="isCollapse">
-            <el-menu-item class="side_item" index="1" @click="location('/')">
+            <!-- <el-menu-item class="side_item" index="1" @click="location('/')">
                 <i class="el-icon-house"></i>
                 <span slot="title">控制面板</span>
-            </el-menu-item>
+            </el-menu-item> -->
             <el-menu-item class="side_item" index="2" @click="location('/team')">
                 <i class="el-icon-apple"></i>
                 <span slot="title">团队管理</span>
@@ -120,7 +120,7 @@
                 <i class="el-icon-message"></i>
                 <span slot="title">邮件管理</span>
             </el-menu-item>
-            <el-menu-item class="side_item" index="9" @click="location('/users')">
+            <el-menu-item class="side_item" index="9" @click="location('/user')">
                 <i class="el-icon-user"></i>
                 <span slot="title">用户管理</span>
             </el-menu-item>

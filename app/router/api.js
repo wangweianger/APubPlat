@@ -14,10 +14,26 @@ module.exports = app => {
         build,
         commtask,
         logs,
+        user,
     } = controller.api;
 
     // 校验用户是否登录中间件
     // const tokenRequired = middleware.tokenRequired();
+    // -----------------用户相关------------------
+    // 用户登录
+    apiV1Router.post('user/login', user.login);
+    // 用户注册
+    apiV1Router.post('user/register', user.register);
+    // 退出登录
+    apiV1Router.get('user/logout', user.logout);
+    // 新增 | 编辑
+    apiV1Router.post('user/handle', user.handle);
+    // 获得用户列表
+    apiV1Router.get('user/getUserList', user.getUserList);
+    // 冻结解冻用户
+    apiV1Router.post('user/setStatus', user.setStatus);
+    // 删除用户
+    apiV1Router.post('user/delete', user.delete);
 
     // --------------------------- 团队管理 --------------------------------
     // get list

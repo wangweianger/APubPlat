@@ -123,6 +123,14 @@ class WebController extends Controller {
         });
     }
 
+    // 用户管理
+    async user() {
+        const { ctx } = this;
+        await ctx.render('user', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

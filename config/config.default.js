@@ -26,6 +26,9 @@ module.exports = appInfo => {
         },
     };
 
+    // 用户密码加盐随机值
+    config.user_pwd_salt_addition = 'ZANEHELLOBEAUTIFUL';
+
     // 用户登录态持续时间 1 天
     config.user_login_timeout = 86400;
 
@@ -96,6 +99,17 @@ module.exports = appInfo => {
         },
     };
 
+    // redis配置
+    config.redis = {
+        client: {
+            port: 6379, // Redis port
+            host: '127.0.0.1', // Redis host
+            password: '',
+            db: 0,
+        },
+    };
+
+    // mongodb configs
     exports.mongoose = {
         url: 'mongodb://127.0.0.1:27017/APubPlat',
         options: {

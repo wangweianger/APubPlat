@@ -45,4 +45,7 @@ module.exports = app => {
     // 应用还原
     router.get('/reduction', web.reduction);
 
+    // 用户管理
+    router.get('/user', web.user);
+
 };
