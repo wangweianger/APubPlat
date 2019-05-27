@@ -110,7 +110,7 @@ iframe { display: none; }
     overflow-y: auto;
     font-size:14px;
     margin-left:180px;
-    padding-top:50px;
+    padding:50px 0 30px;
 }
 
 .content{

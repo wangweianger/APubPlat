@@ -3,7 +3,17 @@ const { URL } = require('url');
 
 // 校验用户是否登录
 module.exports = () => {
-    return async function (ctx, next) {
+    return async (ctx, next) => {
+        const referer = ctx.request.header.referer || '';
+        const url = new URL(referer);
+
+        if (ctx.app.config.origin && ctx.app.config.origin.indexOf(url.origin) === -1) {
+            ctx.body = {
+                code: 1004,
+                desc: '域名来源有误',
+            };
+            return;
+        }
         const usertoken = ctx.cookies.get('usertoken', {
             encrypt: true,
             signed: true,
@@ -12,6 +22,17 @@ module.exports = () => {
             ctx.body = {
                 code: 1004,
                 desc: '用户未登录',
+            };
+            return;
+        }
+
+        const data = await ctx.service.user.finUserForToken(usertoken);
+        if (!data || !data.user_name) {
+            ctx.cookies.set('usertoken', '');
+            const descr = data && !data.user_name ? data.desc : '登录用户无效！';
+            ctx.body = {
+                code: 1004,
+                desc: descr,
             };
             return;
         }

@@ -131,6 +131,14 @@ class WebController extends Controller {
         });
     }
 
+    // 用户登录
+    async login() {
+        const { ctx } = this;
+        await ctx.render('login', {
+            data: {},
+        });
+    }
+
 }
 
 module.exports = WebController;

@@ -52,29 +52,28 @@
       el: '#header',
       data: function () {
          return {
-            
+            userMsg: {
+               user_name: '游小白',
+               token: ''
+            },
          }
-      },
-      filters: {
-      },
-      mounted() {
-         
       },
       methods: {
          goToHome() {
             this.$router.push({ name: 'home' })
          },
          logout() {
-            popup.confirm({
-               title: '确定删除商品吗？', yes: () => {
-                  ajax({
-                     url: `${baseApi}sys_account/sys_logout`,
-                  }).then(data => {
-                     util.setStorage('local', 'use_login_token', '');
-                     location.href = config.loginUrl
-                  })
-               }
-            });
+            const _this = this;
+            popup.confirm({ title: '确定退出登录吗？', yes() {
+               util.ajax({
+                  type: 'get',
+                  url: `${config.baseApi}api/v1/user/logout?token=${_this.userMsg.token}`,
+                  success: data => {
+                     util.setStorage('local', 'userMsg', '');
+                     location.href = `/login`
+                  }
+               })
+            }})
          },
       }
    })

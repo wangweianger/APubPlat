@@ -4,7 +4,7 @@ module.exports = app => {
     const { web } = controller;
 
     // 首页
-    router.get('/', web.home);
+    router.get('/', web.team);
 
     // 团队管理
     router.get('/team', web.team);
@@ -48,4 +48,6 @@ module.exports = app => {
     // 用户管理
     router.get('/user', web.user);
 
+    // 用户登录
+    router.get('/login', web.login);
 };
