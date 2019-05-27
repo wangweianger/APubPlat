@@ -6,7 +6,7 @@ module.exports = () => {
     config.debug = false;
 
     // 用于安全校验和回调域名根路径 生产线域名（必填）
-    config.origin = 'https://test-apub.juxingyi.com';
+    config.origin = 'https://xxx.xxx.com';
 
     config.email = {
         client: {
