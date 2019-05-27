@@ -42,7 +42,7 @@
       </el-breadcrumb> -->
    </div>
    <div class="right">
-      <div class="block">个人中心</div>
+      <!-- <div class="block">个人中心</div> -->
       <div class="block" @click="logout">退出登录</div>
    </div>
 </div>
@@ -58,7 +58,17 @@
             },
          }
       },
+       mounted() {
+         this.setToken()
+      },
       methods: {
+         setToken() {
+            util.ajax({
+               type: 'get',
+               url: config.baseApi + 'api/v1/set/token',
+               success: function (data) { }
+            })
+         },
          goToHome() {
             this.$router.push({ name: 'home' })
          },

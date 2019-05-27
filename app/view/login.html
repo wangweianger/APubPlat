@@ -28,7 +28,6 @@
     }
     .main .right{
         width:380px;
-        height:300px;
         background:#fff;
         padding:20px;
         box-shadow: 5px 5px 10px #eee;
@@ -36,7 +35,7 @@
     .main .right .h1{
         font-size:28px;
         font-weight:300;
-        margin:20px 0;
+        margin:10px 0 20px;
         text-align:center;
     }
     .main .right .item{
@@ -58,6 +57,13 @@
         margin-left:40px;
 
     }
+    .main .right .texts{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        margin-top:15px;
+    }
 </style>
 <div class="content" id="login" v-cloak>
     <div class="main">
@@ -73,14 +79,24 @@
             <div class="h1">用户登录</div>
             <div class="item">
                 <span class="el-icon-user"></span>
-                <el-input class="inp" type="text" v-model.trim="username" placeholder="请输入"></el-input>
+                <el-input class="inp" type="text" v-model.trim="username" placeholder="请输入账号"></el-input>
             </div>
             <div class="item">
                 <span class="el-icon-lock"></span>
-                <el-input class="inp" type="password" v-model.trim="password" placeholder="请输入"></el-input>
+                <el-input class="inp" type="password" v-model.trim="password" placeholder="请输入密码"></el-input>
+            </div>
+            <div class="item" v-show="type===2">
+                <span class="el-icon-lock"></span>
+                <el-input class="inp" type="password" v-model.trim="typassword" placeholder="请确认密码"></el-input>
             </div>
             <div class="btn">
-                <el-button class="submit" type="primary" @click="login">登录</el-button>
+                <el-button class="submit" v-show="type===1" type="primary" @click="login">登录</el-button>
+                <el-button class="submit" v-show="type===2" type="primary" @click="register">注册</el-button>
+            </div>
+            <div class="texts">
+                <el-button class="bt" type="text" @click="login">忘记密码</el-button>
+                <el-button class="bt" type="text" @click="type=1" v-show="type===2">返回登录</el-button>
+                <el-button class="bt" type="text" @click="type=2" v-show="type===1">注册账号</el-button>
             </div>
         </div>
     </div>
@@ -90,8 +106,10 @@
         el: '#login',
         data: function () {
             return {
+                type: 1,   //1:登录  2：注册
                 username:'',
                 password:'',
+                typassword:'',
             } 
         },
         mounted() {
@@ -112,6 +130,30 @@
                     },
                     success: function (data) {
                         popup.miss({ title: "登录成功！" });
+                        util.setStorage('local', 'userMsg', JSON.stringify(data.data))
+                        setTimeout(() => { location.href = '/' }, 500)
+                    }
+                })
+            },
+            register() {
+                if (!this.username) {
+                    popup.alert({ type: 'msg', title: '用户名有误!' }); return false;
+                }
+                if (!this.password) {
+                    popup.alert({ type: 'msg', title: '用户密码有误!' }); return false;
+                }
+                if (this.password !== this.typassword) {
+                    popup.alert({ type: 'msg', title: '两次密码输入不一致!' }); return false;
+                }
+
+                util.ajax({
+                    url: config.baseApi + 'api/v1/user/register',
+                    data: {
+                        userName: this.username,
+                        passWord: this.password
+                    },
+                    success(data) {
+                        popup.miss({ title: "注册成功！" });
                         util.setStorage('local', 'userMsg', JSON.stringify(data.data))
                         setTimeout(() => { location.href = '/' }, 500)
                     }

@@ -20,6 +20,7 @@ module.exports = app => {
     // 校验用户是否登录中间件
     const tokenRequired = middleware.tokenRequired();
     // -----------------用户相关------------------
+    apiV1Router.get('set/token', user.setToken);
     // 用户登录
     apiV1Router.post('user/login', user.login);
     // 用户注册

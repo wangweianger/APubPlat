@@ -95,6 +95,7 @@ class utilfn {
             dataType: "json",
             async: asyncVal,
             beforeSend: function(xhr) {
+                xhr.setRequestHeader("x-csrf-token", $.cookie('csrfToken')||'');
                 json.beforeSend && json.beforeSend(xhr);
             },
             success: function(data) {

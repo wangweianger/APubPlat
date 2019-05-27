@@ -41,8 +41,8 @@ module.exports = appInfo => {
             port: 465,
             secure: true,
             auth: {
-                user: 'zanewangwei@163.com',
-                pass: '752636052aaaa',
+                user: 'xxxxxx@163.com',
+                pass: 'xxxxxx',
             },
         },
     };
@@ -58,17 +58,6 @@ module.exports = appInfo => {
                 packetMiddleware: [],
             },
         },
-    };
-
-    config.qiniu = {
-        bucket: 'morning-star',
-        ACCESS_KEY: 'F40SI1YWViFTYJOV3OYNk_xzugTX2SJ3Pybd9bOZ',
-        SECRET_KEY: 'qPBZPYblI1zJ60cc8XA9acYDEG-p8iMGh1ObgBHz',
-    };
-
-    config.login = {
-        usrname: 'admin',
-        password: '123456789',
     };
 
     config.view = {
@@ -93,9 +82,9 @@ module.exports = appInfo => {
 
     config.security = {
         csrf: {
-            enable: false,
+            enable: true,
             // 通过 header 传递 CSRF token 的默认字段为 x-csrf-token
-            // headerName: 'x-csrf-token',
+            headerName: 'x-csrf-token',
         },
     };
 

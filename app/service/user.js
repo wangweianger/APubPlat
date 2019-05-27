@@ -203,53 +203,6 @@ class UserService extends Service {
         return await this.ctx.model.User.findOne({ token: id }).exec() || {};
     }
 
-    // github | 新浪微博 | 微信 register
-    async githubRegister(userinfo, token) {
-        let userInfo = {};
-        userInfo = await this.getUserInfoForGithubId(token);
-        const random_key = this.app.randomString();
-        if (userInfo.token) {
-            // 存在则直接登录
-            if (userInfo.is_use !== 0) {
-                userInfo = { desc: '用户被冻结不能登录，请联系管理员！' };
-            } else {
-                // 清空以前的登录态
-                if (userInfo.usertoken) this.app.redis.set(`${userInfo.usertoken}_user_login`, '');
-                // 设置redis登录态
-                this.app.redis.set(`${random_key}_user_login`, JSON.stringify(userInfo), 'EX', this.app.config.user_login_timeout);
-                // 设置登录cookie
-                this.ctx.cookies.set('usertoken', random_key, {
-                    maxAge: this.app.config.user_login_timeout * 1000,
-                    httpOnly: true,
-                    encrypt: true,
-                    signed: true,
-                });
-                // 更新用户信息
-                await this.updateUserToken({ username: userinfo, usertoken: random_key });
-            }
-        } else {
-            // 不存在 先注册 再登录
-            const user = this.ctx.model.User();
-            user.user_name = userinfo;
-            user.token = token;
-            user.create_time = new Date();
-            user.level = 1;
-            user.usertoken = random_key;
-            userInfo = await user.save() || {};
-            userInfo.pass_word = '';
-
-            // 设置redis登录态
-            this.app.redis.set(`${random_key}_user_login`, JSON.stringify(userInfo), 'EX', this.app.config.user_login_timeout);
-            // 设置登录cookie
-            this.ctx.cookies.set('usertoken', random_key, {
-                maxAge: this.app.config.user_login_timeout * 1000,
-                httpOnly: true,
-                encrypt: true,
-                signed: true,
-            });
-        }
-        return userInfo;
-    }
 }
 
 module.exports = UserService;
