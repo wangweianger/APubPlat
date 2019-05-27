@@ -197,14 +197,14 @@
             handleCommTask(type, item){
                 if (item) item = JSON.parse(JSON.stringify(item));
                 if (item) {
-                    item.shell_write_type = item.shell_write_type?parseInt(item.shell_write_type):1;
+                    item.shell_write_type = item.shell_write_type?parseInt(item.shell_write_type):2;
                     this.team = item;
                     editor ? editor.setValue(item.shell_body) : setTimeout(() => { this.runMonaco('editor', item.shell_body); });
                 } else {
                     this.team = {
                         name: '',
                         type: 1,
-                        shell_write_type:1,
+                        shell_write_type:2,
                         shell_body: '',
                         btn_color: 'primary',
                         is_plain: 2,
