@@ -104,8 +104,8 @@
             <div class="bottom" style="width:100%;">
                 <div class="top mb20">资产列表</div>
                 <div class="mb10">
-                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-tickets" size="small">脚本任务</el-button>
-                    <el-button @click="applicationConsole()" type="danger" icon="el-icon-s-tools" size="small">控制台</el-button>
+                    <el-button @click="serverConfigs()" type="primary" icon="el-icon-tickets" size="medium">脚本任务</el-button>
+                    <el-button @click="applicationConsole()" type="danger" icon="el-icon-s-tools" size="medium">控制台</el-button>
                     <span class="ml10 light"><i class="el-icon-warning fs-16 mr5 primary"></i>默认执行所有资产项操作，若有选择则执行选中资产项的相关操作(例如：部署、生成构建配置等操作)。
                     </span>
                 </div>
@@ -127,12 +127,14 @@
                                 <el-button 
                                     class="btn-item" 
                                     @click="serverConfigs(scope.row)"
+                                    size="small"
                                     type="primary" size="mini">脚本任务</el-button>
                                 <div v-for="(item,index) in tasklist" :key="index">
                                     <el-button 
                                         class="btn-item" 
                                         @click="deployApplications(item, 3, scope.row)" 
                                         :type="item.btntype" 
+                                        size="small"
                                         size="mini">{{item.task_name}}</el-button>
                                 </div>
                             </div>

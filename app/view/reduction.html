@@ -171,7 +171,7 @@
                             <div class="red" v-if="scope.row.status==2">备份失败</div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="备份时间" width="150">
+                    <el-table-column label="备份时间" width="160">
                         <template slot-scope="scope">
                             <div>{{scope.row.create_time | date('-',true)}}</div>
                         </template>
@@ -194,7 +194,7 @@
                                     v-if="(scope.row.status==0 || scope.row.status==1) && !scope.row.delete"
                                     @click="appReduction(scope.row)" 
                                     type="primary" 
-                                    size="mini">还原为此版本</el-button>
+                                    size="small">还原为此版本</el-button>
                             </div>
                         </template>
                     </el-table-column>

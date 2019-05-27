@@ -331,3 +331,27 @@ iframe { display: none; }
     z-index: 255!important;
     padding:10px!important;
 }
+
+/* element-ui-common */
+.el-button{
+    padding: 9px 20px!important;
+    border-radius: 0px!important;
+}
+.el-table td, .el-table th {
+    padding: 8px 0!important;
+}
+.el-button--medium {
+    padding: 8px 10px!important;
+    font-size:12px!important;
+}
+.el-button--small, .el-button--small.is-round {
+    padding: 6px 10px!important;
+}
+.el-input__inner {
+    height: 35px!important;
+    line-height: 35px!important;
+}
+.el-input__icon{
+    line-height: 35px!important;
+}
+
