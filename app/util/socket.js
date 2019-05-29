@@ -12,7 +12,7 @@ module.exports = function socket(json) {
     let isSend = false;
     let isSuccess = false;
     let timer = null;
-    const timeout = 1000;
+    const timeout = 2000;
     const regExp = new RegExp(`\\[${json.username || ''}@.+?\\]`);
     const socketIndex = json.socket.data.split('_').splice(-1).join();
     const taskType = json.taskType || 'command';
@@ -28,7 +28,7 @@ module.exports = function socket(json) {
             cols: json.cols,
             rows: json.rows,
         }, function connShell(err, stream) {
-            setTimeout(() => { json.initialTask && stream.write(json.initialTask); }, 1000);
+            setTimeout(() => { json.initialTask && stream.write(json.initialTask); }, 200);
 
             if (err) {
                 socket.emit(json.socket.close || 'close', 'SSH2 CONN ERROR');
