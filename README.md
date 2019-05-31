@@ -6,7 +6,7 @@
 [![Redis](https://img.shields.io/badge/redis-5.0+-green.svg?style=plastic)](https://redis.io/)
 [![Ssh2](https://img.shields.io/badge/ssh2-blue.svg?style=plastic)](https://www.npmjs.com/package/ssh2)
 [![Xterm](https://img.shields.io/badge/xterm-green.svg?style=plastic)](https://xtermjs.org/)
-[![Monaco-editor](https://img.shields.io/badge/monaco-editor-green.svg?style=plastic)](https://microsoft.github.io/monaco-editor/)
+[![Monaco-editor](https://img.shields.io/badge/monaco_editor-green.svg?style=plastic)](https://microsoft.github.io/monaco-editor/)
 [![Socket.io](https://img.shields.io/badge/socket.io-brightgreen.svg?style=plastic)](https://socket.io/)
 
 APubPlat是一款开源免费的自动化部署、运维平台，开源堡垒机。
