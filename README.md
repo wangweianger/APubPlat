@@ -20,8 +20,11 @@ APubPlat是一款开源免费的自动化部署、运维平台，开源堡垒机
 # Preview
 ![](https://github.com/wangweianger/APubPlat/blob/master/demo/01.png "")
 ![](https://github.com/wangweianger/APubPlat/blob/master/demo/02.png "")
+发布、备份、生成配置日志
 ![](https://github.com/wangweianger/APubPlat/blob/master/demo/03.png "")
+build servers
 ![](https://github.com/wangweianger/APubPlat/blob/master/demo/04.png "")
+Web Terminal
 ![](https://github.com/wangweianger/APubPlat/blob/master/demo/05.png "")
 
 
