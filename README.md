@@ -1,27 +1,29 @@
-# APubPlat
-## 项目目的
-打造一款强大的可视化发布系统，用WEB的方式实现系统的发布、备份、中断、和恢复能力，支持单机、多机、前端、后端的发布能力。
-## 开发功能进度说明
->  * 基础框架选型和开发 （已完成）
->  * 前端界面开发（开发中）
->  * 后端核心逻辑开发（开发中）
->  * 团队、资产、应用、日志、邮件开发 （开发中）
->  * linux系统文件上下载 （开发中）
->  * 自定义脚本开发（例如安装各种软件，node、nginx、mysql等等） （已完成）
->  * 核心自动化部署应用实现（已完成）
->  * 实时部署日志，单机多机器部署实现（已完成）
->  * linux各种命令实时查看功能开发（例如实时查看应用日志）（已完成）
->  * web shh实现（web端linux控制台），支持单服务器，多服务器，单窗口，多窗口 （已完成）
->  * 发布系统回测功能、发布备份能力 （开发中）
->  * 发布日志开发、邮件通知 （开发中）
->  * 定时发布能力 （待开发）
->  * 服务器性能上报、预警功能（待开发）
->  * 系统用户、角色、权限开发 （待开发）
->  * 其他... （待开发）
+# APubPlat - [开发文档](http://apub-wiki.seosiwei.com/)
+[![Node](https://img.shields.io/badge/node-8.9.0-green.svg?style=plastic)](https://nodejs.org/en/)
+[![Vue](https://img.shields.io/badge/vue-2.0-blue.svg?style=plastic)](https://cn.vuejs.org/)
+[![Egg](https://img.shields.io/badge/egg-2.0-green.svg?style=plastic)](https://eggjs.org/)
+[![Mogodb](https://img.shields.io/badge/mogodb-4.0-brightgreen.svg?style=plastic)](https://www.mongodb.com/)
+[![Redis](https://img.shields.io/badge/redis-5.0-green.svg?style=plastic)](https://redis.io/)
+[![Ssh2](https://img.shields.io/badge/ssh2-blue.svg?style=plastic)](https://www.npmjs.com/package/ssh2)
+[![Xterm](https://img.shields.io/badge/xterm-green.svg?style=plastic)](https://xtermjs.org/)
+[![Monaco-editor](https://img.shields.io/badge/monaco-editor-green.svg?style=plastic)](https://microsoft.github.io/monaco-editor/)
+[![Socket.io](https://img.shields.io/badge/socket.io-brightgreen.svg?style=plastic)](https://socket.io/)
 
-## 技术选型说明
-* nodejs，mongodb，shell，ssh2，xterm，monaco-editor，redis，socket，vue，egg
+APubPlat是一款开源免费的自动化部署、运维平台，开源堡垒机。
 
-## 项目开发文档 
-* 待写
+实现了Web界面话的Terminal，可替换xshell等工具。可开启多窗口和批量命令的运行。
+
+友好的持续集成，支持web前端、node、java、php等后端servers的发布，并支持单机和多机的同时发布能力。
+
+### 开发文档：http://apub-wiki.seosiwei.com
+
+# Preview
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/01.png "")
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/02.png "")
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/03.png "")
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/04.png "")
+![](https://github.com/wangweianger/APubPlat/blob/master/demo/05.png "")
+
+
+
 
