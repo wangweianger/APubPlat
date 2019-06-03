@@ -7,6 +7,7 @@ module.exports = app => {
     const CommtaskSchema = new Schema({
         name: { type: String }, // 任务名称
         type: { type: Number, default: 1 }, // 任务类型 1：窗口运行命令  2：shell脚本命令
+        user_name: { type: String }, // 操作人
         shell_body: { type: String }, // 运行内容
         shell_opction: { type: String }, // shell 参数
         shell_path: { type: String }, // shell存放路径

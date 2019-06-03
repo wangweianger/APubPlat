@@ -17,7 +17,7 @@ class CommtaskService extends Service {
 
     // add | update
     async handle(query) {
-        let { _id, name, type, btn_color, is_plain, shell_body, handletype, shell_opction, shell_path, shell_write_type } = query;
+        let { _id, name, type, btn_color, is_plain, shell_body, handletype, shell_opction, shell_path, shell_write_type, user_name } = query;
         handletype = handletype * 1;
         let result = '';
         if (handletype === 1) {
@@ -27,6 +27,7 @@ class CommtaskService extends Service {
             commtask.type = type;
             commtask.btn_color = btn_color;
             commtask.is_plain = is_plain;
+            commtask.user_name = user_name;
             commtask.shell_body = shell_body;
             commtask.shell_opction = shell_opction;
             commtask.shell_path = shell_path;
@@ -37,7 +38,7 @@ class CommtaskService extends Service {
             // update
             result = await this.ctx.model.Commtask.update(
                 { _id },
-                { $set: { name, type, btn_color, is_plain, shell_body, shell_opction, shell_path, shell_write_type } },
+                { $set: { name, type, btn_color, is_plain, shell_body, shell_opction, shell_path, shell_write_type, user_name } },
                 { multi: true }
             );
         }

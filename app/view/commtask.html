@@ -34,6 +34,8 @@
                 </el-table-column>
                 <el-table-column prop="shell_opction" label="shell脚本参数">
                 </el-table-column>
+                <el-table-column prop="user_name" label="操作人">
+                </el-table-column>
                 <el-table-column label="按钮样式">
                     <template slot-scope="scope">
                         <div><el-button :type="scope.row.btn_color" :plain="scope.row.is_plain==1?true:false" size="small">按钮样式</el-button></div>
@@ -228,6 +230,8 @@
                     return
                 }
                 this.team.shell_body = shell_body;
+                const userMsg = util.getStorage('local','userMsg');
+                this.team.user_name = userMsg ? JSON.parse(userMsg).user_name : '';
                 util.ajax({
                     url:`${config.baseApi}api/v1/commtask/handle`,
                     data:this.team,

@@ -46,9 +46,11 @@
                 </el-table-column>
                 <el-table-column prop="lan_ip" label="内网IP" width="150">
                 </el-table-column>
-                <el-table-column prop="user" label="用户名" width="100">
+                <el-table-column prop="user" label="账号" width="100">
                 </el-table-column>
                 <el-table-column prop="port" label="端口号" width="100">
+                </el-table-column>
+                <el-table-column prop="user_name" label="操作人" width="80">
                 </el-table-column>
                 <el-table-column label="可用状态" width="100">
                     <template slot-scope="scope">
@@ -265,6 +267,8 @@
                     return;
                 }
                 this.team.status = this.team.status ? 1 : 0;
+                const userMsg = util.getStorage('local', 'userMsg');
+                this.team.user_name = userMsg ? JSON.parse(userMsg).user_name : '';
                 util.ajax({
                     url: `${config.baseApi}api/v1/assets/handle`,
                     data: this.team,

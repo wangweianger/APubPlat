@@ -46,6 +46,7 @@ class AssetsController extends Controller {
         const user = query.user;
         const port = query.port;
         const password = query.password;
+        const user_name = query.user_name;
 
         if (type === 2 && !_id) throw new Error('id参数不能为空!');
         if (!team_code) throw new Error('请选择资产所属团队!');
@@ -57,7 +58,7 @@ class AssetsController extends Controller {
         if (!port) throw new Error('登录端口号不能为空!');
         if (!password) throw new Error('登录密码不能为空!');
 
-        const result = await this.ctx.service.assets.handle({ type, name, code, status, _id, team_code, outer_ip, lan_ip, user, port, password });
+        const result = await this.ctx.service.assets.handle({ type, name, code, status, _id, team_code, outer_ip, lan_ip, user, port, password, user_name });
 
         ctx.body = this.app.result({
             data: result,

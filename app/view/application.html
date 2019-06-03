@@ -111,6 +111,8 @@
                         </div>
                     </template>
                 </el-table-column>
+                <el-table-column prop="user_name" label="操作人" width="80">
+                </el-table-column>
                 <el-table-column label="部署网络方式" width="120">
                     <template slot-scope="scope">
                         <div>{{scope.row.net_type == 1?'外网IP':'内网IP'}}</div>
@@ -434,6 +436,8 @@
                     return;
                 }
                 this.team.status = this.team.status ? 1 : 0;
+                const userMsg = util.getStorage('local', 'userMsg');
+                this.team.user_name = userMsg ? JSON.parse(userMsg).user_name : '';
                 util.ajax({
                     url: `${config.baseApi}api/v1/application/handle`,
                     data: this.team,

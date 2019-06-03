@@ -57,7 +57,7 @@ class AssetsService extends Service {
 
     // add | update
     async handle(json) {
-        const { type, name, code, status, _id, team_code, outer_ip, lan_ip, user, port, password } = json;
+        const { type, name, code, status, _id, team_code, outer_ip, lan_ip, user, port, password, user_name } = json;
         let result = '';
         if (type === 1) {
             // add
@@ -69,6 +69,7 @@ class AssetsService extends Service {
             assets.outer_ip = outer_ip;
             assets.lan_ip = lan_ip;
             assets.user = user;
+            assets.user_name = user_name;
             assets.port = port;
             assets.password = password;
             assets.create_time = new Date();
@@ -77,7 +78,7 @@ class AssetsService extends Service {
             // update
             result = await this.ctx.model.Assets.update(
                 { _id },
-                { $set: { name, code, status, team_code, outer_ip, lan_ip, user, port, password } },
+                { $set: { name, code, status, team_code, outer_ip, lan_ip, user, port, password, user_name } },
                 { multi: true }
             );
         }

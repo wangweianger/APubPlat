@@ -48,6 +48,7 @@ class ApplicationService extends Service {
                         environlist: 1,
                         team_code: 1,
                         environ_code: 1,
+                        user_name: 1,
                         code: 1,
                         task_list: 1,
                     },
@@ -83,7 +84,7 @@ class ApplicationService extends Service {
 
     // add | update
     async handle(json) {
-        const { type, name, code, status, _id, team_code, environ_code } = json;
+        const { type, name, code, status, _id, team_code, environ_code, user_name } = json;
         let result = '';
         if (type === 1) {
             // add
@@ -92,12 +93,13 @@ class ApplicationService extends Service {
             application.code = code;
             application.status = status;
             application.team_code = team_code;
+            application.user_name = user_name;
             application.environ_code = environ_code;
             application.create_time = new Date();
             result = await application.save();
         } else if (type === 2) {
             // update
-            result = await this.ctx.model.Application.update({ _id }, { $set: { name, code, status, team_code, environ_code } }, { multi: true });
+            result = await this.ctx.model.Application.update({ _id }, { $set: { name, code, status, team_code, environ_code, user_name } }, { multi: true });
         }
         return result;
     }

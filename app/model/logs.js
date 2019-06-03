@@ -6,6 +6,7 @@ module.exports = app => {
 
     const LogsSchema = new Schema({
         name: { type: String }, // 日志名称
+        user_name: { type: String }, // 操作人
         application_id: { type: String }, // 所属应用code
         commtask_id: { type: String }, // 所属脚本任务code
         type: { type: Number, default: 1 }, // 日志类型 1：发布服务  2：应用服务备份  3：应用生成构建配置 4：服务资产生成构建配置 5:备份还原记录

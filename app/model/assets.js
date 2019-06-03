@@ -7,6 +7,7 @@ module.exports = app => {
     const AssetsSchema = new Schema({
         name: { type: String }, // 资产名称
         code: { type: String }, // 资产编码
+        user_name: { type: String }, // 操作人
         outer_ip: { type: String }, // 外网IP
         lan_ip: { type: String }, // 内网IP
         user: { type: String }, // 登录用户

@@ -534,6 +534,8 @@
                     type: 3,
                     content: assetslist,
                 }
+                let userMsg = util.getStorage('local', 'userMsg');
+                let user_name = userMsg ? JSON.parse(userMsg).user_name : '';
                 util.ajax({
                     nohideloading: true,
                     notimeout: true,
@@ -541,6 +543,7 @@
                     data: {
                         id: this.id,
                         taskItem: item,
+                        user_name,
                         assetsList: this.assetslist,
                     },
                     success: data => {
@@ -591,6 +594,8 @@
                     type: 3,
                     content: assetslist,
                 }
+                let userMsg = util.getStorage('local', 'userMsg');
+                let user_name = userMsg ? JSON.parse(userMsg).user_name : '';
                 util.ajax({
                     nohideloading:true,
                     notimeout: true,
@@ -598,6 +603,7 @@
                     data: {
                         id: this.id,
                         taskItem: item,
+                        user_name,
                         assetsList:this.assetslist,
                     },
                     success: data => {

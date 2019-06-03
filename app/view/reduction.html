@@ -500,6 +500,8 @@
                     content: assetslist,
                 }
                 this.taskItem.reduction_shell_body = editor.getValue();
+                const userMsg = util.getStorage('local', 'userMsg');
+                const user_name = userMsg ? JSON.parse(userMsg).user_name : '';
                 util.ajax({
                     nohideloading: true,
                     notimeout: true,
@@ -507,6 +509,7 @@
                     data: {
                         id: this.id,
                         taskItem: this.taskItem,
+                        user_name,
                         assetsList: assetslist,
                     },
                     success: data => {

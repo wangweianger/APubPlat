@@ -86,7 +86,7 @@ class NspController extends Controller {
     // 应用构建
     async buildProcess(query = {}) {
         if (!query.data) return;
-        const { taskItem, data, id } = query;
+        const { taskItem, data, id, user_name } = query;
 
         let shell = '';
         if (taskItem && taskItem.shell_path) {
@@ -102,6 +102,7 @@ class NspController extends Controller {
         taskItem.is_backups && this.ctx.service.logs.addLogs({
             name: `${taskItem.task_name}任务-服务备份`,
             type: 2,
+            user_name,
             application_id: id,
             content: result || [],
         });

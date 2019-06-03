@@ -479,7 +479,16 @@ class utilfn {
                 data, resize, close, end
             })
         })
-        socket.emit('socket', { taskItem, data: result, buildType, id: json.id || '', cols: XTEAMLIST[0].cols, rows: XTEAMLIST[0].rows} || 'begin');
+        const userMsg = util.getStorage('local', 'userMsg');
+        const user_name = userMsg ? JSON.parse(userMsg).user_name : '';
+        socket.emit('socket', { 
+            taskItem,
+            data: result, buildType,
+            id: json.id || '',
+            user_name,
+            cols: XTEAMLIST[0].cols,
+            rows: XTEAMLIST[0].rows} || 'begin'
+        );
 
         window.addEventListener('resize', this.resizeScreen.bind(this, XTEAMLIST, socket), false)
 

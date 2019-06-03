@@ -7,6 +7,7 @@ module.exports = app => {
     const ApplicationSchema = new Schema({
         name: { type: String }, // 应用名称
         code: { type: String }, // 应用编码
+        user_name: { type: String }, // 操作人
         team_code: { type: String }, // 所属公司编码
         environ_code: { type: String }, // 所属环境编码
         net_type: { type: Number, default: 1 }, // 网络部署IP说明 1：外网IP  2：内网IP

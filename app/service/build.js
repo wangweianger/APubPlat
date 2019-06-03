@@ -8,7 +8,7 @@ const path = require('path');
 class BuildService extends Service {
 
     // 生成构建配置
-    async generateBuildConfig(id, taskItem = {}, assetslist = []) {
+    async generateBuildConfig(id, taskItem = {}, assetslist = [], user_name) {
         let file = '';
         let paths = '/';
         if (taskItem.shell_path && taskItem.shell_path.indexOf('/') > -1) {
@@ -34,6 +34,7 @@ class BuildService extends Service {
             task_name: `${taskItem.task_name}任务-生成构建配置`,
             type: 3,
             isLoad: true,
+            user_name,
             content: data || [],
         };
         this.ctx.service.logs.addLogs(json);
@@ -43,7 +44,7 @@ class BuildService extends Service {
     }
 
     // 脚本备份
-    async backupApplications(id, taskItem = {}, assetslist = []) {
+    async backupApplications(id, taskItem = {}, assetslist = [], user_name) {
         const bakList = [];
         const { project_path, backups_path } = taskItem;
         const backupDir = 'bak_' + this.app.format(new Date(), 'yyyy-MM-dd:hh:mm:ss');
@@ -59,6 +60,7 @@ class BuildService extends Service {
             task_name: `${taskItem.task_name}任务-服务备份`,
             type: 2,
             isLoad: true,
+            user_name,
             content: result || [],
         };
         this.ctx.service.logs.addLogs(json);
@@ -66,7 +68,7 @@ class BuildService extends Service {
     }
 
     // 备份还原
-    async reductionApplications(id, taskItem = {}, assetslist = []) {
+    async reductionApplications(id, taskItem = {}, assetslist = [], user_name) {
         let file = '';
         let paths = '/';
         if (taskItem.reduction_shell_path && taskItem.reduction_shell_path.indexOf('/') > -1) {
@@ -91,6 +93,7 @@ class BuildService extends Service {
             application_id: id,
             task_name: `${taskItem.name}任务-备份还原`,
             type: 5,
+            user_name,
             isLoad: true,
             content: data || [],
         };
