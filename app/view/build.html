@@ -94,32 +94,34 @@
                 </div>
                 <div class="table_body">
                     <el-table :data="datalist" style="width: 100%">
-                        <el-table-column prop="name" label="应用名称" width="250">
+                        <el-table-column prop="name" label="应用名称">
                         </el-table-column>
-                        <el-table-column prop="code" label="应用编码" width="200">
+                        <el-table-column prop="code" label="应用编码">
                         </el-table-column>
-                        <el-table-column label="所属团队" width="250">
+                        <el-table-column label="所属团队">
                             <template slot-scope="scope">
                                 <div>{{scope.row.teamlist[0]?scope.row.teamlist[0].name:''}}</div>
                             </template>
                         </el-table-column>
-                        <el-table-column label="所属环境" width="150">
+                        <el-table-column label="所属环境">
                             <template slot-scope="scope">
                                 <div class="success">{{scope.row.environlist[0]?scope.row.environlist[0].name:''}}</div>
                             </template>
                         </el-table-column>
-                        <el-table-column label="部署网络方式" width="150">
+                        <el-table-column label="部署网络方式">
                             <template slot-scope="scope">
                                 <div>{{scope.row.net_type == 1?'外网IP':'内网IP'}}</div>
                             </template>
                         </el-table-column>
-                        <el-table-column label="操作">
+                        <el-table-column label="操作" fixed="right" width="220">
                             <template slot-scope="scope">
+                                <div class="mb10">
+                                    <el-button @click="buildProcess(scope.row)" type="primary" size="small">应用部署</el-button>
+                                    <el-button @click="goToReduction(scope.row)" type="success" size="small">应用还原</el-button>
+                                </div>
                                 <div>
-                                    <el-button @click="buildProcess(scope.row)" type="text" size="small">应用部署</el-button>
-                                    <el-button @click="applicationConsole(scope.row)" type="text" size="small">控制台</el-button>
-                                    <el-button @click="goToReduction(scope.row)" type="text" size="small">应用还原</el-button>
-                                    <el-button @click="setAppConfig(scope.row)" type="text" size="small" plain>构建配置</el-button>
+                                    <el-button @click="applicationConsole(scope.row)" type="primary" size="small">控制台</el-button>
+                                    <el-button @click="setAppConfig(scope.row)" type="warning" size="small">构建配置</el-button>
                                 </div>
                             </template>
                         </el-table-column>
