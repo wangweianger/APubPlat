@@ -46,6 +46,7 @@ class UserService extends Service {
 
     // 用户注册
     async register(userName, passWord) {
+        if (!userName || userName !== 'admin') throw new Error('请使用admin账号进行注册！');
         // 检测用户是否存在
         const userInfo = await this.getUserInfoForUserName(userName);
         if (userInfo.token) throw new Error('用户注册：用户已存在！');
