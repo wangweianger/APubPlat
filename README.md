@@ -11,7 +11,7 @@
 
 APubPlat是一款开源免费的自动化部署、运维平台，开源堡垒机。
 
-实现了Web界面话的Terminal，可替换xshell等工具。可开启多窗口和批量命令的运行。
+实现了Web Terminal，跟xshell一样的体验。可开启多窗口和批量命令的运行。
 
 友好的持续集成，支持web前端、node、java、php等后端servers的发布，并支持单机和多机的同时发布能力。
 
