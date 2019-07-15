@@ -6,7 +6,6 @@ module.exports = () => {
     return async (ctx, next) => {
         const referer = ctx.request.header.referer || '';
         const url = new URL(referer);
-
         if (ctx.app.config.origin && ctx.app.config.origin.indexOf(url.origin) === -1) {
             ctx.body = {
                 code: 1004,

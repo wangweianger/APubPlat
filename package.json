@@ -38,7 +38,7 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start  --daemon --sticky",
+    "start": "egg-scripts start --port 18888  --daemon --sticky",
     "stop": "egg-scripts stop",
     "dev": "egg-bin dev --sticky",
     "debug": "egg-bin debug",
