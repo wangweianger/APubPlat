@@ -137,7 +137,7 @@ PopLayer.prototype.alert=function(json){
 }
 //确认层
 PopLayer.prototype.confirm=function(json){
-	this.varLiang(json);
+    this.varLiang(json);
     var This=this;
     var str='<div class="popup">';
     	str+=this.setting.maskHide?'<div class="mask" onclick="closeThisPopup(this)"></div>':'<div class="mask"></div>';
